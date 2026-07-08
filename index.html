@@ -14,9 +14,9 @@
             color: #000000;
         }
 
-        /* --- Header Section --- */
+        /* --- Header Section (Title Only) --- */
         header {
-            margin-bottom: 40px;
+            margin-bottom: 60px; /* Gives nice breathing room below the title line */
         }
 
         .title-container {
@@ -38,26 +38,41 @@
             width: 100%;
         }
 
-        /* --- Content Layout --- */
-        .content-container {
-            position: relative;
+        /* --- Perfectly Balanced Content Row --- */
+        .content-row {
+            display: flex;
+            justify-content: space-between; /* Ensures equal spacing between the 3 elements */
+            align-items: flex-start; /* Lines them up perfectly at the top edge */
             width: 100%;
-            margin-top: 20px;
         }
 
-        /* Side Menus Shared Styles */
-        .side-menu {
-            position: absolute;
-            top: 0;
+        /* Each of the three sections gets equal sizing priority */
+        .column-left {
+            width: 30%;
+            text-align: left;
         }
 
-        .side-menu ul {
+        .column-center {
+            width: 40%;
+            display: flex;
+            justify-content: center; /* Centers the chat boxes container exactly in the middle */
+        }
+
+        .column-right {
+            width: 30%;
+            text-align: left; /* Keeps text left-aligned inside the right column */
+            display: flex;
+            justify-content: flex-end; /* Aligns the column block to the right side of the screen */
+        }
+
+        /* Lists formatting inside side columns */
+        ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
         }
 
-        .side-menu li {
+        li {
             font-size: 1.3rem;
             margin-bottom: 20px;
             cursor: pointer;
@@ -65,30 +80,11 @@
             white-space: nowrap;
         }
 
-        /* Left side menu placement */
-        .left-menu {
-            left: 0;
-            text-align: left;
-        }
-
-        /* Right side menu placement */
-        .right-menu {
-            right: 150px; /* Pulls it away from the far right edge so it isn't squished */
-            text-align: left; /* Keeps text left-aligned inside its column */
-        }
-
-        /* --- Chat Boxes Section --- */
-        /* This keeps the chats perfectly centered horizontally on the page */
-        .chat-wrapper {
-            display: flex;
-            justify-content: center; 
-            width: 100%;
-            margin-top: 0px;
-        }
-
+        /* --- Chat Boxes Formatting --- */
         .chat-container {
             display: flex;
-            gap: 60px; /* Generous even space between the two chat boxes */
+            gap: 50px; /* Clear, wide spacing between the two boxes */
+            margin-top: 5px; /* Tiny nudge down so it matches the line height of the first links */
         }
 
         /* Boxed chat buttons */
@@ -111,9 +107,9 @@
         </div>
     </header>
 
-    <div class="content-container">
+    <main class="content-row">
         
-        <div class="side-menu left-menu">
+        <div class="column-left">
             <ul>
                 <li>main dashboard.</li>
                 <li>league match Entry</li>
@@ -124,23 +120,25 @@
             </ul>
         </div>
 
-        <div class="chat-wrapper">
+        <div class="column-center">
             <div class="chat-container">
                 <div class="chat-box">PvP chat</div>
                 <div class="chat-box">World chat</div>
             </div>
         </div>
 
-        <div class="side-menu right-menu">
-            <ul>
-                <li>leaderboards</li>
-                <li>world map</li>
-                <li>Guild</li>
-                <li>shop</li>
-            </ul>
+        <div class="column-right">
+            <div>
+                <ul>
+                    <li>leaderboards</li>
+                    <li>world map</li>
+                    <li>Guild</li>
+                    <li>shop</li>
+                </ul>
+            </div>
         </div>
 
-    </div>
+    </main>
 
 </body>
-</html> 
+</html>
