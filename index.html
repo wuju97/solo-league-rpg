@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo League. RPG.</title>
+    <style>
+        /* This handles the overall look and feel */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212; /* Dark theme background */
+            color: #e0e0e0; /* Light text color */
+        }
+
+        /* --- Header Styling --- */
+        header {
+            display: flex;
+            justify-content: space-between; /* Pushes layout apart */
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 2px solid #2d2d2d;
+        }
+
+        .main-title {
+            margin: 0;
+            font-size: 2rem;
+            text-decoration: underline; /* Matches the sketch underline */
+        }
+
+        .chat-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-box {
+            border: 2px solid #e0e0e0;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- Main Layout Grid --- */
+        .grid-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 40px;
+        }
+
+        /* Lists */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 18px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        li:hover {
+            color: #ff4757; /* Changes color when hovering */
+        }
+
+        /* Specific alignments matching the image layout */
+        .left-menu {
+            text-align: left;
+        }
+
+        .right-menu {
+            text-align: left; /* Kept left-aligned on the right side as written */
+            padding-right: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Section -->
+    <header>
+        <h1 class="main-title">Solo League. RPG.</h1>
+        <div class="chat-container">
+            <div class="chat-box">PvP chat</div>
+            <div class="chat-box">World chat</div>
+        </div>
+    </header>
+
+    <!-- Content Sections -->
+    <main class="grid-container">
+        
+        <!-- Left Column -->
+        <div class="left-menu">
+            <ul>
+                <li>main dashboard.</li>
+                <li>league match Entry</li>
+                <li>Recent activity</li>
+                <li>Character tab</li>
+                <li>Battle log</li>
+                <li>settings</li>
+            </ul>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-menu">
+            <ul>
+                <li>leaderboards</li>
+                <li>world map</li>
+                <li>Guild</li>
+                <li>shop</li>
+            </ul>
+        </div>
+
+    </main>
+
+</body>
+</html>
