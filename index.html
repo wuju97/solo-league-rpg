@@ -14,9 +14,9 @@
             color: #000000;
         }
 
-        /* --- Header Section (Title) --- */
+        /* --- Header Section (Title Only) --- */
         header {
-            margin-bottom: 30px;
+            margin-bottom: 50px;
         }
 
         .title-container {
@@ -38,36 +38,16 @@
             width: 100%;
         }
 
-        /* --- Chat Boxes Section --- */
-        /* This wrapper centers the chat boxes horizontally on the page */
-        .chat-wrapper {
-            display: flex;
-            justify-content: center; /* Centers the chats between the left and right sides */
-            margin-bottom: 40px;
+        /* --- Three-Column Grid Layout --- */
+        /* This perfectly splits the layout into 3 equal sections across the screen */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; 
+            width: 100%;
+            align-items: start;
         }
 
-        .chat-container {
-            display: flex;
-            gap: 20px;
-        }
-
-        /* Boxed chat buttons */
-        .chat-box {
-            border: 2px solid #000000;
-            padding: 5px 15px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            background: none;
-        }
-
-        /* --- Main Content Layout (Columns) --- */
-        .columns-container {
-            display: flex;
-            justify-content: space-between;
-            max-width: 100%;
-        }
-
-        /* Lists formatting */
+        /* Lists formatting for side columns */
         ul {
             list-style-type: none;
             padding: 0;
@@ -86,10 +66,30 @@
             text-align: left;
         }
 
+        /* Center Column Alignment (The Chat Boxes) */
+        .center-menu {
+            display: flex;
+            justify-content: center; /* Centers the container in the middle third */
+        }
+
+        .chat-container {
+            display: flex;
+            gap: 40px; /* Added more spacing between the two chat boxes */
+        }
+
+        /* Boxed chat buttons */
+        .chat-box {
+            border: 2px solid #000000;
+            padding: 5px 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: none;
+            white-space: nowrap;
+        }
+
         /* Right Column Alignment */
         .right-menu {
-            text-align: left;
-            padding-right: 60px;
+            text-align: right; /* Aligns list neatly to the right edge */
         }
     </style>
 </head>
@@ -102,14 +102,7 @@
         </div>
     </header>
 
-    <div class="chat-wrapper">
-        <div class="chat-container">
-            <div class="chat-box">PvP chat</div>
-            <div class="chat-box">World chat</div>
-        </div>
-    </div>
-
-    <main class="columns-container">
+    <main class="main-layout">
         
         <div class="left-menu">
             <ul>
@@ -120,6 +113,13 @@
                 <li>Battle log</li>
                 <li>settings</li>
             </ul>
+        </div>
+
+        <div class="center-menu">
+            <div class="chat-container">
+                <div class="chat-box">PvP chat</div>
+                <div class="chat-box">World chat</div>
+            </div>
         </div>
 
         <div class="right-menu">
