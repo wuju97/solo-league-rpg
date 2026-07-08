@@ -14,17 +14,14 @@
             color: #000000;
         }
 
-        /* --- Header Section (Stacked Title & Chats) --- */
+        /* --- Header Section (Title) --- */
         header {
-            display: flex;
-            flex-direction: column; /* Stacks the chats underneath the title */
-            gap: 20px; /* Space between the title line and the chat boxes */
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
 
         .title-container {
             display: inline-block;
-            max-width: fit-content; /* Keeps the underline perfectly sized to the text */
+            max-width: fit-content;
         }
 
         .main-title {
@@ -41,12 +38,20 @@
             width: 100%;
         }
 
+        /* --- Chat Boxes Section --- */
+        /* This wrapper centers the chat boxes horizontally on the page */
+        .chat-wrapper {
+            display: flex;
+            justify-content: center; /* Centers the chats between the left and right sides */
+            margin-bottom: 40px;
+        }
+
         .chat-container {
             display: flex;
             gap: 20px;
         }
 
-        /* Boxed chat buttons matching the sketch */
+        /* Boxed chat buttons */
         .chat-box {
             border: 2px solid #000000;
             padding: 5px 15px;
@@ -60,7 +65,6 @@
             display: flex;
             justify-content: space-between;
             max-width: 100%;
-            margin-top: 20px;
         }
 
         /* Lists formatting */
@@ -91,23 +95,22 @@
 </head>
 <body>
 
-    <!-- Top Title and Chat Boxes Stacked -->
     <header>
         <div class="title-container">
             <h1 class="main-title">Solo League Rpg</h1>
             <div class="double-underline"></div>
         </div>
-        
+    </header>
+
+    <div class="chat-wrapper">
         <div class="chat-container">
             <div class="chat-box">PvP chat</div>
             <div class="chat-box">World chat</div>
         </div>
-    </header>
+    </div>
 
-    <!-- The Two Navigation Columns -->
     <main class="columns-container">
         
-        <!-- Left Side Menu -->
         <div class="left-menu">
             <ul>
                 <li>main dashboard.</li>
@@ -119,7 +122,6 @@
             </ul>
         </div>
 
-        <!-- Right Side Menu -->
         <div class="right-menu">
             <ul>
                 <li>leaderboards</li>
