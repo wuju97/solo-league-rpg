@@ -14,9 +14,9 @@
             color: #000000;
         }
 
-        /* --- Header Section (Title Only) --- */
+        /* --- Header Section --- */
         header {
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
 
         .title-container {
@@ -38,43 +38,57 @@
             width: 100%;
         }
 
-        /* --- Three-Column Grid Layout --- */
-        /* This perfectly splits the layout into 3 equal sections across the screen */
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr; 
+        /* --- Content Layout --- */
+        .content-container {
+            position: relative;
             width: 100%;
-            align-items: start;
+            margin-top: 20px;
         }
 
-        /* Lists formatting for side columns */
-        ul {
+        /* Side Menus Shared Styles */
+        .side-menu {
+            position: absolute;
+            top: 0;
+        }
+
+        .side-menu ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
         }
 
-        li {
+        .side-menu li {
             font-size: 1.3rem;
             margin-bottom: 20px;
             cursor: pointer;
             line-height: 1.4;
+            white-space: nowrap;
         }
 
-        /* Left Column Alignment */
+        /* Left side menu placement */
         .left-menu {
+            left: 0;
             text-align: left;
         }
 
-        /* Center Column Alignment (The Chat Boxes) */
-        .center-menu {
+        /* Right side menu placement */
+        .right-menu {
+            right: 150px; /* Pulls it away from the far right edge so it isn't squished */
+            text-align: left; /* Keeps text left-aligned inside its column */
+        }
+
+        /* --- Chat Boxes Section --- */
+        /* This keeps the chats perfectly centered horizontally on the page */
+        .chat-wrapper {
             display: flex;
-            justify-content: center; /* Centers the container in the middle third */
+            justify-content: center; 
+            width: 100%;
+            margin-top: 0px;
         }
 
         .chat-container {
             display: flex;
-            gap: 40px; /* Added more spacing between the two chat boxes */
+            gap: 60px; /* Generous even space between the two chat boxes */
         }
 
         /* Boxed chat buttons */
@@ -85,11 +99,6 @@
             cursor: pointer;
             background: none;
             white-space: nowrap;
-        }
-
-        /* Right Column Alignment */
-        .right-menu {
-            text-align: right; /* Aligns list neatly to the right edge */
         }
     </style>
 </head>
@@ -102,9 +111,9 @@
         </div>
     </header>
 
-    <main class="main-layout">
+    <div class="content-container">
         
-        <div class="left-menu">
+        <div class="side-menu left-menu">
             <ul>
                 <li>main dashboard.</li>
                 <li>league match Entry</li>
@@ -115,14 +124,14 @@
             </ul>
         </div>
 
-        <div class="center-menu">
+        <div class="chat-wrapper">
             <div class="chat-container">
                 <div class="chat-box">PvP chat</div>
                 <div class="chat-box">World chat</div>
             </div>
         </div>
 
-        <div class="right-menu">
+        <div class="side-menu right-menu">
             <ul>
                 <li>leaderboards</li>
                 <li>world map</li>
@@ -131,7 +140,7 @@
             </ul>
         </div>
 
-    </main>
+    </div>
 
 </body>
-</html>
+</html> 
