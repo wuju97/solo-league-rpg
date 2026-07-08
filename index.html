@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo League. RPG.</title>
+    <title>Solo League Rpg</title>
     <style>
         /* --- General Page Setup --- */
         body {
-            font-family: 'Courier New', Courier, monospace, sans-serif; /* Giving it a clean, written look */
+            font-family: 'Courier New', Courier, monospace, sans-serif;
             margin: 0;
             padding: 40px;
-            background-color: #ffffff; /* Clean white background like paper */
-            color: #000000; /* Dark text like ink */
+            background-color: #ffffff;
+            color: #000000;
         }
 
-        /* --- Header Section (Title + Chats) --- */
+        /* --- Header Section (Stacked Title & Chats) --- */
         header {
             display: flex;
-            align-items: flex-start;
-            gap: 40px; /* Puts space between the title and the chat boxes */
+            flex-direction: column; /* Stacks the chats underneath the title */
+            gap: 20px; /* Space between the title line and the chat boxes */
             margin-bottom: 50px;
         }
 
         .title-container {
             display: inline-block;
+            max-width: fit-content; /* Keeps the underline perfectly sized to the text */
         }
 
         .main-title {
@@ -33,7 +34,7 @@
             letter-spacing: 1px;
         }
 
-        /* The double underline effect from your sketch */
+        /* The double underline effect under the title */
         .double-underline {
             border-bottom: 4px double #000000;
             margin-top: 5px;
@@ -43,10 +44,9 @@
         .chat-container {
             display: flex;
             gap: 20px;
-            margin-top: 10px;
         }
 
-        /* Boxed chat buttons matching the pen boxes */
+        /* Boxed chat buttons matching the sketch */
         .chat-box {
             border: 2px solid #000000;
             padding: 5px 15px;
@@ -58,21 +58,21 @@
         /* --- Main Content Layout (Columns) --- */
         .columns-container {
             display: flex;
-            justify-content: space-between; /* Throws one list to the far left, one to the far right */
+            justify-content: space-between;
             max-width: 100%;
             margin-top: 20px;
         }
 
         /* Lists formatting */
         ul {
-            list-style-type: none; /* Removes any bullet points */
+            list-style-type: none;
             padding: 0;
             margin: 0;
         }
 
         li {
             font-size: 1.3rem;
-            margin-bottom: 20px; /* Space between each item */
+            margin-bottom: 20px;
             cursor: pointer;
             line-height: 1.4;
         }
@@ -84,17 +84,17 @@
 
         /* Right Column Alignment */
         .right-menu {
-            text-align: left; /* Text itself aligns left, but the block sits on the right side */
-            padding-right: 60px; /* Gives it some breathing room from the very edge of the screen */
+            text-align: left;
+            padding-right: 60px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Title and Chat Boxes -->
+    <!-- Top Title and Chat Boxes Stacked -->
     <header>
         <div class="title-container">
-            <h1 class="main-title">Solo League. RPG.</h1>
+            <h1 class="main-title">Solo League Rpg</h1>
             <div class="double-underline"></div>
         </div>
         
