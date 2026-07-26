@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Log In</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+<style>
+  .auth-page{
+    min-height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 1.5rem;
+  }
+  .auth-box{
+    width: 100%;
+    max-width: 380px;
+  }
+  .auth-box .brand{
+    display:flex;
+    align-items:baseline;
+    gap:0.6rem;
+    justify-content:center;
+    margin-bottom: 1.5rem;
+  }
+  .auth-box .brand .glyph{ color: var(--gold); font-size:1.3rem; }
+  .auth-box .brand h1{ font-size:1.3rem; margin:0; }
+
+  .tabs{
+    display:flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .tab-btn{
+    flex:1;
+    text-align:center;
+    padding: 0.6rem;
+    font-family:'Cinzel',serif;
+    font-size:0.8rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background: var(--panel-raised);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    color: var(--dim);
+    cursor:pointer;
+  }
+  .tab-btn.active{
+    color: var(--gold-bright);
+    border-color: var(--gold);
+    background: rgba(201,162,75,0.1);
+  }
+
+  .field{ margin-bottom: 1rem; }
+  .field label{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color: var(--dim);
+    margin-bottom:0.4rem;
+  }
+  .field input{
+    width:100%;
+    background: var(--panel-raised);
+    border:1px solid var(--border-bright);
+    border-radius: var(--radius);
+    color: var(--parchment);
+    padding: 0.6rem 0.8rem;
+    font-family:'Spectral',serif;
+    font-size:0.95rem;
+  }
+  .field input:focus{ outline: 1px solid var(--gold); }
+
+  .auth-submit{
+    width:100%;
+    text-align:center;
+    margin-top: 0.5rem;
+  }
+
+  .auth-message{
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    text-align:center;
+    min-height: 1.2em;
+  }
+  .auth-message.error{ color: var(--crimson-bright); }
+  .auth-message.success{ color: var(--steel-bright); }
+
+  .form-panel{ display:none; }
+  .form-panel.active{ display:block; }
+</style>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-box frame">
+    <div class="brand">
+      <span class="glyph">&#9876;</span>
+      <h1>Solo League RPG</h1>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Log In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOG IN FORM -->
+    <div class="form-panel active" id="panel-login">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn auth-submit" onclick="handleLogin()">Enter the Arena</button>
+    </div>
+
+    <!-- SIGN UP FORM -->
+    <div class="form-panel" id="panel-signup">
+      <div class="field">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="At least 6 characters">
+      </div>
+      <button class="btn auth-submit" onclick="handleSignup()">Create Account</button>
+    </div>
+
+    <div class="auth-message" id="auth-message"></div>
+  </div>
+</div>
+
+<!-- Supabase library, then our connection file, then this page's logic -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="audioManager.js"></script>
+<script>
+  function switchTab(which){
+    document.getElementById("tab-login").classList.toggle("active", which === "login");
+    document.getElementById("tab-signup").classList.toggle("active", which === "signup");
+    document.getElementById("panel-login").classList.toggle("active", which === "login");
+    document.getElementById("panel-signup").classList.toggle("active", which === "signup");
+    document.getElementById("auth-message").textContent = "";
+  }
+
+  function showMessage(text, type){
+    const el = document.getElementById("auth-message");
+    el.textContent = text;
+    el.className = "auth-message " + type;
+  }
+
+  async function handleLogin(){
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    if(!email || !password){
+      showMessage("Enter both email and password.", "error");
+      return;
+    }
+
+    showMessage("Logging in...", "");
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+
+    if(error){
+      showMessage(error.message, "error");
+      return;
+    }
+
+    // Success — go to the dashboard
+    window.location.href = "index.html";
+  }
+
+  async function handleSignup(){
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value;
+
+    if(!email || !password){
+      showMessage("Enter both email and password.", "error");
+      return;
+    }
+    if(password.length < 6){
+      showMessage("Password must be at least 6 characters.", "error");
+      return;
+    }
+
+    showMessage("Creating account...", "");
+    const { error } = await sb.auth.signUp({ email, password });
+
+    if(error){
+      showMessage(error.message, "error");
+      return;
+    }
+
+    showMessage("Account created! You can now log in.", "success");
+    switchTab("login");
+  }
+
+  // If already logged in, skip straight to the dashboard
+  (async () => {
+    const { data } = await sb.auth.getSession();
+    if(data.session){
+      window.location.href = "index.html";
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+// ============================================================
+// SOLO LEAGUE RPG — Audio Manager
+// Handles sound effects (tab navigation, notifications) and music
+// (battle music, login/ambient music) using files the player
+// uploads in Settings -> Music & Sound Effects. SFX fall back to
+// synthesized tones (Web Audio API) when no file is uploaded, so
+// there's always feedback even before anyone uploads anything.
+// Load this after supabaseClient.js on every page.
+// ============================================================
+
+const SoloLeagueAudio = (function () {
+  let ctx = null;
+  let prefs = {
+    music_enabled: true, sfx_enabled: true, music_volume: 50, sfx_volume: 70,
+    login_music_enabled: true, login_music_volume: 40,
+    battle_music_url: null, sfx_custom_url: null, login_music_url: null,
+  };
+  let musicElement = null;
+  let ambientElement = null;
+  let ambientPausedForBattle = false;
+
+  function getContext() {
+    if (!ctx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      ctx = new AudioContextClass();
+    }
+    return ctx;
+  }
+
+  async function loadPrefs() {
+    const { data: sessionData } = await sb.auth.getSession();
+    if (!sessionData.session) return;
+    const { data } = await sb.rpc("get_or_create_preferences");
+    const p = Array.isArray(data) ? data[0] : data;
+    if (p) prefs = p;
+  }
+
+  function tone(freq, durationMs, type = "sine", volumeMult = 1) {
+    if (!prefs.sfx_enabled) return;
+    try {
+      const audioCtx = getContext();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      const vol = (prefs.sfx_volume / 100) * 0.15 * volumeMult;
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + durationMs / 1000);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + durationMs / 1000);
+    } catch (e) {
+      // Web Audio can fail before any user gesture on the page — skip silently
+    }
+  }
+
+  function playCustomSfx() {
+    if (!prefs.sfx_enabled || !prefs.sfx_custom_url) return false;
+    try {
+      const audio = new Audio(prefs.sfx_custom_url);
+      audio.volume = prefs.sfx_volume / 100;
+      audio.play().catch(() => {});
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function startAmbient() {
+    if (!prefs.login_music_enabled || !prefs.login_music_url) return;
+    if (ambientElement) return;
+    ambientElement = new Audio(prefs.login_music_url);
+    ambientElement.loop = true;
+    ambientElement.volume = prefs.login_music_volume / 100;
+    ambientElement.play().catch(() => {}); // the persistent click listener below handles retrying
+  }
+
+  function stopAmbient() {
+    if (ambientElement) {
+      ambientElement.pause();
+      ambientElement = null;
+    }
+  }
+
+  // Browsers block audio autoplay until a real user gesture happens
+  // on the page. A single one-shot retry isn't reliable -- if that
+  // one attempt also gets blocked (timing edge cases), there was
+  // previously no further recovery until a full page reload. This
+  // listener stays active permanently and checks on every click
+  // whether ambient music SHOULD be playing but isn't, fixing it
+  // whenever that's true rather than only once.
+  document.addEventListener("click", () => {
+    if (prefs.login_music_enabled && prefs.login_music_url && ambientElement && ambientElement.paused && !ambientPausedForBattle) {
+      ambientElement.play().catch(() => {});
+    }
+  });
+
+  return {
+    async init() {
+      await loadPrefs();
+      startAmbient();
+    },
+    async refreshPrefs() {
+      const wasLoginUrl = prefs.login_music_url;
+      await loadPrefs();
+
+      // Stop immediately if it just got disabled or the track was
+      // removed -- previously this was never checked here at all,
+      // so disabling the toggle had no actual effect on audio that
+      // was already playing.
+      if ((!prefs.login_music_enabled || !prefs.login_music_url) && ambientElement) {
+        stopAmbient();
+        return;
+      }
+
+      // if the ambient track changed, restart with the new one
+      if (prefs.login_music_url !== wasLoginUrl && ambientElement) {
+        stopAmbient();
+      }
+      startAmbient();
+      if (ambientElement) ambientElement.volume = prefs.login_music_volume / 100;
+    },
+    playNavClick() {
+      tone(720, 60, "sine", 0.6);
+    },
+    playNotification() {
+      if (playCustomSfx()) return;
+      tone(660, 90, "triangle", 0.8);
+      setTimeout(() => tone(880, 120, "triangle", 0.8), 90);
+    },
+    playVictory() {
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        setTimeout(() => tone(freq, 180, "triangle", 0.9), i * 110);
+      });
+    },
+    playDefeat() {
+      [392, 349, 311].forEach((freq, i) => {
+        setTimeout(() => tone(freq, 220, "sine", 0.8), i * 140);
+      });
+    },
+    playClick() {
+      tone(500, 40, "square", 0.4);
+    },
+    playBattleMusic() {
+      if (!prefs.music_enabled || !prefs.battle_music_url) return;
+      if (musicElement) return;
+
+      // pause ambient music while battle music plays, resume after
+      if (ambientElement && !ambientElement.paused) {
+        ambientElement.pause();
+        ambientPausedForBattle = true;
+      }
+
+      musicElement = new Audio(prefs.battle_music_url);
+      musicElement.loop = true;
+      musicElement.volume = prefs.music_volume / 100;
+      musicElement.play().catch(() => {});
+    },
+    stopBattleMusic() {
+      if (musicElement) {
+        musicElement.pause();
+        musicElement = null;
+      }
+      if (ambientPausedForBattle && ambientElement) {
+        ambientElement.play().catch(() => {});
+        ambientPausedForBattle = false;
+      }
+    },
+    getPrefs() {
+      return prefs;
+    },
+  };
+})();
+
+(async function () {
+  await SoloLeagueAudio.init();
+
+  // Play a soft click on every tab navigation click, site-wide, via
+  // event delegation — no need to touch every individual tab's
+  // click handler across every page.
+  document.addEventListener("click", (evt) => {
+    if (evt.target.closest(".page-tab-btn")) {
+      SoloLeagueAudio.playNavClick();
+    }
+  });
+})();

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Party</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Party</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="party-tabs">
+      <button class="page-tab-btn active" data-tab="friends">Friends</button>
+      <button class="page-tab-btn" data-tab="party">Party</button>
+      <button class="page-tab-btn" data-tab="invites">Invites</button>
+      <button class="page-tab-btn" data-tab="shared-quests">Shared Quests</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="friends">
+      <section class="frame">
+        <h3>Friends</h3>
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem;">
+          <input type="text" id="add-friend-gamer-name" placeholder="Gamer name" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+          <button class="btn" onclick="addFriendByName()">Add Friend</button>
+        </div>
+        <p class="placeholder-note" id="add-friend-status" style="margin-bottom:0.75rem;"></p>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Chat isn't wired up yet — this is your friends list for now, not a messaging system.</p>
+        <div id="friends-list"><p class="placeholder-note">Loading...</p></div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="party">
+      <section class="frame">
+        <h3>Party</h3>
+        <div id="no-party-state">
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">You're not in a party right now.</p>
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <button class="btn" onclick="createNewParty()">Create Party</button>
+            <input type="number" id="join-party-id" placeholder="Party ID" style="width:120px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+            <button class="btn" onclick="joinExistingParty()">Join</button>
+          </div>
+        </div>
+
+        <div id="in-party-state" style="display:none;">
+          <p class="placeholder-note" style="margin-bottom:0.5rem;">Party ID: <span class="mono" id="my-party-id"></span></p>
+          <div id="party-members-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem;">
+            <input type="text" id="invite-gamer-name" placeholder="Gamer name" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+            <button class="btn" onclick="sendPartyInviteByName()">Invite</button>
+          </div>
+          <p class="placeholder-note" id="invite-status" style="margin-bottom:0.75rem;"></p>
+
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn" id="ready-toggle-btn" onclick="togglePartyReady()">Ready Up</button>
+            <button class="btn" style="display:none; border-color:var(--gold); color:var(--gold-bright);" id="start-party-battle-btn" onclick="startPartyBattle()">Start Party Battle</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="leaveCurrentParty()">Leave Party</button>
+          </div>
+          <p class="placeholder-note" id="party-battle-status" style="margin-top:0.5rem;"></p>
+          <p class="placeholder-note" style="margin-top:0.75rem;">Inviting someone brings them into your world — their location moves to match yours, but their own class, rank, cards, and equipment stay entirely their own. Party members can pick from each other's cards when building a loadout for a fight. Champions require a party. Each ready member should challenge the same Champion from World Map first (their loadout gets tagged to this party automatically) — once everyone's done that, the leader can Start Party Battle here.</p>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="invites">
+      <section class="frame">
+        <h3>Invites</h3>
+        <div id="party-invites-list"><p class="placeholder-note">Loading...</p></div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="shared-quests">
+      <section class="frame"><h3>Shared Quests</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+<script>
+  function escapeHtml(str){
+    if (str === null || str === undefined) return "";
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  async function loadMyParty(){
+    const { data: result, error } = await sb.rpc("get_my_party");
+    if (error) return;
+
+    if (!result.in_party){
+      document.getElementById("no-party-state").style.display = "block";
+      document.getElementById("in-party-state").style.display = "none";
+      return;
+    }
+
+    document.getElementById("no-party-state").style.display = "none";
+    document.getElementById("in-party-state").style.display = "block";
+    document.getElementById("my-party-id").textContent = result.party_id;
+
+    const { data: userData } = await sb.auth.getUser();
+    const myMembership = result.members.find(m => m.user_id === userData.user.id);
+
+    document.getElementById("party-members-list").innerHTML = result.members.map(m => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.7rem;">
+        <span>${m.is_leader ? "👑 " : ""}${escapeHtml(m.gamer_name || "Unnamed")}</span>
+        <span class="tag" style="${m.ready ? "border-color:var(--gold); color:var(--gold-bright);" : ""}">${m.ready ? "Ready" : "Not Ready"}</span>
+      </div>
+    `).join("");
+
+    const readyBtn = document.getElementById("ready-toggle-btn");
+    readyBtn.textContent = myMembership?.ready ? "Unready" : "Ready Up";
+
+    const startBtn = document.getElementById("start-party-battle-btn");
+    if (startBtn){
+      startBtn.style.display = result.is_leader ? "inline-block" : "none";
+    }
+  }
+
+  async function startPartyBattle(){
+    const statusEl = document.getElementById("party-battle-status");
+    statusEl.textContent = "Starting...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("start_party_battle");
+    if (error || !result.success){
+      const reasonText = {
+        not_in_a_forming_party: "You're not in a party that's still forming.",
+        only_the_leader_can_start: "Only the party leader can start the battle.",
+        not_everyone_ready: "Not everyone's ready with a loadout yet — each ready member needs to challenge the same Champion from World Map first.",
+      }[result?.reason] || error?.message || result?.reason;
+      statusEl.textContent = reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Battle starting — heading to Duel Chat...";
+    statusEl.style.color = "var(--steel-bright)";
+    window.location.href = "pvp-chat.html";
+  }
+
+  async function createNewParty(){
+    const { data: result, error } = await sb.rpc("create_party");
+    if (error || !result.success){
+      alert("Couldn't create party: " + (error?.message || result.reason));
+      return;
+    }
+    await loadMyParty();
+  }
+
+  async function joinExistingParty(){
+    const partyId = document.getElementById("join-party-id").value;
+    if (!partyId) return;
+    const { data: result, error } = await sb.rpc("join_party", { p_party_id: parseInt(partyId) });
+    if (error || !result.success){
+      alert("Couldn't join party: " + (error?.message || result.reason));
+      return;
+    }
+    await loadMyParty();
+  }
+
+  async function togglePartyReady(){
+    await sb.rpc("toggle_party_ready");
+    await loadMyParty();
+  }
+
+  async function leaveCurrentParty(){
+    await sb.rpc("leave_party");
+    await loadMyParty();
+  }
+
+  async function sendPartyInviteByName(){
+    const nameInput = document.getElementById("invite-gamer-name");
+    const statusEl = document.getElementById("invite-status");
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    statusEl.textContent = "Sending invite...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("send_party_invite", { p_invitee_gamer_name: name });
+    if (error || !result.success){
+      const reasonText = {
+        gamer_name_not_found: "No player found with that gamer name.",
+        cannot_invite_yourself: "You can't invite yourself.",
+        already_in_your_party: "They're already in your party.",
+        invite_already_pending: "They already have a pending invite from you.",
+      }[result?.reason] || (error?.message || result?.reason);
+      statusEl.textContent = reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = `Invite sent to ${name}.`;
+    statusEl.style.color = "var(--steel-bright)";
+    nameInput.value = "";
+    await loadMyParty();
+  }
+
+  async function loadPartyInvites(){
+    const listEl = document.getElementById("party-invites-list");
+    if (!listEl) return;
+    const { data: invites, error } = await sb.rpc("get_my_party_invites");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!invites || invites.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No pending invites.</p>`;
+      return;
+    }
+    listEl.innerHTML = invites.map(inv => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+        <span><strong style="color:var(--parchment);">${escapeHtml(inv.inviter_gamer_name)}</strong> invited you to their party${inv.inviter_kingdom ? ` in ${escapeHtml(inv.inviter_kingdom)}` : ""}</span>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.75rem;" onclick="respondToPartyInvite(${inv.invite_id}, true)">Accept</button>
+          <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson-bright);" onclick="respondToPartyInvite(${inv.invite_id}, false)">Reject</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function respondToPartyInvite(inviteId, accept){
+    const { data: result, error } = await sb.rpc("respond_to_party_invite", { p_invite_id: inviteId, p_accept: accept });
+    if (error || !result.success){
+      alert("Couldn't respond to invite: " + (error?.message || result.reason));
+      return;
+    }
+    await loadPartyInvites();
+    await loadMyParty();
+    if (result.accepted && result.joined_kingdom){
+      alert(`You've joined the party and traveled to ${result.joined_kingdom}.`);
+    }
+  }
+
+  async function addFriendByName(){
+    const nameInput = document.getElementById("add-friend-gamer-name");
+    const statusEl = document.getElementById("add-friend-status");
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    statusEl.textContent = "Sending...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("add_friend", { p_gamer_name: name });
+    if (error || !result.success){
+      const reasonText = {
+        gamer_name_not_found: "No player found with that gamer name.",
+        cannot_add_yourself: "You can't add yourself.",
+      }[result?.reason] || (error?.message || result?.reason);
+      statusEl.textContent = reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = result.status === "accepted" ? `You and ${name} are now friends.` : `Friend request sent to ${name}.`;
+    statusEl.style.color = "var(--steel-bright)";
+    nameInput.value = "";
+    await loadFriendsList();
+  }
+
+  function presenceLabel(lastSeenAt){
+    if (!lastSeenAt) return { text: "Never played", online: false };
+    const diffMs = Date.now() - new Date(lastSeenAt).getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 5) return { text: "Online now", online: true };
+    if (diffMin < 60) return { text: `Last seen ${diffMin}m ago`, online: false };
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return { text: `Last seen ${diffHr}h ago`, online: false };
+    const diffDay = Math.floor(diffHr / 24);
+    return { text: `Last seen ${diffDay}d ago`, online: false };
+  }
+
+  async function loadFriendsList(){
+    const listEl = document.getElementById("friends-list");
+    if (!listEl) return;
+    const { data: friends, error } = await sb.rpc("get_my_friends");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!friends || friends.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No friends added yet.</p>`;
+      return;
+    }
+    listEl.innerHTML = friends.map(f => {
+      const presence = presenceLabel(f.last_seen_at);
+      return `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem; margin-bottom:0.5rem;">
+        <span>
+          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:0.4rem; background:${presence.online ? "#8fdb8f" : "var(--dim)"};"></span>
+          <strong style="color:var(--parchment);">${escapeHtml(f.gamer_name)}</strong>${f.current_kingdom ? ` <span class="mono" style="font-size:0.75rem; color:var(--dim);">— ${escapeHtml(f.current_kingdom)}</span>` : ""}
+          <span class="mono" style="font-size:0.7rem; color:${presence.online ? "#8fdb8f" : "var(--dim)"}; margin-left:0.5rem;">${presence.text}</span>
+        </span>
+        <span class="tag" style="font-size:0.65rem;">${f.status === "pending" ? "Pending" : "Friend"}</span>
+      </div>
+    `;
+    }).join("");
+  }
+
+  loadMyParty();
+  loadPartyInvites();
+  loadFriendsList();
+</script>
+
+<script>
+  document.querySelectorAll("#party-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#party-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+
+      if (target === "invites") loadPartyInvites();
+    });
+  });
+</script>
+</body>
+</html>

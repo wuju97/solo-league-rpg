@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Mail</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Mail</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="mail-tabs">
+      <button class="page-tab-btn active" data-tab="npc-letters">NPC Letters</button>
+      <button class="page-tab-btn" data-tab="guild-invitations">Guild Invitations</button>
+      <button class="page-tab-btn" data-tab="auction-sales">Auction Sales</button>
+      <button class="page-tab-btn" data-tab="announcements">Announcements</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="npc-letters">
+      <section class="frame"><h3>NPC Letters</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="guild-invitations">
+      <section class="frame"><h3>Guild Invitations</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="auction-sales">
+      <section class="frame"><h3>Auction Sales</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="announcements">
+      <section class="frame"><h3>Announcements</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+<script>
+  document.querySelectorAll("#mail-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#mail-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+</script>
+</body>
+</html>

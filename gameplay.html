@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Gameplay</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item active" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Reference</div>
+        <h2>Gameplay</h2>
+      </div>
+    </div>
+
+    <div class="page-tabs" id="gameplay-tabs">
+      <button class="page-tab-btn active" data-tab="rules">Game Rules</button>
+      <button class="page-tab-btn" data-tab="objective">Game Objective</button>
+    </div>
+
+    <div class="channel-content">
+      <div class="page-tab-panel active" data-panel="rules">
+        <section class="frame">
+          <h3>Game Rules</h3>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Starting Out</h4>
+          <p>You pick a class at character creation (Knight, Berserker, Assassin, Ranger, Mage, Druid, Paladin, Necromancer, Monk, or Engineer). Your class sets your base Power, Defense, Speed, and HP, plus one visible passive — no hidden effects. Every player starts locked to Valoria at E-rank, with only Valoria unlocked.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Class Growth by Rank</h4>
+          <p>Your class's base stats and your Player Card's 3 abilities both scale up as your rank rises (E through SS) — not by level, by rank specifically. Each class grows differently: some (Paladin, Druid, Knight) lean tanky with high HP and Defense but low Speed; others (Assassin) lean pure speed, exceeding even a Kingdom Champion's typical Speed by SS-rank; others (Mage, Necromancer) stay glass-cannons even at the top, with Power beyond Champion-level but HP and Defense that stay comparatively low. By SS-rank, every class is roughly comparable in overall power to a Kingdom Champion, just arrived at differently. Choose carefully — your class becomes permanent the moment you enter your first political hierarchy fight (Warriors through Champion). Creature fights and Primordial fights don't lock it.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Cards</h4>
+          <p>A card is a single ability, not a whole creature. Your <strong>Player Card</strong> — your class's 3 abilities — is automatically included in every fight, on top of up to 3 optional creature cards you choose beforehand (0-3, not mandatory — your Player Card alone is enough to fight). Creature cards are earned through the Ability-Fragment system: defeating a creature grants one of its abilities at a time (weakest first), with the unlock chance dropping as abilities get stronger (70% / 45% / 25% / 10%), and a pity bonus that grows on repeated failures. Cards render as actual card-shaped visuals everywhere they appear — Pre-Battle selection, live battle, and your Player tab.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Combat</h4>
+          <p>Turn order is Speed-based — whoever's faster (base Speed plus any temporary bonus) acts first, every exchange, in every fight type, including the enemy potentially acting before you if it's faster. Each turn you choose to Attack, Guard, or use one of your cards' abilities, gated by that card's own energy (shown as a real fillable bar on each card, not just a number). Damage follows Power minus Defense. The Elemental Wheel (Fire → Ice → Nature → Sand → Water → Storm → Poison → Shadow → Light → back to Fire) grants +25% damage against the next element in the cycle — when it triggers, the battle log calls it out directly ("The elements favor you!"). Elements also carry signature status effects — Burn, Freeze, Root, Blind, Soak, Shock, Poison, Fear, and Purify.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Beyond Damage — Full Ability Effects</h4>
+          <p>Abilities aren't just damage numbers. Temporary stat buffs and debuffs, shields that absorb incoming hits, dodge chance, damage reflection, one-time revives, defense-piercing, conditional bonus damage, HP/energy steals, forced skip-turns, and even copying an opponent's last-used ability are all real, working effects — not flavor text. These work the same way whether it's you, an enemy, a party member, or an opponent in PvP using them.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Encounters</h4>
+          <p><strong>Roam</strong> gives random creature encounters weighted by rarity (E-C common, B-A less frequent, S-SS rare). <strong>Targeted Hunts</strong> let you track a specific creature directly once you've partially learned its abilities. Political hierarchies (Warriors → Captains → Nobles → Generals → King → Champion) are climbed by defeating every named NPC in a tier before the next unlocks, with a cooldown before you can re-fight someone (2 days, 3 for Champions). You must physically be in that kingdom to fight its hierarchy — checked before the fight starts, not just at the end. Defeating a Champion resets that kingdom's ladder, requiring a full re-climb to challenge them again.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">PKMN, NRTO, LOL — Traveler Mini-Games</h4>
+          <p>Travel the Roads, and a traveler might offer you a riddle instead of a fight. Three guessing games, each built the same way: a name is picked in secret, you type a guess, and the game tells you which attributes of your guess match the hidden answer and which don't — keep guessing until you land on it exactly. These are outside Solonia's own lore entirely — real Pokemon, real Naruto characters, real League of Legends champions.</p>
+          <p><strong>PKMN</strong> — guess a real Pokemon. Compares primary Type, secondary Type, Generation, and Legendary status.<br>
+          <strong>NRTO</strong> — guess a real Naruto character. Compares Village, Rank, and Nature (elemental) Type.<br>
+          <strong>LOL</strong> — guess a real League of Legends champion. Compares Role, Region, Gender, and Release Era.</p>
+          <p>Start typing in the guess box and only real, valid names will show up as suggestions — you're always picking from an actual list, never guessing blind at spelling. Solve it and you're paid in gold, same as any other traveler favor.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Losing Has Real Stakes</h4>
+          <p>Losing to a political hierarchy NPC (Warriors through Champion) costs real XP — more for losing to someone higher up the ladder. If that XP loss drops you below your current level's threshold, your level falls too, and a big enough drop can cost you a rank. Surrendering any fight costs gold instead. Creature fights and Primordial fights carry no such penalty on a loss. Whatever you lost — XP, gold, a level, a rank — is shown directly on the defeat screen.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Rank &amp; Unlocking</h4>
+          <p>Rank comes from XP, earned in any fight — creature, hierarchy, PvP, or League KDA sync — and the XP needed per level genuinely climbs the higher you go. Leveling up raises your rank (E through SS), and reaching certain ranks unlocks new countries at random from whichever you haven't reached yet (D→1, C→2, B→2, A→3, all 9 by A-rank). Higher-rank creatures are gated behind total countries unlocked: B/A-rank need 3+ countries, S-rank needs 5+, SS-rank needs 7+.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Gear</h4>
+          <p>Weapons and armor add real stat bonuses in a fight (weapon boosts Attack, armor reduces incoming damage passively), pulled from your actual Shop catalog. Consumables can be used at the start of a fight and genuinely heal. All three are chosen per-fight from the Pre-Battle screen — your permanent Inventory equip state is separate and unaffected, so you can bring different gear to different fights without changing what's equipped.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Parties &amp; PvP</h4>
+          <p>Party fights use simultaneous submission — every living member picks their action, and once everyone's in, the whole round resolves together in true Speed order alongside the enemy, whose turn can land in the middle of your party's turns if it's fast enough. PvP duels (via Duel Trade) use the exact same engine — cards, classes, energy, full ability effects — with the faster player acting first each exchange. The Elemental Wheel bonus never applies in PvP specifically, since players carry no element of their own.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Wagering &amp; Trading</h4>
+          <p>Before a duel starts, either player can lock in a bet — gold, AP, and/or specific items — which gets held immediately once locked. When the duel ends, the winner takes the entire combined pot from both sides. Changed your mind before the fight starts? Cancel Duel in the Prep screen refunds anything already locked in.</p>
+          <p>Separately, Duel Trade also supports genuine gifting — offer gold, AP, any number of items, and any number of ability cards to another player by name, no fight required. They can accept or reject; nothing changes hands until they do.</p>
+        </section>
+      </div>
+
+      <div class="page-tab-panel" data-panel="objective">
+        <section class="frame">
+          <h3>Game Objective</h3>
+          <p class="placeholder-note" style="margin-bottom:1rem;">The long arc of what you're actually working toward.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Short Term</h4>
+          <p>Fight, earn XP and ability-fragment cards, and grow your class's power. Every fight — creature, hierarchy, or PvP — feeds the same rank progression.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Mid Term</h4>
+          <p>Climb each kingdom's political hierarchy from Warriors up to its Champion, and unlock new kingdoms as your rank rises. Each kingdom has two separate tracks — its creatures (fought by anyone, anytime) and its political ladder (gated, climbed in order).</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">How Countries Unlock</h4>
+          <p>You start locked to Valoria only. From there, new kingdoms unlock automatically as your rank rises from XP — not chosen by you, picked at random from whichever kingdoms you haven't reached yet:</p>
+          <ul class="clean" style="margin:0.5rem 0 1rem;">
+            <li><span>Reach D-rank</span><span class="mono">unlocks 1 kingdom (2 total)</span></li>
+            <li><span>Reach C-rank</span><span class="mono">unlocks 2 more (4 total)</span></li>
+            <li><span>Reach B-rank</span><span class="mono">unlocks 2 more (6 total)</span></li>
+            <li><span>Reach A-rank</span><span class="mono">unlocks the final 3 (all 9)</span></li>
+          </ul>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Creature Rank Gating</h4>
+          <p>Even once a creature is in front of you, its rank can still be locked based on how many countries you've unlocked in total, not which kingdom you're standing in:</p>
+          <ul class="clean" style="margin:0.5rem 0 1rem;">
+            <li><span>B and A-rank creatures</span><span class="mono">require 3+ countries unlocked</span></li>
+            <li><span>S-rank creatures</span><span class="mono">require 5+ countries unlocked</span></li>
+            <li><span>SS-rank creatures</span><span class="mono">require 7+ countries unlocked</span></li>
+          </ul>
+          <p class="placeholder-note">E, D, and C-rank creatures are never gated this way — fightable from the very start.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Conquest</h4>
+          <p>Defeating a kingdom's Champion grants real ownership of that kingdom — the country's true top authority, above even its King. Ownership can be lost if someone else defeats that Champion after you.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Champion's Mystery Reward</h4>
+          <p>Beating a Champion also gives you a choice: 3 face-down cards, and you pick one. Two hold gold (1500 or 2500), one holds a genuine random ability belonging to the Champion you just beat — added straight to your card collection if you get it. Every pick is freshly random, every time, for every Champion — there's no pattern to learn or exploit.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Endgame — PvG</h4>
+          <p>The Primordial Gods, one per kingdom, are the true endgame. Reaching them requires three things at once: every one of the 9 kingdoms conquered, every one of the 9 Champions defeated, and every SS-rank creature across every kingdom defeated at least once. Once eligible, click any kingdom's name on the World Map to challenge its Primordial directly.</p>
+          <p>Every Primordial fight requires a party at first — solo access to the remaining Primordials only opens up after you've personally been part of a party that's defeated 3 different ones. Defeating a Primordial grants both of its unique abilities as real cards, a large gold reward, and triple the usual SS-rank XP.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="themeLoader.js"></script>
+
+<script>
+  document.querySelectorAll("#gameplay-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#gameplay-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.toggle("active", p.dataset.panel === target));
+    });
+  });
+
+  document.querySelector(".nav-toggle")?.addEventListener("click", () => {
+    document.querySelector(".sidebar.left")?.classList.toggle("open");
+  });
+</script>
+</body>
+</html>

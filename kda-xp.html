@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — KDA / XP</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Main</div>
+        <h2>KDA / XP</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+      <div class="page-tabs" id="kdaxp-tabs">
+        <button class="page-tab-btn active" data-tab="match-entry">League Match Entry</button>
+        <button class="page-tab-btn" data-tab="spend-ap">Spend AP</button>
+        <button class="page-tab-btn" data-tab="convert-gold">Convert to Gold</button>
+      </div>
+
+      <div class="channel-content">
+        <div class="page-tab-panel active" data-panel="match-entry">
+          <div class="card-grid" style="grid-template-columns: minmax(280px, 420px);">
+            <section class="frame">
+              <h3>League Match Entry</h3>
+
+              <div style="margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
+                <button class="btn" onclick="syncLatestRiotMatch()" id="sync-riot-btn">🔄 Sync Latest Match</button>
+                <p class="placeholder-note" id="sync-riot-status" style="margin-top:0.5rem;">Set your Riot API key and Riot ID in Settings → API → LoL API Key first. Once set, this page checks for a new match every 90 seconds automatically and applies the XP by itself — no clicking needed, just leave this tab open (even in the background) while you play. The button above is only for checking right now instead of waiting. Automatic syncs never include the MVP bonus, since Riot has no clean way to detect that — use the button and tick MVP yourself if you want that bonus.</p>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+                <div class="field">
+                  <label for="match-kills" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Kills</label>
+                  <input type="number" id="match-kills" min="0" value="0" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+                </div>
+                <div class="field">
+                  <label for="match-deaths" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Deaths</label>
+                  <input type="number" id="match-deaths" min="0" value="0" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+                </div>
+                <div class="field">
+                  <label for="match-assists" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Assists</label>
+                  <input type="number" id="match-assists" min="0" value="0" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+                </div>
+              </div>
+
+              <div style="display:flex; gap:1.5rem; margin-bottom:1.25rem;">
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-family:'Spectral',serif; font-size:0.95rem;">
+                  <input type="checkbox" id="match-won"> Won the match (+50 XP)
+                </label>
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-family:'Spectral',serif; font-size:0.95rem;">
+                  <input type="checkbox" id="match-mvp"> Was MVP (+30 XP)
+                </label>
+              </div>
+
+              <button class="btn" style="width:100%;" onclick="submitMatchEntry()">Submit</button>
+
+              <div id="match-result" style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border); display:none;">
+                <ul class="clean">
+                  <li><span>XP Generated</span><span class="mono" id="result-xp" style="color:var(--gold-bright);">--</span></li>
+                  <li><span>STAT Points Generated</span><span class="mono" id="result-ap" style="color:var(--gold-bright);">--</span></li>
+                </ul>
+                <p class="placeholder-note" id="match-result-note" style="margin-top:0.5rem;"></p>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="page-tab-panel" data-panel="spend-ap">
+          <section class="frame" style="max-width:420px;">
+            <h3>Spend AP</h3>
+            <div id="kx-no-character" class="placeholder-note">Create your character in the Character tab first.</div>
+            <div id="kx-spend-content" style="display:none;">
+              <p>Unspent Attribute Points: <span class="mono" id="kx-ap-count" style="color:var(--gold-bright);">--</span></p>
+              <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;" id="kx-stat-buttons"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="page-tab-panel" data-panel="convert-gold">
+          <section class="frame" style="max-width:420px;">
+            <h3>Convert to Gold</h3>
+            <div id="kx-no-character-2" class="placeholder-note">Create your character in the Character tab first.</div>
+            <div id="kx-convert-content" style="display:none;">
+              <p>Unspent AP: <span class="mono" id="kx-ap-count-2" style="color:var(--gold-bright);">--</span> &nbsp;|&nbsp; Gold: <span class="mono" id="kx-gold-count" style="color:var(--gold-bright);">--</span></p>
+              <p class="placeholder-note" style="margin:0.75rem 0;">1 AP converts to 100 Gold.</p>
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <input type="number" id="kx-convert-amount" min="1" value="1" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+                <button class="btn" onclick="kxConvertApToGold()">Convert</button>
+              </div>
+              <p class="placeholder-note" id="kx-convert-message" style="margin-top:0.75rem;"></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  // ============================================================
+  // League Match Entry — converts KDA into XP. Deliberately NOT
+  // proportional to KDA alone (a 25/3/10 game shouldn't break
+  // progression) — flat, modest per-stat values instead.
+  // ============================================================
+  function calculateXP(kills, deaths, assists, won, wasMvp){
+    let xp = 100; // base
+    xp += kills * 20;
+    xp += assists * 10;
+    xp -= deaths * 5;
+    if (won) xp += 50;
+    if (wasMvp) xp += 30;
+    // Every match still gives at least a little XP, even a rough loss
+    return Math.max(10, Math.round(xp));
+  }
+
+  // AP is deliberately NOT derived from per-match XP — it's rarer,
+  // awarded only when a level is actually gained (+5 AP per level).
+  const AP_PER_LEVEL = 5;
+
+  // Level and rank now come from the shared level_and_rank_for_xp()
+  // database function (Step 37) so every part of the site — this
+  // page, PvE fights, Boss fights — uses the exact same curve.
+  // Level cap is 100, 7 rank tiers (E/D/C/B/A/S/SS), each rank
+  // requiring progressively more XP per level than the last.
+  async function levelAndRankForXp(totalXp){
+    const { data, error } = await sb.rpc("level_and_rank_for_xp", { p_xp: totalXp });
+    const result = Array.isArray(data) ? data[0] : data;
+    if (error || !result) return { level: 1, rank: "E" };
+    return result;
+  }
+
+  const ALL_STATS = ["strength","vitality","agility","dexterity","intellect","wisdom","luck","spirit","endurance","perception","charisma"];
+
+  async function applyMatchXp(kills, deaths, assists, won, wasMvp, source){
+    const xp = calculateXP(kills, deaths, assists, won, wasMvp);
+
+    const { data: sessionData } = await sb.auth.getSession();
+    if (!sessionData.session){
+      return { ok: false, message: "Not logged in — this wasn't saved." };
+    }
+
+    const userId = sessionData.session.user.id;
+    const { data: character, error: fetchError } = await sb
+      .from("characters")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchError || !character){
+      return { ok: false, message: "No character found yet — this XP wasn't saved to a character." };
+    }
+
+    const newXp = (character.xp || 0) + xp;
+    const { level: newLevel, rank: newRank } = await levelAndRankForXp(newXp);
+    const levelsGained = newLevel - character.level;
+    const apGained = Math.max(0, levelsGained) * AP_PER_LEVEL;
+    const newAp = (character.attribute_points || 0) + apGained;
+
+    const statUpdates = {};
+    if (levelsGained > 0){
+      ALL_STATS.forEach((stat) => {
+        statUpdates[stat] = (character[stat] ?? 10) + levelsGained;
+      });
+    }
+
+    const { error: updateError } = await sb
+      .from("characters")
+      .update({ xp: newXp, attribute_points: newAp, level: newLevel, rank: newRank, ...statUpdates })
+      .eq("user_id", userId);
+
+    if (updateError){
+      return { ok: false, message: "Couldn't save to your character: " + updateError.message };
+    }
+
+    // Record the match itself -- this is what the Dashboard's League
+    // Summary reads from. Not critical if this fails, so don't block
+    // on it -- XP already applied successfully above either way.
+    await sb.from("match_history").insert({
+      user_id: userId, kills, deaths, assists, won, mvp: wasMvp, xp_earned: xp, source: source || "manual",
+    });
+
+    return {
+      ok: true, xp, apGained, levelsGained, newLevel, newRank,
+      message: levelsGained > 0
+        ? `Saved to your character — leveled up to Level ${newLevel} (Rank ${newRank})! All stats +${levelsGained}.`
+        : "Saved to your character.",
+    };
+  }
+
+  async function syncLatestRiotMatch(){
+    const btn = document.getElementById("sync-riot-btn");
+    const statusEl = document.getElementById("sync-riot-status");
+    btn.disabled = true;
+    statusEl.textContent = "Checking for a new match...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data, error } = await sb.functions.invoke("riot-match-sync");
+    btn.disabled = false;
+
+    if (error){
+      statusEl.textContent = "Couldn't check: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (data.error){
+      statusEl.textContent = data.error + (data.debug ? " | DEBUG: " + JSON.stringify(data.debug) : "");
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (!data.newMatch){
+      statusEl.textContent = "No new match yet — still watching.";
+      statusEl.style.color = "var(--dim)";
+      return;
+    }
+
+    document.getElementById("match-kills").value = data.kills;
+    document.getElementById("match-deaths").value = data.deaths;
+    document.getElementById("match-assists").value = data.assists;
+    document.getElementById("match-won").checked = data.won;
+
+    statusEl.textContent = `Filled in from your last match (${data.championName}) — MVP isn't detected automatically, check it yourself if you were. Review below, then submit.`;
+    statusEl.style.color = "var(--steel-bright)";
+  }
+
+  // Fully automatic version — no clicking, no reviewing, applies XP
+  // the instant a new match is found. This is what runs on the 90s
+  // timer. MVP can never be auto-detected from Riot's data, so
+  // automatic syncs never include the MVP bonus — only a manual
+  // "Sync Latest Match" click + ticking the box yourself does.
+  async function autoSyncLatestRiotMatch(){
+    const statusEl = document.getElementById("sync-riot-status");
+    const { data, error } = await sb.functions.invoke("riot-match-sync");
+
+    if (error || (data && data.error) || !data || !data.newMatch){
+      // stay quiet on "nothing new" or transient errors -- this runs
+      // unattended, no need to alarm anyone every 90 seconds
+      return;
+    }
+
+    const result = await applyMatchXp(data.kills, data.deaths, data.assists, data.won, false, "riot_auto");
+    if (statusEl){
+      statusEl.textContent = result.ok
+        ? `Auto-applied your last match (${data.championName}, ${data.kills}/${data.deaths}/${data.assists}) — +${result.xp} XP. ${result.message}`
+        : result.message;
+      statusEl.style.color = result.ok ? "var(--steel-bright)" : "var(--crimson-bright)";
+    }
+    if (window.SoloLeagueAudio) window.SoloLeagueAudio.playNotification();
+  }
+
+  // Auto-check every 90s while this page stays open (even in the
+  // background) — fully hands-off, no clicking required. This can't
+  // run with the browser fully closed; Riot has no push notification
+  // for match completion, so periodic checking while the tab is open
+  // is the closest real equivalent to "automatic."
+  setInterval(() => {
+    if (document.getElementById("sync-riot-btn")) autoSyncLatestRiotMatch();
+  }, 90000);
+
+  async function submitMatchEntry(){
+    const kills = parseInt(document.getElementById("match-kills").value, 10) || 0;
+    const deaths = parseInt(document.getElementById("match-deaths").value, 10) || 0;
+    const assists = parseInt(document.getElementById("match-assists").value, 10) || 0;
+    const won = document.getElementById("match-won").checked;
+    const wasMvp = document.getElementById("match-mvp").checked;
+
+    const xp = calculateXP(kills, deaths, assists, won, wasMvp);
+
+    document.getElementById("result-xp").textContent = "+" + xp;
+    document.getElementById("result-ap").textContent = "(AP only comes from leveling up)";
+    document.getElementById("match-result").style.display = "block";
+
+    const noteEl = document.getElementById("match-result-note");
+    const result = await applyMatchXp(kills, deaths, assists, won, wasMvp, "manual");
+
+    if (result.ok){
+      document.getElementById("result-ap").textContent = result.apGained > 0 ? "+" + result.apGained : "0 (no level gained)";
+    }
+    noteEl.textContent = result.message;
+  }
+
+  // ============================================================
+  // Spend AP / Convert to Gold — same actions as Character →
+  // Attributes, available here too since this is where AP is earned
+  // ============================================================
+  document.querySelectorAll("#kdaxp-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#kdaxp-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+
+      if (target === "spend-ap" || target === "convert-gold") loadKxCharacter();
+    });
+  });
+
+  let kxCharacter = null;
+
+  async function loadKxCharacter(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    const { data, error } = await sb
+      .from("characters")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error || !data){
+      document.getElementById("kx-no-character").style.display = "block";
+      document.getElementById("kx-spend-content").style.display = "none";
+      document.getElementById("kx-no-character-2").style.display = "block";
+      document.getElementById("kx-convert-content").style.display = "none";
+      return;
+    }
+
+    kxCharacter = data;
+
+    document.getElementById("kx-no-character").style.display = "none";
+    document.getElementById("kx-spend-content").style.display = "block";
+    document.getElementById("kx-no-character-2").style.display = "none";
+    document.getElementById("kx-convert-content").style.display = "block";
+
+    document.getElementById("kx-ap-count").textContent = kxCharacter.attribute_points ?? 0;
+    document.getElementById("kx-ap-count-2").textContent = kxCharacter.attribute_points ?? 0;
+    document.getElementById("kx-gold-count").textContent = kxCharacter.gold ?? 0;
+
+    const btnContainer = document.getElementById("kx-stat-buttons");
+    btnContainer.innerHTML = ALL_STATS.map((stat) => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem;">
+        <span style="text-transform:capitalize;">${stat}</span>
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span class="mono">${kxCharacter[stat] ?? 10}</span>
+          <button class="btn" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="kxSpendApOnStat('${stat}')">+1</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function kxSpendApOnStat(stat){
+    if (!kxCharacter) return;
+    if ((kxCharacter.attribute_points ?? 0) < 1){
+      alert("No unspent Attribute Points left.");
+      return;
+    }
+
+    const { error } = await sb
+      .from("characters")
+      .update({ [stat]: (kxCharacter[stat] ?? 10) + 1, attribute_points: kxCharacter.attribute_points - 1 })
+      .eq("user_id", kxCharacter.user_id);
+
+    if (error){
+      alert("Couldn't spend AP: " + error.message);
+      return;
+    }
+
+    await loadKxCharacter();
+  }
+
+  async function kxConvertApToGold(){
+    if (!kxCharacter) return;
+    const amount = parseInt(document.getElementById("kx-convert-amount").value, 10);
+    const msgEl = document.getElementById("kx-convert-message");
+
+    if (!amount || amount < 1){
+      msgEl.textContent = "Enter a valid amount.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (amount > (kxCharacter.attribute_points ?? 0)){
+      msgEl.textContent = "You don't have that many unspent AP.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { error } = await sb
+      .from("characters")
+      .update({ gold: (kxCharacter.gold ?? 0) + amount * 100, attribute_points: kxCharacter.attribute_points - amount })
+      .eq("user_id", kxCharacter.user_id);
+
+    if (error){
+      msgEl.textContent = "Couldn't convert: " + error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = `Converted ${amount} AP into ${amount * 100} Gold.`;
+    msgEl.style.color = "var(--steel-bright)";
+    await loadKxCharacter();
+  }
+</script>
+</body>
+</html>

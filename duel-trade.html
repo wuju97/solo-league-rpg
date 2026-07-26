@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Duel Trade</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Duel Trade</h2>
+      </div>
+    </div>
+
+    <div class="page-tabs" id="dt-tabs" style="flex-direction:row; flex-wrap:wrap; width:auto; margin-bottom:1rem;">
+      <button class="page-tab-btn active" data-tab="1v1">1v1 Duels</button>
+      <button class="page-tab-btn" data-tab="team">Team Battles</button>
+    </div>
+
+    <div class="page-tab-panel active" data-panel="1v1">
+      <div class="card-grid">
+        <section class="frame">
+          <h3>Challenge a Player</h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Enter their exact gamer name to send a duel challenge.</p>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <input type="text" id="challenge-name-input" placeholder="Gamer name"
+              style="flex:1; min-width:0; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <button class="btn" style="flex-shrink:0; white-space:nowrap;" onclick="sendChallenge()">Challenge</button>
+          </div>
+          <p class="placeholder-note" id="challenge-message" style="margin-top:0.6rem;"></p>
+        </section>
+
+        <section class="frame">
+          <h3>Pending Challenges</h3>
+          <div id="pending-challenges-list">
+            <p class="placeholder-note">Nothing pending.</p>
+          </div>
+        </section>
+
+        <section class="frame">
+          <h3>Send a Trade Offer</h3>
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
+            <input type="text" id="trade-recipient-name" placeholder="Gamer name" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+            <input type="number" id="trade-gold-amount" min="0" value="0" placeholder="Gold" style="width:100px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+            <input type="number" id="trade-ap-amount" min="0" value="0" placeholder="AP" style="width:90px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+            <button class="btn" onclick="sendTradeOffer()">Send Offer</button>
+          </div>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Items to offer</h4>
+          <div id="trade-item-checklist" style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;"><p class="placeholder-note">Loading...</p></div>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Ability cards to offer <span class="tag" style="font-size:0.65rem;">by rank, highest first</span></h4>
+          <div id="trade-card-checklist" style="margin-bottom:0.75rem;"><p class="placeholder-note">Loading...</p></div>
+
+          <p class="placeholder-note" id="trade-send-status"></p>
+        </section>
+
+        <section class="frame">
+          <h3>Open Trade Offers</h3>
+          <div id="trade-offers-list"><p class="placeholder-note">Loading...</p></div>
+        </section>
+        <section class="frame">
+          <h3>Your Inventory</h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Any of these can be offered in a trade above.</p>
+          <div id="dt-inventory-list" style="display:flex; flex-direction:column; gap:0.6rem;"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="page-tab-panel" data-panel="team">
+      <div class="card-grid">
+        <section class="frame">
+          <h3>Form a Team & Challenge</h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Two or three of you against one opponent. Enter exact gamer names — teammates are optional beyond yourself.</p>
+          <div class="field" style="margin-bottom:0.75rem;">
+            <label style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Teammate 2 (optional)</label>
+            <input type="text" id="team-member2-input" placeholder="Gamer name" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          </div>
+          <div class="field" style="margin-bottom:0.75rem;">
+            <label style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Teammate 3 (optional)</label>
+            <input type="text" id="team-member3-input" placeholder="Gamer name" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          </div>
+          <div class="field" style="margin-bottom:0.75rem;">
+            <label style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Opponent</label>
+            <input type="text" id="team-opponent-input" placeholder="Gamer name" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          </div>
+          <button class="btn" onclick="sendTeamChallenge()">Send Team Challenge</button>
+          <p class="placeholder-note" id="team-challenge-message" style="margin-top:0.6rem;"></p>
+          <p class="placeholder-note" style="margin-top:0.75rem;">Note: team formation and challenging works now. Actual team-vs-one combat is still being built — this locks in who's fighting whom, ready for when that's wired up.</p>
+        </section>
+
+        <section class="frame">
+          <h3>Pending Team Challenges</h3>
+          <div id="team-pending-list">
+            <p class="placeholder-note">Nothing pending.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+    const { data: character } = await sb.from("characters").select("gold, attribute_points").eq("user_id", user.id).maybeSingle();
+    const el = document.getElementById("my-wallet-display");
+    if (el && character) el.textContent = `${character.gold} Gold  •  ${character.attribute_points} AP`;
+
+    const { data: items } = await sb.from("player_inventory").select("*").in("item_type", ["Weapon Item", "Armor Item", "Consumable Item"]).order("acquired_at", { ascending: false });
+    const listEl = document.getElementById("dt-inventory-list");
+    if (listEl){
+      function escapeHtml(str){
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+      if (!items || items.length === 0){
+        listEl.innerHTML = `<p class="placeholder-note">Nothing in your inventory yet — buy weapons, armor, or consumables from the Shop on the World Map.</p>`;
+      } else {
+        const categories = [
+          { type: "Weapon Item", label: "Weapons" },
+          { type: "Armor Item", label: "Armor" },
+          { type: "Consumable Item", label: "Consumables" },
+        ];
+        listEl.innerHTML = categories.map(cat => {
+          const catItems = items.filter(i => i.item_type === cat.type);
+          if (catItems.length === 0) return "";
+          const rows = catItems.map((item) => `
+            <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem;">
+              <span>${escapeHtml(item.item_name)} <span class="tag">${escapeHtml(item.rarity)}</span></span>
+              <span class="mono" style="color:var(--dim);">x${item.quantity}</span>
+            </div>
+          `).join("");
+          return `<h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.75rem 0 0.4rem;">${cat.label}</h4>${rows}`;
+        }).join("");
+      }
+    }
+
+    const itemChecklistEl = document.getElementById("trade-item-checklist");
+    if (itemChecklistEl){
+      if (!items || items.length === 0){
+        itemChecklistEl.innerHTML = `<p class="placeholder-note">Nothing owned yet.</p>`;
+      } else {
+        itemChecklistEl.innerHTML = items.map(item => `
+          <label style="display:flex; align-items:center; gap:0.5rem;">
+            <input type="checkbox" class="trade-item-check" value="${item.id}">
+            <span>${escapeHtml(item.item_name)} <span class="tag" style="font-size:0.65rem;">${escapeHtml(item.item_type.replace(" Item", ""))} — ${escapeHtml(item.rarity)}</span></span>
+          </label>
+        `).join("");
+      }
+    }
+
+    loadTradeCardChecklist();
+    loadPendingChallenges();
+    loadTradeOffers();
+  })();
+
+  async function loadTradeCardChecklist(){
+    const cardListEl = document.getElementById("trade-card-checklist");
+    if (!cardListEl) return;
+    const { data: cards, error } = await sb.rpc("get_my_cards");
+    if (error){
+      cardListEl.innerHTML = `<p class="placeholder-note">Couldn't load cards: ${dtEscapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!cards || cards.length === 0){
+      cardListEl.innerHTML = `<p class="placeholder-note">No ability cards owned yet.</p>`;
+      return;
+    }
+
+    const rankOrder = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5, E: 6 };
+    const sorted = [...cards].sort((a, b) => (rankOrder[a.rank] ?? 9) - (rankOrder[b.rank] ?? 9));
+    const byRank = {};
+    sorted.forEach(c => {
+      if (!byRank[c.rank]) byRank[c.rank] = [];
+      byRank[c.rank].push(c);
+    });
+
+    cardListEl.innerHTML = Object.keys(byRank)
+      .sort((a, b) => (rankOrder[a] ?? 9) - (rankOrder[b] ?? 9))
+      .map(rank => `
+        <h5 class="mono" style="color:var(--gold-bright); margin:0.75rem 0 0.4rem; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase;">${dtEscapeHtml(rank)}-Rank</h5>
+        <div style="display:flex; flex-direction:column; gap:0.4rem;">
+          ${byRank[rank].map(c => `
+            <label style="display:flex; align-items:center; gap:0.5rem;">
+              <input type="checkbox" class="trade-card-check" value="${c.card_id}">
+              <span>${dtEscapeHtml(c.ability_name)} <span class="tag" style="font-size:0.65rem;">${dtEscapeHtml(c.source_name)}</span></span>
+            </label>
+          `).join("")}
+        </div>
+      `).join("");
+  }
+
+  async function loadTradeOffers(){
+    const listEl = document.getElementById("trade-offers-list");
+    if (!listEl) return;
+    const { data: offers, error } = await sb.rpc("get_my_trade_offers");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load trade offers: ${dtEscapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!offers || offers.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No open trade offers.</p>`;
+      return;
+    }
+    listEl.innerHTML = offers.map(o => {
+      const parts = [
+        ...(o.item_names || []).map(n => dtEscapeHtml(n)),
+        ...(o.card_names || []).map(n => `${dtEscapeHtml(n)} (card)`),
+        o.gold_offered > 0 ? `${o.gold_offered} Gold` : null,
+        o.ap_offered > 0 ? `${o.ap_offered} AP` : null,
+      ].filter(Boolean);
+      const offerText = parts.length > 0 ? parts.join(", ") : "Nothing (empty offer)";
+      const actionsHtml = o.direction === "received"
+        ? `<div style="display:flex; gap:0.5rem;">
+             <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.75rem;" onclick="respondToTrade(${o.trade_id}, true)">Accept</button>
+             <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.75rem; border-color:var(--crimson); color:var(--crimson-bright);" onclick="respondToTrade(${o.trade_id}, false)">Reject</button>
+           </div>`
+        : `<span class="mono" style="font-size:0.75rem; color:var(--dim);">Waiting for response</span>`;
+      return `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+          <span>${o.direction === "received" ? "From" : "To"} <strong style="color:var(--parchment);">${dtEscapeHtml(o.other_gamer_name)}</strong>: ${offerText}</span>
+          ${actionsHtml}
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function sendTradeOffer(){
+    const nameInput = document.getElementById("trade-recipient-name");
+    const goldInput = document.getElementById("trade-gold-amount");
+    const apInput = document.getElementById("trade-ap-amount");
+    const statusEl = document.getElementById("trade-send-status");
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    const itemIds = Array.from(document.querySelectorAll(".trade-item-check:checked")).map(c => parseInt(c.value, 10));
+    const cardIds = Array.from(document.querySelectorAll(".trade-card-check:checked")).map(c => parseInt(c.value, 10));
+    const gold = parseInt(goldInput.value, 10) || 0;
+    const ap = parseInt(apInput.value, 10) || 0;
+
+    statusEl.textContent = "Sending offer...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("send_trade_offer", {
+      p_recipient_gamer_name: name, p_item_ids: itemIds, p_card_ids: cardIds, p_gold_offered: gold, p_ap_offered: ap,
+    });
+    if (error || !result.success){
+      const reasonText = {
+        gamer_name_not_found: "No player found with that gamer name.",
+        cannot_trade_with_yourself: "You can't trade with yourself.",
+        item_not_owned: "You no longer own one of those items.",
+        card_not_owned: "You no longer own one of those cards.",
+        not_enough_gold: "You don't have that much gold.",
+        not_enough_ap: "You don't have that much AP.",
+        offer_must_include_something: "Include at least gold, AP, an item, or a card.",
+      }[result?.reason] || (error?.message || result?.reason);
+      statusEl.textContent = reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = `Offer sent to ${name}.`;
+    statusEl.style.color = "var(--steel-bright)";
+    nameInput.value = "";
+    goldInput.value = "0";
+    apInput.value = "0";
+    document.querySelectorAll(".trade-item-check:checked, .trade-card-check:checked").forEach(c => c.checked = false);
+    await loadTradeOffers();
+  }
+
+  async function respondToTrade(tradeId, accept){
+    const { data: result, error } = await sb.rpc("respond_to_trade_offer", { p_trade_id: tradeId, p_accept: accept });
+    if (error || !result.success){
+      alert("Couldn't respond to trade: " + (error?.message || result.reason));
+      return;
+    }
+    await loadTradeOffers();
+    if (result.accepted) location.reload(); // refresh inventory/gold/AP/cards display
+  }
+
+  function dtEscapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function sendChallenge(){
+    const nameInput = document.getElementById("challenge-name-input");
+    const msgEl = document.getElementById("challenge-message");
+    const name = nameInput.value.trim();
+
+    if (!name){
+      msgEl.textContent = "Enter a gamer name.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: profile, error: profileError } = await sb
+      .from("profiles")
+      .select("user_id")
+      .eq("gamer_name", name)
+      .maybeSingle();
+
+    if (profileError || !profile){
+      msgEl.textContent = "No player found with that gamer name.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: duelId, error } = await sb.rpc("challenge_player", { p_opponent_id: profile.user_id });
+
+    if (error){
+      msgEl.textContent = "Couldn't send challenge: " + error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = `Challenge sent! Waiting for them to accept.`;
+    msgEl.style.color = "var(--steel-bright)";
+    nameInput.value = "";
+  }
+
+  async function loadPendingChallenges(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    const listEl = document.getElementById("pending-challenges-list");
+
+    const { data: duels } = await sb
+      .from("duels")
+      .select("*")
+      .eq("status", "pending")
+      .or(`challenger_id.eq.${user.id},opponent_id.eq.${user.id}`);
+
+    if (!duels || duels.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Nothing pending.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = duels.map((d) => {
+      const isIncoming = d.opponent_id === user.id;
+      return `
+        <div class="frame" style="margin-bottom:0.6rem; padding:0.75rem 1rem;">
+          <p class="mono" style="font-size:0.78rem; color:var(--dim);">${dtEscapeHtml(d.battle_code)}</p>
+          <p>${isIncoming ? "Incoming challenge" : "Waiting for response..."}</p>
+          ${isIncoming ? `
+            <div style="display:flex; gap:0.5rem; margin-top:0.6rem;">
+              <button class="btn" onclick="respondToChallenge(${d.id}, true)">Accept</button>
+              <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="respondToChallenge(${d.id}, false)">Decline</button>
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function respondToChallenge(duelId, accept){
+    const { error } = await sb.rpc("respond_to_challenge", { p_duel_id: duelId, p_accept: accept });
+    if (error){
+      alert("Couldn't respond: " + error.message);
+      return;
+    }
+    if (accept){
+      window.location.href = "pvp-chat.html?duel=" + duelId;
+    } else {
+      loadPendingChallenges();
+    }
+  }
+
+  // ---- tab switching between 1v1 Duels and Team Battles ----
+  document.querySelectorAll("#dt-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#dt-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+      if (target === "team") loadPendingTeamChallenges();
+    });
+  });
+
+  async function sendTeamChallenge(){
+    const member2 = document.getElementById("team-member2-input").value.trim();
+    const member3 = document.getElementById("team-member3-input").value.trim();
+    const opponent = document.getElementById("team-opponent-input").value.trim();
+    const msgEl = document.getElementById("team-challenge-message");
+
+    const { data: teamDuelId, error } = await sb.rpc("create_team_challenge", {
+      p_member2_name: member2 || null,
+      p_member3_name: member3 || null,
+      p_opponent_name: opponent
+    });
+
+    if (error){
+      msgEl.textContent = error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = "Team challenge created!";
+    msgEl.style.color = "var(--steel-bright)";
+    document.getElementById("team-opponent-input").value = "";
+    loadPendingTeamChallenges();
+  }
+
+  async function loadPendingTeamChallenges(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    const listEl = document.getElementById("team-pending-list");
+    const { data: teamDuels } = await sb
+      .from("team_duels")
+      .select("*")
+      .eq("status", "pending")
+      .or(`initiator_id.eq.${user.id},member2_id.eq.${user.id},member3_id.eq.${user.id},opponent_id.eq.${user.id}`);
+
+    if (!teamDuels || teamDuels.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Nothing pending.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = teamDuels.map((d) => `
+      <div class="frame" style="margin-bottom:0.6rem; padding:0.75rem 1rem;">
+        <p class="mono" style="font-size:0.78rem; color:var(--dim);">${dtEscapeHtml(d.battle_code)}</p>
+        <p class="placeholder-note">Pending — waiting on team combat to be built.</p>
+      </div>
+    `).join("");
+  }
+</script>
+</body>
+</html>

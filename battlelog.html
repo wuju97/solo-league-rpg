@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Battle Log</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Battle Log</div>
+        <h2>Battle Log</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="battlelog-tabs">
+      <button class="page-tab-btn active" data-tab="pvp">PvP</button>
+      <button class="page-tab-btn" data-tab="pve">PvE</button>
+      <button class="page-tab-btn" data-tab="world-boss">World Boss</button>
+      <button class="page-tab-btn" data-tab="dungeons">Dungeons</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="pvp">
+      <section class="frame">
+        <h3>PvP</h3>
+        <div id="pvp-history-list">
+          <p class="placeholder-note">Loading...</p>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="pve">
+      <section class="frame">
+        <h3>PvE</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Creature fights from the World Map — Boss fights are logged separately under World Boss.</p>
+        <div id="pve-history-list">
+          <p class="placeholder-note">Loading...</p>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="world-boss">
+      <section class="frame">
+        <h3>World Boss</h3>
+        <div id="world-boss-history-list">
+          <p class="placeholder-note">Loading...</p>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="dungeons">
+      <section class="frame"><h3>Dungeons</h3><p class="placeholder-note">Not tracked yet — Dungeons aren't a functioning system yet, so there's nothing to log here.</p></section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  document.querySelectorAll("#battlelog-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#battlelog-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  function blEscapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    const listEl = document.getElementById("pvp-history-list");
+    if (!user || !listEl) return;
+
+    const { data: duels, error } = await sb
+      .from("duels")
+      .select("*")
+      .eq("status", "finished")
+      .or(`challenger_id.eq.${user.id},opponent_id.eq.${user.id}`)
+      .order("finished_at", { ascending: false });
+
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load duel history: ${blEscapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!duels || duels.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No PvP battles recorded yet.</p>`;
+      return;
+    }
+
+    const nameCache = {};
+    async function nameFor(id){
+      if (nameCache[id]) return nameCache[id];
+      const { data } = await sb.from("profiles").select("gamer_name").eq("user_id", id).maybeSingle();
+      const name = data?.gamer_name || "Unknown";
+      nameCache[id] = name;
+      return name;
+    }
+
+    const rows = await Promise.all(duels.map(async (d) => {
+      const isChallenger = d.challenger_id === user.id;
+      const oppId = isChallenger ? d.opponent_id : d.challenger_id;
+      const oppName = await nameFor(oppId);
+      const won = d.winner_id === user.id;
+      return `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem; padding:0.75rem 1rem;">
+          <div>
+            <span class="mono" style="font-size:0.75rem; color:var(--dim);">${blEscapeHtml(d.battle_code)}</span>
+            <p style="margin-top:0.2rem;">vs ${blEscapeHtml(oppName)}</p>
+          </div>
+          <span class="mono" style="color:${won ? "var(--gold-bright)" : "var(--crimson-bright)"};">${won ? "WIN" : "LOSS"}</span>
+        </div>
+      `;
+    }));
+
+    listEl.innerHTML = rows.join("");
+  })();
+
+  // ---- PvE history: Creature fights only. Boss fights are their
+  // own tab now ----
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    const listEl = document.getElementById("pve-history-list");
+    if (!user || !listEl) return;
+
+    const { data: creatureBattles, error } = await sb
+      .from("pve_battles")
+      .select("*")
+      .eq("player_id", user.id)
+      .eq("status", "finished")
+      .order("finished_at", { ascending: false });
+
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load PvE history: ${blEscapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!creatureBattles || creatureBattles.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No PvE battles recorded yet.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = creatureBattles.map(b => {
+      const won = b.winner === "player";
+      return `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem; padding:0.75rem 1rem;">
+          <div>
+            <span class="mono" style="font-size:0.75rem; color:var(--dim);">Creature</span>
+            <p style="margin-top:0.2rem;">vs ${blEscapeHtml(b.creature_name)}</p>
+          </div>
+          <span class="mono" style="color:${won ? "var(--gold-bright)" : "var(--crimson-bright)"};">${won ? "WIN" : "LOSS"}</span>
+        </div>
+      `;
+    }).join("");
+  })();
+
+  // ---- World Boss history ----
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    const listEl = document.getElementById("world-boss-history-list");
+    if (!user || !listEl) return;
+
+    const { data: bossBattles, error } = await sb
+      .from("boss_battles")
+      .select("*")
+      .eq("player_id", user.id)
+      .eq("status", "finished")
+      .order("finished_at", { ascending: false });
+
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load World Boss history: ${blEscapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!bossBattles || bossBattles.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No World Boss battles recorded yet.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = bossBattles.map(b => {
+      const won = b.winner === "player";
+      return `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem; padding:0.75rem 1rem;">
+          <div>
+            <span class="mono" style="font-size:0.75rem; color:var(--dim);">Boss</span>
+            <p style="margin-top:0.2rem;">vs ${blEscapeHtml(b.boss_name)}</p>
+          </div>
+          <span class="mono" style="color:${won ? "var(--gold-bright)" : "var(--crimson-bright)"};">${won ? "WIN" : "LOSS"}</span>
+        </div>
+      `;
+    }).join("");
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1049 @@
+/* ============================================================
+   SOLO LEAGUE RPG — shared stylesheet
+   Every page (index.html, character.html, etc.) loads this file.
+   Change a color here once and it updates everywhere.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root{
+  /* --- palette --- */
+  --void:            #0F0C0A;   /* page background */
+  --panel:           #1B1611;   /* card / sidebar background */
+  --panel-raised:    #241D17;   /* hovered / active surfaces */
+  --border:          #3A3025;   /* hairline borders */
+  --border-bright:   #5A4A34;
+
+  --gold:            #C9A24B;   /* primary accent */
+  --gold-bright:     #E6C878;
+  --crimson:         #8B2E3A;   /* PvP accent */
+  --crimson-bright:  #B33F4E;
+  --steel:           #3E6E76;   /* World accent */
+  --steel-bright:    #56949D;
+
+  --parchment:       #E8DFC8;   /* main text */
+  --dim:             #A89C82;   /* secondary text */
+
+  --radius: 3px;
+}
+
+*{ box-sizing: border-box; }
+
+html,body{
+  margin:0;
+  padding:0;
+  background: var(--void);
+  color: var(--parchment);
+  font-family: 'Spectral', serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* subtle vignette + grain-like texture on the void background */
+body{
+  background-image:
+    radial-gradient(ellipse at top, rgba(201,162,75,0.06), transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(0,0,0,0.5), transparent 60%);
+  min-height: 100vh;
+}
+
+h1,h2,h3,h4{
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--gold-bright);
+  margin: 0 0 0.5em 0;
+}
+
+a{ color: inherit; text-decoration: none; }
+
+.mono{ font-family: 'JetBrains Mono', monospace; }
+
+/* ============================================================
+   ORNATE FRAME — the signature visual motif.
+   A double border like a carved stone tablet / ledger box,
+   echoing the hand-drawn rectangles in the original sketch.
+   ============================================================ */
+.frame{
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+}
+.frame::before{
+  content:"";
+  position:absolute;
+  inset: 4px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.shell{
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "header header header"
+    "navleft main navright";
+  min-height: 100vh;
+  gap: 1px;
+}
+
+/* ---- header ---- */
+.app-header{
+  grid-area: header;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border-bright);
+  flex-wrap: wrap;
+}
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap: 0.6rem;
+}
+.brand .glyph{
+  color: var(--gold);
+  font-size: 1.3rem;
+}
+.brand h1{
+  font-size: 1.3rem;
+  margin: 0;
+}
+.brand .sub{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.chat-buttons{
+  display:flex;
+  gap: 0.75rem;
+}
+.chat-btn{
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  border: 1px solid var(--border-bright);
+  background: var(--panel-raised);
+}
+.chat-btn:hover{ transform: translateY(-2px); }
+.chat-btn.pvp{ color: var(--crimson-bright); border-color: var(--crimson); }
+.chat-btn.pvp:hover{ background: rgba(139,46,58,0.18); }
+.chat-btn.world{ color: var(--steel-bright); border-color: var(--steel); }
+.chat-btn.world:hover{ background: rgba(62,110,118,0.18); }
+
+/* ---- hamburger (mobile only) ---- */
+.nav-toggle{
+  display:none;
+  background:none;
+  border: 1px solid var(--border-bright);
+  color: var(--gold);
+  font-size: 1.1rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius);
+  cursor:pointer;
+}
+
+/* ---- sidebars ---- */
+.sidebar{
+  background: var(--panel);
+  padding: 1.25rem 0.9rem;
+  display:flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.sidebar.left{ grid-area: navleft; border-right: 1px solid var(--border); }
+.sidebar.right{ grid-area: navright; border-left: 1px solid var(--border); }
+
+.sidebar .label{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0.6rem 0 0.4rem 0.5rem;
+}
+
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  color: var(--dim);
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  transition: all 0.15s ease;
+}
+.nav-item .glyph{ width: 1.1em; text-align:center; color: var(--gold); }
+.nav-item:hover{
+  background: var(--panel-raised);
+  color: var(--parchment);
+  border-color: var(--border-bright);
+}
+.nav-item.active{
+  background: rgba(201,162,75,0.1);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+/* pushes whatever is inside it (e.g. KDA/XP, Top Clips) down to the
+   bottom of the sidebar column, using the same flex column as .sidebar */
+.nav-bottom{
+  margin-top: auto;
+  display:flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* ---- main content ---- */
+.main{
+  grid-area: main;
+  padding: 1.75rem;
+  display:flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-x: hidden;
+}
+
+.page-title{
+  display:flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+.page-title .eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* card grid for dashboard-style pages */
+.card-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.ability-card-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, 150px);
+  justify-content: start;
+  column-gap: 0.5rem;
+  row-gap: 1.25rem;
+}
+
+.ability-card{
+  display:flex;
+  flex-direction:column;
+  width: 100%;
+  max-width: 150px;
+  min-height: 120px;
+  background: linear-gradient(160deg, var(--panel-raised), var(--void));
+  border: 2px solid var(--border-bright);
+  border-radius: 10px;
+  padding: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ability-card:not(:disabled):hover{
+  transform: translateY(-4px);
+  border-color: var(--gold-bright);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.ability-card:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ability-card .ability-card-name{
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: var(--gold-bright);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  margin-bottom: 0.3rem;
+}
+.ability-card .ability-card-cost{
+  align-self: flex-start;
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--dim);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.08rem 0.35rem;
+  margin-bottom: 0.35rem;
+}
+.ability-card .ability-card-divider{
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.3rem 0;
+}
+.ability-card .ability-card-energy-label{
+  font-size: 0.6rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--dim);
+  margin-top: auto;
+  padding-top: 0.35rem;
+}
+.ability-card .ability-card-effect{
+  font-size: 0.68rem;
+  color: var(--parchment);
+  line-height: 1.25;
+  flex-grow: 1;
+}
+.battle-result-banner{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8,4,14,0.88);
+  backdrop-filter: blur(3px);
+}
+.battle-result-banner h1{
+  font-family: 'Cinzel', serif;
+  font-size: 4.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 30px currentColor;
+  animation: battleResultPop 0.4s ease-out;
+}
+.battle-result-banner h1.win{ color: var(--gold-bright); }
+.battle-result-banner h1.loss{ color: var(--crimson-bright); }
+@keyframes battleResultPop{
+  0%{ transform: scale(0.6); opacity: 0; }
+  70%{ transform: scale(1.08); opacity: 1; }
+  100%{ transform: scale(1); }
+}
+.ability-card.selectable{
+  position: relative;
+  cursor: pointer;
+}
+.ability-card.selectable input[type="checkbox"]{
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold-bright);
+}
+.ability-card.selectable.selected{
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 12px rgba(230,200,120,0.35);
+}
+.ability-card .ability-card-rank-tag{
+  align-self: flex-start;
+  font-size: 0.6rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold-bright);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 0.06rem 0.3rem;
+  margin-bottom: 0.25rem;
+}
+
+.frame h3{
+  font-size: 0.95rem;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.frame h3 .tag{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--dim);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.placeholder-note{
+  color: var(--dim);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+ul.clean{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
+ul.clean li{
+  display:flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.92rem;
+}
+ul.clean li:last-child{ border-bottom:none; }
+
+.btn{
+  display:inline-block;
+  font-family:'Cinzel',serif;
+  font-weight:700;
+  font-size:0.78rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:0.55rem 1rem;
+  border-radius:var(--radius);
+  border:1px solid var(--gold);
+  color: var(--gold-bright);
+  background: rgba(201,162,75,0.08);
+  cursor:pointer;
+  transition: all 0.15s ease;
+}
+.btn:hover{ background: rgba(201,162,75,0.18); transform: translateY(-1px); }
+
+/* ============================================================
+   RESPONSIVE — collapse the two sidebars under a toggle on
+   smaller screens, since three columns won't fit on a phone.
+   ============================================================ */
+@media (max-width: 900px){
+  .shell{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "navleft"
+      "main"
+      "navright";
+  }
+  .nav-toggle{ display:inline-block; }
+  .sidebar{
+    border: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    display: none;
+  }
+  .sidebar.open{ display:flex; }
+  .nav-item{ flex: 1 1 auto; justify-content:center; }
+}
+
+@media (max-width: 560px){
+  .chat-buttons{ width:100%; justify-content: stretch; }
+  .chat-btn{ flex:1; text-align:center; }
+}
+
+/* ============================================================
+   FLOATING CHAT WIDGET — bottom-right lobby chat
+   ============================================================ */
+#lobby-chat-bubble{
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--panel-raised);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 1.4rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index: 999;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+#lobby-chat-badge{
+  display:none;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--crimson-bright);
+  color: #fff;
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid var(--void);
+}
+
+#lobby-chat-badge{
+  position: fixed;
+  bottom: 3.55rem;
+  right: 1.05rem;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--crimson);
+  border: 1px solid var(--crimson-bright);
+  color: var(--parchment);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight:600;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index: 1000;
+  pointer-events:none;
+}
+
+#lobby-chat-panel{
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  width: 320px;
+  max-width: calc(100vw - 2rem);
+  height: 420px;
+  max-height: calc(100vh - 8rem);
+  background: var(--panel);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+#lobby-chat-panel.open{ display:flex; }
+
+/* ---- AI Loremaster: same widget pattern, stacked above Lobby Chat ---- */
+#loremaster-bubble{
+  position: fixed;
+  bottom: 5.5rem;
+  right: 1.5rem;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--panel-raised);
+  border: 1px solid var(--steel);
+  color: var(--steel-bright);
+  font-size: 1.4rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index: 999;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+#loremaster-panel{
+  position: fixed;
+  bottom: 9.5rem;
+  right: 1.5rem;
+  width: 340px;
+  max-width: calc(100vw - 2rem);
+  height: 440px;
+  max-height: calc(100vh - 12rem);
+  background: var(--panel);
+  border: 1px solid var(--steel);
+  border-radius: var(--radius);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+#loremaster-panel.open{ display:flex; }
+#loremaster-panel .lc-header{
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'Cinzel',serif; color: var(--steel-bright);
+}
+#loremaster-panel .lc-close{ cursor:pointer; font-size:1.1rem; color:var(--dim); }
+#loremaster-panel .lc-messages{
+  flex:1; overflow-y:auto; padding: 0.75rem; display:flex; flex-direction:column; gap:0.6rem;
+}
+.lm-msg{
+  padding: 0.5rem 0.7rem; border-radius: var(--radius); font-size: 0.85rem; line-height:1.4;
+}
+.lm-msg.lm-user{ background: rgba(201,162,75,0.12); align-self:flex-end; max-width: 85%; }
+.lm-msg.lm-ai{ background: var(--panel-raised); align-self:flex-start; max-width: 90%; }
+.lm-msg.lm-error{ color: var(--crimson-bright); }
+#loremaster-panel .lc-input-row{
+  display:flex; gap:0.4rem; padding: 0.6rem; border-top: 1px solid var(--border);
+}
+#loremaster-panel .lc-input-row input{
+  flex:1; background: var(--panel-raised); border: 1px solid var(--border-bright);
+  border-radius: var(--radius); color: var(--parchment); padding: 0.5rem 0.6rem; font-size: 0.85rem;
+}
+#loremaster-panel .lc-input-row button{
+  background: var(--panel-raised); border: 1px solid var(--steel); color: var(--steel-bright);
+  border-radius: var(--radius); padding: 0.5rem 0.8rem; cursor:pointer; font-family:'Cinzel',serif;
+}
+
+#lobby-chat-panel .lc-header{
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-family:'Cinzel',serif;
+  font-size:0.85rem;
+  color: var(--gold-bright);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+#lobby-chat-panel .lc-header .lc-close{
+  cursor:pointer;
+  color: var(--dim);
+}
+
+#lobby-chat-panel .lc-messages{
+  flex:1;
+  overflow-y:auto;
+  padding: 0.75rem 1rem;
+  display:flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* each message row — flips side depending on who sent it */
+#lobby-chat-panel .lc-row{
+  display:flex;
+  flex-direction: column;
+  max-width: 78%;
+}
+#lobby-chat-panel .lc-row.other{
+  align-self: flex-start;
+  align-items: flex-start;
+}
+#lobby-chat-panel .lc-row.own{
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+#lobby-chat-panel .lc-who{
+  font-family:'Cinzel',serif;
+  font-size: 0.68rem;
+  margin-bottom: 0.2rem;
+  padding: 0 0.2rem;
+}
+
+#lobby-chat-panel .lc-bubble{
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height:1.4;
+  word-break: break-word;
+}
+#lobby-chat-panel .lc-row.other .lc-bubble{
+  background: var(--panel-raised);
+  border: 1px solid var(--border-bright);
+  border-top-left-radius: 2px;
+}
+#lobby-chat-panel .lc-row.own .lc-bubble{
+  background: rgba(201,162,75,0.14);
+  border: 1px solid var(--gold);
+  color: var(--parchment);
+  border-top-right-radius: 2px;
+}
+
+#lobby-chat-panel .lc-input-row{
+  display:flex;
+  gap:0.5rem;
+  padding: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+#lobby-chat-panel .lc-input-row input{
+  flex:1;
+  background: var(--panel-raised);
+  border:1px solid var(--border-bright);
+  border-radius: var(--radius);
+  color: var(--parchment);
+  padding: 0.5rem 0.6rem;
+  font-family:'Spectral',serif;
+  font-size:0.88rem;
+}
+#lobby-chat-panel .lc-input-row input:focus{ outline: 1px solid var(--gold); }
+#lobby-chat-panel .lc-input-row button{
+  font-family:'Cinzel',serif;
+  font-size:0.75rem;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  padding: 0 0.9rem;
+  border-radius: var(--radius);
+  border:1px solid var(--gold);
+  color: var(--gold-bright);
+  background: rgba(201,162,75,0.08);
+  cursor:pointer;
+}
+
+/* ============================================================
+   WORLD MAP — region name labels
+   ============================================================ */
+.map-label{
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(0.6rem, 1.4vw, 1rem);
+  letter-spacing: 0.06em;
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 6px rgba(0,0,0,0.9),
+    0 0 12px rgba(0,0,0,0.7),
+    0 2px 3px rgba(0,0,0,0.9);
+  white-space: nowrap;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: text-shadow 0.15s ease;
+}
+.map-label.locked{
+  color: #7a7a85;
+  filter: grayscale(1) brightness(0.7);
+  cursor: not-allowed;
+}
+.map-label.locked::before{
+  content: "🔒";
+  margin-right: 0.3em;
+  font-size: 0.85em;
+  filter: none;
+}
+.map-label:hover{
+  text-shadow:
+    0 0 10px rgba(230,200,120,0.9),
+    0 0 16px rgba(0,0,0,0.8),
+    0 2px 3px rgba(0,0,0,0.9);
+}
+
+/* breadcrumb navigation for the Explore tab */
+.breadcrumb{
+  margin-bottom: 1rem;
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+.breadcrumb .crumb{
+  color: var(--dim);
+  cursor: pointer;
+}
+.breadcrumb .crumb:hover{ color: var(--gold-bright); }
+.breadcrumb .crumb.current{
+  color: var(--gold-bright);
+  cursor: default;
+}
+.breadcrumb .crumb-sep{
+  color: var(--border-bright);
+  margin: 0 0.4rem;
+}
+
+/* ============================================================
+   PAGE SUB-TABS — reusable on any page (e.g. Character page's
+   Players / NPCs & Creatures split)
+   ============================================================ */
+.page-tabs{
+  display:flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  padding: 1rem 0.75rem;
+}
+.page-tab-btn{
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  font-family:'Cinzel',serif;
+  font-size:0.8rem;
+  letter-spacing:0.03em;
+  text-transform:uppercase;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--dim);
+  cursor:pointer;
+  transition: all 0.15s ease;
+}
+.page-tab-btn:hover{
+  background: var(--panel-raised);
+  color: var(--parchment);
+  border-color: var(--border-bright);
+}
+.page-tab-btn.active{
+  color: var(--gold-bright);
+  border-color: var(--gold);
+  background: rgba(201,162,75,0.1);
+}
+.page-tab-panel{ display:none; }
+.page-tab-panel.active{ display:block; }
+.page-tab-subpanel{ display:none; margin-top:1rem; }
+.page-tab-subpanel.active{ display:block; }
+
+/* kingdom picker blocks inside World Lore sections — hidden until
+   the matching picker button is clicked */
+.kingdom-block{ display:none; margin-top:1rem; }
+.kingdom-block.active{ display:block; }
+.kingdom-pick-btn{ width:auto; }
+
+/* simple data table for the player roster */
+.roster-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.roster-table th{
+  text-align:left;
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border-bright);
+}
+.roster-table td{
+  padding: 0.6rem;
+  border-bottom: 1px dashed var(--border);
+}
+.roster-table tr:last-child td{ border-bottom:none; }
+.roster-table .rname{
+  font-family:'Cinzel',serif;
+  color: var(--gold-bright);
+}
+
+/* reusable small section label, same look as the main sidebar's
+   "Main" / "World" labels, usable anywhere (e.g. World Chat's
+   channel list) */
+.section-label{
+  font-family:'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 0.9rem 0 0.4rem 0.2rem;
+}
+.section-label:first-child{ margin-top: 0; }
+
+/* ============================================================
+   WORLD CHAT — Discord-style channel sidebar
+   ============================================================ */
+.channel-layout{
+  display:flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.channel-sidebar{
+  width: 220px;
+  flex-shrink: 0;
+  display:flex;
+  flex-direction: column;
+}
+.channel-content{
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 780px){
+  .channel-layout{ flex-direction: column; }
+  .channel-sidebar{ width: 100%; }
+}
+
+/* ============================================================
+   PERSONALIZATION THEMES
+   Applied by setting data-theme="..." on <html>, done by
+   themeLoader.js on every page based on the player's saved
+   preference. "dark_fantasy" (no data-theme attribute) is the
+   original default and needs no override block.
+   ============================================================ */
+
+/* ---- Modern: clean, minimal, sans-serif, blue/slate ---- */
+[data-theme="modern"]{
+  --void:            #10141C;
+  --panel:           #171D28;
+  --panel-raised:    #212938;
+  --border:          #2C3646;
+  --border-bright:   #445067;
+
+  --gold:            #4F8CFF;
+  --gold-bright:     #7BAAFF;
+  --crimson:         #D64560;
+  --crimson-bright:  #F0617C;
+  --steel:           #3E8E8E;
+  --steel-bright:    #56B4B4;
+
+  --parchment:       #E7ECF5;
+  --dim:             #8C97AC;
+
+  --radius: 8px;
+}
+[data-theme="modern"] *{ font-family: 'Inter', 'Poppins', sans-serif !important; letter-spacing: normal !important; text-transform: none !important; }
+[data-theme="modern"] .mono{ font-family: 'Space Grotesk', monospace !important; }
+
+/* ---- Victorian Gothic: ornate, deep burgundy/brass ---- */
+[data-theme="victorian"]{
+  --void:            #120D0A;
+  --panel:           #1E1712;
+  --panel-raised:    #2A1F17;
+  --border:          #4A3626;
+  --border-bright:   #6E5238;
+
+  --gold:            #B5872E;
+  --gold-bright:     #D6A94F;
+  --crimson:         #6E1B24;
+  --crimson-bright:  #952834;
+  --steel:           #5A6B4F;
+  --steel-bright:    #7A8F6A;
+
+  --parchment:       #EDE1C8;
+  --dim:             #A8987A;
+
+  --radius: 1px;
+}
+[data-theme="victorian"] *{ font-family: 'EB Garamond', 'Cormorant Garamond', serif !important; }
+[data-theme="victorian"] h1, [data-theme="victorian"] h2, [data-theme="victorian"] h3, [data-theme="victorian"] h4{
+  font-family: 'Playfair Display', serif !important; letter-spacing: 0.03em !important;
+}
+
+/* ---- Light Fantasy: same fantasy bones, daylight parchment ---- */
+[data-theme="light_fantasy"]{
+  --void:            #F3ECD8;
+  --panel:           #EDE3C8;
+  --panel-raised:    #E4D6B0;
+  --border:          #C9B98C;
+  --border-bright:   #A98F5C;
+
+  --gold:            #8A6412;
+  --gold-bright:     #6B4C0C;
+  --crimson:         #8B2E3A;
+  --crimson-bright:  #6E232C;
+  --steel:           #2E5A61;
+  --steel-bright:    #22454B;
+
+  --parchment:       #241C12;
+  --dim:             #5A4E38;
+
+  --radius: 3px;
+}
+
+/* ---- Cyberpunk: neon pink/cyan on near-black ---- */
+[data-theme="cyberpunk"]{
+  --void:            #08060F;
+  --panel:           #120E1E;
+  --panel-raised:    #1B1530;
+  --border:          #362A54;
+  --border-bright:   #5A3F8A;
+
+  --gold:            #FF2E9A;
+  --gold-bright:     #FF6FC1;
+  --crimson:         #FF3B3B;
+  --crimson-bright:  #FF6B6B;
+  --steel:           #2ED9E8;
+  --steel-bright:    #6FF1FC;
+
+  --parchment:       #E4E8FF;
+  --dim:             #8C8CB8;
+
+  --radius: 2px;
+}
+[data-theme="cyberpunk"] *{ font-family: 'Space Grotesk', 'Inter', sans-serif !important; }
+[data-theme="cyberpunk"] h1, [data-theme="cyberpunk"] h2, [data-theme="cyberpunk"] h3, [data-theme="cyberpunk"] h4{
+  text-transform: uppercase !important; letter-spacing: 0.08em !important;
+}
+
+/* ---- Blood Moon: horror-adjacent, deep red/black, sharp ---- */
+[data-theme="blood_moon"]{
+  --void:            #0A0505;
+  --panel:           #150808;
+  --panel-raised:    #200D0D;
+  --border:          #3D1414;
+  --border-bright:   #5E1E1E;
+
+  --gold:            #9E1B1B;
+  --gold-bright:     #D42C2C;
+  --crimson:         #6B0F0F;
+  --crimson-bright:  #950F0F;
+  --steel:           #4A4A4A;
+  --steel-bright:    #6E6E6E;
+
+  --parchment:       #D8C8C8;
+  --dim:             #7A6060;
+
+  --radius: 0px;
+}
+[data-theme="blood_moon"] *{ font-family: 'EB Garamond', serif !important; }
+
+/* ---- Royal Purple: regal purple and gold ---- */
+[data-theme="royal_purple"]{
+  --void:            #0F0A1A;
+  --panel:           #1A1229;
+  --panel-raised:    #251A3A;
+  --border:          #3E2C5C;
+  --border-bright:   #5E4485;
+
+  --gold:            #D4AF37;
+  --gold-bright:     #F0CC5C;
+  --crimson:         #8B2E5C;
+  --crimson-bright:  #B33F7A;
+  --steel:           #6B5CA5;
+  --steel-bright:    #8F7FCB;
+
+  --parchment:       #EDE4F5;
+  --dim:             #A796C4;
+
+  --radius: 4px;
+}
+[data-theme="royal_purple"] h1, [data-theme="royal_purple"] h2, [data-theme="royal_purple"] h3, [data-theme="royal_purple"] h4{
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* ---- Nature: earthy greens and browns ---- */
+[data-theme="nature"]{
+  --void:            #0C1410;
+  --panel:           #141F18;
+  --panel-raised:    #1D2C22;
+  --border:          #34493A;
+  --border-bright:   #4E6B56;
+
+  --gold:            #8FA84C;
+  --gold-bright:     #B0CC6E;
+  --crimson:         #A85C3A;
+  --crimson-bright:  #C97A50;
+  --steel:           #3E7A6B;
+  --steel-bright:    #5A9C8B;
+
+  --parchment:       #E4EDE0;
+  --dim:             #8FA091;
+
+  --radius: 6px;
+}
+[data-theme="nature"] *{ font-family: 'Cormorant Garamond', serif !important; }
+
+/* ---- Font size ---- */
+[data-font-size="small"]{ font-size: 14px; }
+[data-font-size="medium"]{ font-size: 16px; }
+[data-font-size="large"]{ font-size: 18px; }
+
+/* ---- Reduce motion ---- */
+[data-reduce-motion="true"] *{
+  animation-duration: 0.001s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+}
+
+/* ---- UI density ---- */
+[data-density="compact"] .frame{ padding: 0.6rem 0.8rem !important; }
+[data-density="compact"] .card-grid{ gap: 0.5rem !important; }
+
+body{ transition: background-color 0.3s ease, color 0.3s ease; }

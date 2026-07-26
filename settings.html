@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Settings</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Main</div>
+        <h2>Settings</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="settings-tabs">
+      <button class="page-tab-btn active" data-tab="account">Account</button>
+      <button class="page-tab-btn" data-tab="preferences">Preferences</button>
+      <button class="page-tab-btn" data-tab="personalization">Personalization</button>
+      <button class="page-tab-btn" data-tab="audio">Music &amp; Sound Effects</button>
+      <button class="page-tab-btn" data-tab="ai-memory">AI Memory</button>
+      <button class="page-tab-btn" data-tab="content-tools">Content Tools</button>
+      <button class="page-tab-btn" data-tab="api">API</button>
+    </div>
+    <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="account">
+      <section class="frame">
+        <h3>Account</h3>
+        <ul class="clean">
+          <li><span>Email</span><span class="mono" id="settings-email">--</span></li>
+        </ul>
+
+        <div style="margin-top:1rem;">
+          <label for="gamer-name-input" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Gamer Name</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="gamer-name-input" maxlength="24" placeholder="Loading..."
+              style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <button class="btn" onclick="saveGamerName()">Save</button>
+          </div>
+          <p class="placeholder-note" id="gamer-name-message" style="margin-top:0.5rem;"></p>
+          <p class="placeholder-note" style="margin-top:0.5rem;">This is what other players see instead of your email — in chat, PvP, and everywhere else on the site.</p>
+        </div>
+
+        <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="handleLogout()">Log Out</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="preferences">
+      <section class="frame">
+        <h3>Preferences</h3>
+        <p class="placeholder-note">General notification preferences go here as more systems (Mail, Party, Guild) come online. Audio is under Music &amp; Sound Effects; look and feel is under Personalization.</p>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="personalization">
+      <section class="frame">
+        <h3>Personalization</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Changes the whole site's colors and fonts. Saved to your account, so it follows you across devices.</p>
+        <div class="card-grid" id="theme-options"></div>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Display Options</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Layered on top of whichever theme you pick above.</p>
+
+        <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Font Size</label>
+        <select id="font-size-select" onchange="updateDisplayOptions()" style="margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.7rem;">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
+
+        <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">UI Density</label>
+        <select id="ui-density-select" onchange="updateDisplayOptions()" style="margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.7rem;">
+          <option value="comfortable">Comfortable</option>
+          <option value="compact">Compact</option>
+        </select>
+
+        <label style="display:flex; align-items:center; justify-content:space-between; max-width:280px; cursor:pointer;">
+          <span>Reduce Motion</span>
+          <input type="checkbox" id="reduce-motion-toggle" onchange="updateDisplayOptions()">
+        </label>
+        <p class="placeholder-note" id="display-options-status" style="margin-top:0.75rem;"></p>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="audio">
+      <section class="frame">
+        <h3>Music &amp; Sound Effects</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Upload your own audio for each — files are stored on your account and only you can overwrite them. Browser autoplay rules mean Battle Music and Login Music may need one click anywhere on the page before they'll actually start playing; that's a browser restriction, not a bug here.</p>
+
+        <div class="page-tabs" id="audio-subtabs">
+          <button class="page-tab-btn active" data-subtab="battle-music">Battle Music</button>
+          <button class="page-tab-btn" data-subtab="sound-effects">Sound Effects</button>
+          <button class="page-tab-btn" data-subtab="login-music">Login / Ambient Music</button>
+        </div>
+
+        <div class="page-tab-subpanel active" data-subpanel="battle-music" style="margin-top:1rem;">
+          <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; cursor:pointer;">
+            <span>Enabled</span>
+            <input type="checkbox" id="music-enabled-toggle" onchange="updateAudioPref()">
+          </label>
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.3rem;">Volume</label>
+          <input type="range" id="music-volume-slider" min="0" max="100" style="width:100%; margin-bottom:1rem;" onchange="updateAudioPref()">
+
+          <p class="placeholder-note" id="battle-music-current" style="margin-bottom:0.5rem;">No file uploaded yet.</p>
+          <input type="file" id="battle-music-file" accept="audio/*" style="margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="uploadAudio('battle_music_url', 'battle-music-file', 'battle-music')">Upload</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeAudio('battle_music_url', 'battle-music')">Remove</button>
+          </div>
+          <p class="placeholder-note" id="battle-music-status" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="sound-effects" style="margin-top:1rem; display:none;">
+          <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; cursor:pointer;">
+            <span>Enabled</span>
+            <input type="checkbox" id="sfx-enabled-toggle" onchange="updateAudioPref()">
+          </label>
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.3rem;">Volume</label>
+          <input type="range" id="sfx-volume-slider" min="0" max="100" style="width:100%; margin-bottom:1rem;" onchange="updateAudioPref()">
+
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Without an upload, notifications use a built-in synthesized tone (no file needed). Uploading one here replaces that tone for notifications — navigation clicks and victory/defeat stings stay as the built-in tones either way.</p>
+          <p class="placeholder-note" id="sfx-current" style="margin-bottom:0.5rem;">No file uploaded yet — using the built-in tone.</p>
+          <input type="file" id="sfx-file" accept="audio/*" style="margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="uploadAudio('sfx_custom_url', 'sfx-file', 'sfx')">Upload</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeAudio('sfx_custom_url', 'sfx')">Remove</button>
+            <button class="btn" onclick="testSfx()">Test Sound</button>
+          </div>
+          <p class="placeholder-note" id="sfx-status" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="login-music" style="margin-top:1rem; display:none;">
+          <label style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; cursor:pointer;">
+            <span>Enabled</span>
+            <input type="checkbox" id="login-music-enabled-toggle" onchange="updateAudioPref()">
+          </label>
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.3rem;">Volume</label>
+          <input type="range" id="login-music-volume-slider" min="0" max="100" style="width:100%; margin-bottom:1rem;" onchange="updateAudioPref()">
+
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Plays on loop in the background right after you log in, on every page — pauses automatically while Battle Music is playing during a fight, then resumes.</p>
+          <p class="placeholder-note" id="login-music-current" style="margin-bottom:0.5rem;">No file uploaded yet.</p>
+          <input type="file" id="login-music-file" accept="audio/*" style="margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="uploadAudio('login_music_url', 'login-music-file', 'login-music')">Upload</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeAudio('login_music_url', 'login-music')">Remove</button>
+          </div>
+          <p class="placeholder-note" id="login-music-status" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <p class="placeholder-note" id="audio-save-status" style="margin-top:1rem;"></p>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="ai-memory">
+      <section class="frame">
+        <h3>AI Memory</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem; color:var(--gold-bright);">This is the default knowledge base for any AI feature added later — shared site-wide, same for every player, since it describes the one world and site everyone uses. Edited here, not per-account.</p>
+
+        <div class="page-tabs" id="ai-memory-subtabs">
+          <button class="page-tab-btn active" data-subtab="ai-information">Information</button>
+          <button class="page-tab-btn" data-subtab="ai-instructions">Instructions</button>
+          <button class="page-tab-btn" data-subtab="ai-website-guide">Website Guide</button>
+        </div>
+
+        <div class="page-tab-subpanel active" data-subpanel="ai-information" style="margin-top:1rem;">
+          <p class="placeholder-note" style="margin-bottom:0.5rem;">Type 1 — the world's actual content: lore, kingdoms, characters, items, anything that <em>exists</em>. Seeded with a starting summary; add anything you want the AI to know.</p>
+          <textarea id="ai-memory-information-text" rows="16" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.75rem; font-family:'JetBrains Mono',monospace; font-size:0.82rem; resize:vertical;"></textarea>
+          <button class="btn" style="margin-top:0.75rem;" onclick="saveAiMemory('ai_memory_information', 'ai-memory-information-text', 'ai-information')">Save</button>
+          <p class="placeholder-note" id="status-ai-information" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="ai-instructions" style="margin-top:1rem; display:none;">
+          <p class="placeholder-note" style="margin-bottom:0.5rem;">Type 2 — how things actually work: the website's systems, and the rules governing how the world functions (not what's in it).</p>
+          <textarea id="ai-memory-instructions-text" rows="16" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.75rem; font-family:'JetBrains Mono',monospace; font-size:0.82rem; resize:vertical;"></textarea>
+          <button class="btn" style="margin-top:0.75rem;" onclick="saveAiMemory('ai_memory_instructions', 'ai-memory-instructions-text', 'ai-instructions')">Save</button>
+          <p class="placeholder-note" id="status-ai-instructions" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="ai-website-guide" style="margin-top:1rem; display:none;">
+          <p class="placeholder-note" style="margin-bottom:0.5rem;">Type 3 — the website itself: what every tab, feature, and button actually does. For answering questions about how to use the site, not about the world.</p>
+          <textarea id="ai-memory-website-guide-text" rows="16" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.75rem; font-family:'JetBrains Mono',monospace; font-size:0.82rem; resize:vertical;"></textarea>
+          <button class="btn" style="margin-top:0.75rem;" onclick="saveAiMemory('ai_memory_website_guide', 'ai-memory-website-guide-text', 'ai-website-guide')">Save</button>
+          <p class="placeholder-note" id="status-ai-website-guide" style="margin-top:0.5rem;"></p>
+        </div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="content-tools">
+      <section class="frame">
+        <h3>Content Tools</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Not player-facing — a private tool for drafting new content in your established style. Uses your own Gemini key, grounded in AI Memory.</p>
+
+        <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">What kind of content?</label>
+        <select id="content-tool-type" onchange="onContentTypeChange()" style="margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.7rem;">
+          <option value="freeform">Free-form (lore, quests, ideas — text only, nothing added to the site)</option>
+          <option value="weapon">Weapon (structured — can be added to the Kingdom Armory)</option>
+          <option value="armor">Armor (structured — can be added to the Kingdom Armor Shop)</option>
+          <option value="consumable">Consumable (structured — can be added to the Kingdom Alchemist)</option>
+        </select>
+
+        <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">What do you want drafted?</label>
+        <textarea id="content-tool-prompt" rows="4" placeholder="e.g. Draft 3 new Rare-tier consumables for Frosthaven's Alchemist, matching the kingdom's Chill/endurance identity." style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.75rem; font-family:'Spectral',serif; margin-bottom:0.75rem; resize:vertical;"></textarea>
+        <button class="btn" onclick="generateContent()" id="content-tool-btn">Generate</button>
+        <p class="placeholder-note" id="content-tool-status" style="margin-top:0.5rem;"></p>
+
+        <div id="content-tool-output" style="display:none; margin-top:1rem; padding:1rem; background:var(--panel-raised); border:1px solid var(--border); border-radius:var(--radius); white-space:pre-wrap; font-family:'JetBrains Mono',monospace; font-size:0.85rem;"></div>
+
+        <div id="content-tool-preview-list" style="display:none; margin-top:1rem;"></div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="api">
+      <section class="frame">
+        <h3>API</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Your own API keys, stored on your account only — no one else, including other players, can read these. Only the last 4 characters are ever shown once saved.</p>
+
+        <div class="page-tabs" id="api-subtabs">
+          <button class="page-tab-btn active" data-subtab="gemini-1">Gemini API Key 1</button>
+          <button class="page-tab-btn" data-subtab="gemini-2">Gemini API Key 2</button>
+          <button class="page-tab-btn" data-subtab="lol">LoL API Key</button>
+          <button class="page-tab-btn" data-subtab="gdrive">Google Drive API Key</button>
+        </div>
+
+        <div class="page-tab-subpanel active" data-subpanel="gemini-1" style="margin-top:1rem;">
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Gemini API Key 1</label>
+          <input type="password" id="key-gemini-1" placeholder="Enter key" style="width:100%; max-width:420px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="saveApiKey('gemini_api_key_1', 'key-gemini-1', 'gemini-1')">Save</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeApiKey('gemini_api_key_1', 'key-gemini-1', 'gemini-1')">Remove</button>
+          </div>
+          <p class="placeholder-note" id="status-gemini-1" style="margin-top:0.5rem;"></p>
+          <p class="placeholder-note" id="rate-limit-gemini-1" style="margin-top:0.5rem; display:none; color:var(--crimson-bright);"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="gemini-2" style="margin-top:1rem; display:none;">
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Gemini API Key 2</label>
+          <input type="password" id="key-gemini-2" placeholder="Enter key" style="width:100%; max-width:420px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn" onclick="saveApiKey('gemini_api_key_2', 'key-gemini-2', 'gemini-2')">Save</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeApiKey('gemini_api_key_2', 'key-gemini-2', 'gemini-2')">Remove</button>
+          </div>
+          <p class="placeholder-note" id="status-gemini-2" style="margin-top:0.5rem;"></p>
+          <p class="placeholder-note" id="rate-limit-gemini-2" style="margin-top:0.5rem; display:none; color:var(--crimson-bright);"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="lol" style="margin-top:1rem; display:none;">
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">LoL (Riot) API Key</label>
+          <input type="password" id="key-lol" placeholder="Enter key" style="width:100%; max-width:420px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'JetBrains Mono',monospace; margin-bottom:0.5rem;">
+          <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+            <button class="btn" onclick="saveApiKey('lol_api_key', 'key-lol', 'lol')">Save Key</button>
+            <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeApiKey('lol_api_key', 'key-lol', 'lol')">Remove</button>
+          </div>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">A Development key (the free one you get instantly) expires every 24 hours and needs manual regeneration from the Riot Developer Portal — auto-sync will quietly stop working until you paste in a fresh one. A Personal key doesn't expire but requires applying to Riot first.</p>
+
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Riot ID</label>
+          <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap;">
+            <input type="text" id="riot-game-name" placeholder="Game Name" style="flex:1; min-width:140px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem;">
+            <input type="text" id="riot-tag-line" placeholder="Tag (without #)" style="width:120px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem;">
+            <select id="riot-region" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem;">
+              <option value="na1">NA</option><option value="euw1">EUW</option><option value="eun1">EUNE</option>
+              <option value="kr">KR</option><option value="jp1">JP</option><option value="br1">BR</option>
+              <option value="la1">LAN</option><option value="la2">LAS</option><option value="oc1">OCE</option>
+              <option value="tr1">TR</option><option value="ru">RU</option>
+              <option value="sg2">SEA (Singapore / Malaysia / Philippines / Indonesia / Thailand / Vietnam)</option>
+            </select>
+          </div>
+          <p class="placeholder-note" style="margin-top:0.4rem;">No option for India — Riot has never launched a dedicated India server. Indian players typically play on EUW/EUNE or through Garena-based access depending on account setup; pick whichever your account actually plays on.</p>
+          <button class="btn" onclick="saveRiotId()">Save Riot ID</button>
+          <p class="placeholder-note" id="status-riot-id" style="margin-top:0.5rem;"></p>
+
+          <p class="placeholder-note" style="margin-top:1rem;">Once both are set, use the "Sync Latest Match" button on the KDA / XP page — it checks for a new match while that page is open, no manual typing needed.</p>
+          <p class="placeholder-note" id="status-lol" style="margin-top:0.5rem;"></p>
+        </div>
+
+        <div class="page-tab-subpanel" data-subpanel="gdrive" style="margin-top:1rem; display:none;">
+          <p class="placeholder-note" style="margin-bottom:0.75rem; color:var(--crimson-bright);">These folders are shared site-wide — whoever adds them here powers Top Clips for every player, not just you.</p>
+          <p class="placeholder-note" style="margin-bottom:1rem;">No API key needed — paste a folder link and everything inside it (now and anything added later) shows up automatically, using Google's own embeddable folder view.</p>
+
+          <div>
+            <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Add a Drive Folder Link</label>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <input type="text" id="gdrive-folder-link" placeholder="https://drive.google.com/drive/folders/..." style="flex:1; min-width:220px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'JetBrains Mono',monospace;">
+              <input type="text" id="gdrive-folder-label" placeholder="Label (optional)" style="width:160px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem;">
+              <button class="btn" onclick="addGdriveFolder()">Add Folder</button>
+            </div>
+            <p class="placeholder-note" style="margin-top:0.5rem;">The folder needs to be shared as "Anyone with the link can view" in Google Drive itself, or it won't load on the site.</p>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <label class="mono" style="font-size:0.72rem; color:var(--dim); display:block; margin-bottom:0.4rem;">Folders currently feeding Top Clips</label>
+            <div id="gdrive-folders-list"><p class="placeholder-note">Loading...</p></div>
+          </div>
+
+          <p class="placeholder-note" id="status-gdrive" style="margin-top:0.75rem;"></p>
+        </div>
+      </section>
+    </div>
+
+    </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  document.querySelectorAll("#settings-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#settings-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+
+      if (target === "personalization") loadThemeOptions();
+      if (target === "audio") loadAudioPrefs();
+      if (target === "api") loadApiKeys();
+      if (target === "ai-memory") loadAiMemory();
+    });
+  });
+
+  // Load the current email + gamer name into the form
+  (async () => {
+    const { data } = await sb.auth.getSession();
+    if(!data.session){
+      window.location.href = "login.html";
+      return;
+    }
+    document.getElementById("settings-email").textContent = data.session.user.email;
+    document.getElementById("gamer-name-input").value = await getMyGamerName();
+  })();
+
+  async function saveGamerName(){
+    const input = document.getElementById("gamer-name-input");
+    const msg = document.getElementById("gamer-name-message");
+    const newName = input.value.trim();
+
+    if(!newName){
+      msg.textContent = "Gamer name can't be empty.";
+      msg.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msg.textContent = "Saving...";
+    msg.style.color = "var(--dim)";
+
+    const { error } = await saveMyGamerName(newName);
+
+    if(error){
+      // A "duplicate" error means someone already took that name
+      if(error.message && error.message.toLowerCase().includes("duplicate")){
+        msg.textContent = "That gamer name is already taken. Try another.";
+      } else {
+        msg.textContent = error.message;
+      }
+      msg.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msg.textContent = "Saved!";
+    msg.style.color = "var(--steel-bright)";
+
+    // Update the header immediately too, not just after a page reload
+    const headerEl = document.getElementById("header-gamer-name");
+    if (headerEl) headerEl.textContent = newName;
+  }
+
+  async function handleLogout(){
+    await sb.auth.signOut();
+    window.location.href = "login.html";
+  }
+
+  // ============================================================
+  // Personalization
+  // ============================================================
+  const THEMES = [
+    { id: "dark_fantasy", name: "Dark Fantasy", desc: "The original look — Cinzel & Spectral, gold and crimson on near-black." },
+    { id: "modern", name: "Modern", desc: "Clean sans-serif, rounded corners, blue and slate — minimal and contemporary." },
+    { id: "victorian", name: "Victorian Gothic", desc: "Ornate serif headings, deep burgundy and brass, sharp edges." },
+    { id: "light_fantasy", name: "Light Fantasy", desc: "Same fantasy bones, daylight parchment background instead of near-black." },
+    { id: "cyberpunk", name: "Cyberpunk", desc: "Neon pink and cyan on near-black, uppercase headings, sharp edges." },
+    { id: "blood_moon", name: "Blood Moon", desc: "Horror-leaning deep red and black, sharp corners, no rounding at all." },
+    { id: "royal_purple", name: "Royal Purple", desc: "Regal purple and gold, ornate serif headings." },
+    { id: "nature", name: "Nature", desc: "Earthy greens and browns, soft rounded corners, elegant serif." },
+  ];
+
+  async function loadThemeOptions(){
+    const { data: prefs } = await sb.rpc("get_or_create_preferences");
+    const p = Array.isArray(prefs) ? prefs[0] : prefs;
+    const currentTheme = p?.theme || "dark_fantasy";
+
+    document.getElementById("theme-options").innerHTML = THEMES.map(t => `
+      <div class="frame" style="${t.id === currentTheme ? "border-color:var(--gold-bright);" : ""}">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${t.name}${t.id === currentTheme ? ' <span class="tag">Active</span>' : ""}</h4>
+        <p style="font-size:0.85rem; margin-bottom:0.6rem;">${t.desc}</p>
+        ${t.id === currentTheme
+          ? `<span class="mono" style="color:var(--gold-bright);">Currently applied</span>`
+          : `<button class="btn" onclick="applyTheme('${t.id}')">Apply</button>`
+        }
+      </div>
+    `).join("");
+
+    if (p){
+      document.getElementById("font-size-select").value = p.font_size || "medium";
+      document.getElementById("ui-density-select").value = p.ui_density || "comfortable";
+      document.getElementById("reduce-motion-toggle").checked = !!p.reduce_motion;
+    }
+  }
+
+  async function applyTheme(themeId){
+    const { error } = await sb.from("user_preferences").upsert({ user_id: (await sb.auth.getUser()).data.user.id, theme: themeId }, { onConflict: "user_id" });
+    if (error){ alert("Couldn't save theme: " + error.message); return; }
+
+    if (themeId === "dark_fantasy"){
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", themeId);
+    }
+    try { localStorage.setItem("slrpg_theme", themeId); } catch(e){}
+    loadThemeOptions();
+  }
+
+  async function updateDisplayOptions(){
+    const font_size = document.getElementById("font-size-select").value;
+    const ui_density = document.getElementById("ui-density-select").value;
+    const reduce_motion = document.getElementById("reduce-motion-toggle").checked;
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_preferences").upsert({
+      user_id: userData.user.id, font_size, ui_density, reduce_motion,
+    }, { onConflict: "user_id" });
+
+    const statusEl = document.getElementById("display-options-status");
+    statusEl.textContent = error ? "Couldn't save: " + error.message : "Saved.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+
+    document.documentElement.setAttribute("data-font-size", font_size);
+    document.documentElement.setAttribute("data-density", ui_density);
+    document.documentElement.setAttribute("data-reduce-motion", reduce_motion ? "true" : "false");
+
+    try {
+      localStorage.setItem("slrpg_font_size", font_size);
+      localStorage.setItem("slrpg_density", ui_density);
+      localStorage.setItem("slrpg_reduce_motion", String(reduce_motion));
+    } catch(e){}
+  }
+
+  // ============================================================
+  // Music & Sound Effects
+  // ============================================================
+  document.querySelectorAll("#audio-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#audio-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.subtab;
+      document.querySelectorAll(".page-tab-subpanel[data-subpanel]").forEach((p) => {
+        p.classList.toggle("active", p.dataset.subpanel === target);
+        p.style.display = p.dataset.subpanel === target ? "block" : "none";
+      });
+    });
+  });
+
+  function fileNameFromUrl(url){
+    if (!url) return null;
+    const parts = url.split("/");
+    return decodeURIComponent(parts[parts.length - 1]).replace(/^\d+-/, "");
+  }
+
+  async function loadAudioPrefs(){
+    const { data: prefs } = await sb.rpc("get_or_create_preferences");
+    const p = Array.isArray(prefs) ? prefs[0] : prefs;
+    if (!p) return;
+
+    document.getElementById("sfx-enabled-toggle").checked = p.sfx_enabled;
+    document.getElementById("sfx-volume-slider").value = p.sfx_volume;
+    document.getElementById("music-enabled-toggle").checked = p.music_enabled;
+    document.getElementById("music-volume-slider").value = p.music_volume;
+    document.getElementById("login-music-enabled-toggle").checked = p.login_music_enabled;
+    document.getElementById("login-music-volume-slider").value = p.login_music_volume;
+
+    document.getElementById("battle-music-current").textContent = p.battle_music_url
+      ? "Current file: " + fileNameFromUrl(p.battle_music_url)
+      : "No file uploaded yet.";
+    document.getElementById("sfx-current").textContent = p.sfx_custom_url
+      ? "Current file: " + fileNameFromUrl(p.sfx_custom_url)
+      : "No file uploaded yet — using the built-in tone.";
+    document.getElementById("login-music-current").textContent = p.login_music_url
+      ? "Current file: " + fileNameFromUrl(p.login_music_url)
+      : "Using the default track — upload your own to replace it.";
+  }
+
+  async function updateAudioPref(){
+    const sfx_enabled = document.getElementById("sfx-enabled-toggle").checked;
+    const sfx_volume = parseInt(document.getElementById("sfx-volume-slider").value, 10);
+    const music_enabled = document.getElementById("music-enabled-toggle").checked;
+    const music_volume = parseInt(document.getElementById("music-volume-slider").value, 10);
+    const login_music_enabled = document.getElementById("login-music-enabled-toggle").checked;
+    const login_music_volume = parseInt(document.getElementById("login-music-volume-slider").value, 10);
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_preferences").upsert({
+      user_id: userData.user.id, sfx_enabled, sfx_volume, music_enabled, music_volume,
+      login_music_enabled, login_music_volume,
+    }, { onConflict: "user_id" });
+
+    const statusEl = document.getElementById("audio-save-status");
+    statusEl.textContent = error ? "Couldn't save: " + error.message : "Saved.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+
+    if (window.SoloLeagueAudio) await window.SoloLeagueAudio.refreshPrefs();
+  }
+
+  function testSfx(){
+    if (window.SoloLeagueAudio) window.SoloLeagueAudio.playNotification();
+  }
+
+  // Storage keys reject spaces, most Unicode punctuation (–, ｜,
+  // etc.), brackets, and other special characters -- a filename
+  // like "Song – Artist [Official].mp3" fails outright otherwise.
+  // Keeps letters, numbers, dots, hyphens, underscores; everything
+  // else becomes a hyphen, with repeats collapsed.
+  function sanitizeFileName(name){
+    return name
+      .normalize("NFKD").replace(/[\u0300-\u036f]/g, "") // strip accents
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  async function uploadAudio(prefColumn, fileInputId, statusPrefix){
+    const fileInput = document.getElementById(fileInputId);
+    const statusEl = document.getElementById(statusPrefix + "-status");
+    const file = fileInput.files[0];
+    if (!file){
+      statusEl.textContent = "Choose a file first.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploading...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: userData } = await sb.auth.getUser();
+    const safeName = sanitizeFileName(file.name);
+    const path = `${userData.user.id}/${statusPrefix}-${Date.now()}-${safeName}`;
+
+    const { error: uploadError } = await sb.storage.from("audio-uploads").upload(path, file, { upsert: true });
+    if (uploadError){
+      statusEl.textContent = "Upload failed: " + uploadError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: publicUrlData } = sb.storage.from("audio-uploads").getPublicUrl(path);
+    const publicUrl = publicUrlData.publicUrl;
+
+    const { error: saveError } = await sb.from("user_preferences").upsert({
+      user_id: userData.user.id, [prefColumn]: publicUrl,
+    }, { onConflict: "user_id" });
+
+    if (saveError){
+      statusEl.textContent = "Uploaded, but couldn't save: " + saveError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploaded and saved!";
+    statusEl.style.color = "var(--steel-bright)";
+    fileInput.value = "";
+    await loadAudioPrefs();
+    if (window.SoloLeagueAudio) await window.SoloLeagueAudio.refreshPrefs();
+  }
+
+  async function removeAudio(prefColumn, statusPrefix){
+    const statusEl = document.getElementById(statusPrefix + "-status");
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_preferences").upsert({
+      user_id: userData.user.id, [prefColumn]: null,
+    }, { onConflict: "user_id" });
+
+    statusEl.textContent = error ? "Couldn't remove: " + error.message : "Removed.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+    await loadAudioPrefs();
+    if (window.SoloLeagueAudio) await window.SoloLeagueAudio.refreshPrefs();
+  }
+
+  // ============================================================
+  // API Keys
+  // ============================================================
+  document.querySelectorAll("#api-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#api-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.subtab;
+      document.querySelectorAll('[data-subpanel]').forEach((p) => {
+        if (["gemini-1", "gemini-2", "lol", "gdrive"].includes(p.dataset.subpanel)){
+          p.classList.toggle("active", p.dataset.subpanel === target);
+          p.style.display = p.dataset.subpanel === target ? "block" : "none";
+        }
+      });
+    });
+  });
+
+  function maskKey(key){
+    if (!key) return "";
+    if (key.length <= 4) return "••••";
+    return "••••••••" + key.slice(-4);
+  }
+
+  const rateLimitIntervals = {};
+
+  function startRateLimitCountdown(elId, untilTimestamp){
+    const el = document.getElementById(elId);
+    if (!el) return;
+
+    // Clear any previous timer for this element before starting a new one
+    if (rateLimitIntervals[elId]) clearInterval(rateLimitIntervals[elId]);
+
+    if (!untilTimestamp){
+      el.style.display = "none";
+      return;
+    }
+
+    const untilTime = new Date(untilTimestamp).getTime();
+
+    function tick(){
+      const remainingMs = untilTime - Date.now();
+      if (remainingMs <= 0){
+        el.style.display = "none";
+        clearInterval(rateLimitIntervals[elId]);
+        return;
+      }
+      const totalSeconds = Math.ceil(remainingMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const isDailyReset = hours >= 1;
+      const timeStr = hours > 0
+        ? `${hours}h ${minutes}m`
+        : `${minutes > 0 ? minutes + "m " : ""}${seconds}s`;
+      el.textContent = isDailyReset
+        ? `⏱ Daily quota used up — resets in ${timeStr} (midnight Pacific Time)`
+        : `⏱ Rate limited — usable again in ${timeStr}`;
+      el.style.display = "block";
+    }
+
+    tick();
+    rateLimitIntervals[elId] = setInterval(tick, 1000);
+  }
+
+  async function loadApiKeys(){
+    const { data: keys } = await sb.rpc("get_or_create_api_keys");
+    const k = Array.isArray(keys) ? keys[0] : keys;
+    if (k){
+      document.getElementById("key-gemini-1").placeholder = k.gemini_api_key_1 ? maskKey(k.gemini_api_key_1) : "Enter key";
+      document.getElementById("key-gemini-2").placeholder = k.gemini_api_key_2 ? maskKey(k.gemini_api_key_2) : "Enter key";
+      document.getElementById("key-lol").placeholder = k.lol_api_key ? maskKey(k.lol_api_key) : "Enter key";
+
+      if (k.riot_game_name) document.getElementById("riot-game-name").value = k.riot_game_name;
+      if (k.riot_tag_line) document.getElementById("riot-tag-line").value = k.riot_tag_line;
+      if (k.riot_region) document.getElementById("riot-region").value = k.riot_region;
+
+      startRateLimitCountdown("rate-limit-gemini-1", k.gemini_1_rate_limited_until);
+      startRateLimitCountdown("rate-limit-gemini-2", k.gemini_2_rate_limited_until);
+    }
+
+    // Shared Gdrive folders — same for every player
+    await loadGdriveFolders();
+  }
+
+  async function saveRiotId(){
+    const statusEl = document.getElementById("status-riot-id");
+    const riot_game_name = document.getElementById("riot-game-name").value.trim();
+    const riot_tag_line = document.getElementById("riot-tag-line").value.trim().replace(/^#/, "");
+    const riot_region = document.getElementById("riot-region").value;
+
+    if (!riot_game_name || !riot_tag_line){
+      statusEl.textContent = "Enter both your Riot game name and tag.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_api_keys").upsert({
+      user_id: userData.user.id, riot_game_name, riot_tag_line, riot_region,
+    }, { onConflict: "user_id" });
+
+    statusEl.textContent = error ? "Couldn't save: " + error.message : "Saved.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+  }
+
+  // Pulls the file ID out of any common Drive file link format --
+  // /file/d/{id}/..., ?id={id}, or a bare ID pasted directly.
+  function extractDriveFolderId(input){
+    const foldersMatch = input.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+    if (foldersMatch) return foldersMatch[1];
+    const idParamMatch = input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idParamMatch) return idParamMatch[1];
+    if (/^[a-zA-Z0-9_-]{10,}$/.test(input.trim())) return input.trim(); // looks like a bare ID already
+    return null;
+  }
+
+  async function addGdriveFolder(){
+    const statusEl = document.getElementById("status-gdrive");
+    const linkInput = document.getElementById("gdrive-folder-link");
+    const labelInput = document.getElementById("gdrive-folder-label");
+    const link = linkInput.value.trim();
+    const label = labelInput.value.trim();
+
+    const folderId = extractDriveFolderId(link);
+    if (!folderId){
+      statusEl.textContent = "Couldn't find a folder ID in that link — paste the normal Drive folder share link.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("gdrive_folders").insert({
+      folder_url: link, folder_id: folderId, label: label || null, added_by: userData.user.id,
+    });
+
+    statusEl.textContent = error ? "Couldn't add: " + error.message : "Folder added — now live for every player.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+    linkInput.value = "";
+    labelInput.value = "";
+    await loadGdriveFolders();
+  }
+
+  async function removeGdriveFolder(id){
+    const statusEl = document.getElementById("status-gdrive");
+    const { error } = await sb.from("gdrive_folders").delete().eq("id", id);
+    statusEl.textContent = error ? "Couldn't remove: " + error.message : "Folder removed for everyone.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+    await loadGdriveFolders();
+  }
+
+  async function loadGdriveFolders(){
+    const listEl = document.getElementById("gdrive-folders-list");
+    const { data, error } = await sb.from("gdrive_folders").select("*").order("added_at", { ascending: false });
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${error.message}</p>`;
+      return;
+    }
+    if (!data || data.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">No folders added yet.</p>`;
+      return;
+    }
+    listEl.innerHTML = data.map(f => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; padding:0.5rem 0.75rem;">
+        <span class="mono" style="font-size:0.75rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${f.label ? f.label + " — " : ""}${f.folder_id}</span>
+        <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright); padding:0.25rem 0.5rem; font-size:0.7rem;" onclick="removeGdriveFolder(${f.id})">Remove</button>
+      </div>
+    `).join("");
+  }
+
+  // ============================================================
+  // AI Memory
+  // ============================================================
+  document.querySelectorAll("#ai-memory-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#ai-memory-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.subtab;
+      document.querySelectorAll('[data-subpanel]').forEach((p) => {
+        if (["ai-information", "ai-instructions"].includes(p.dataset.subpanel)){
+          p.classList.toggle("active", p.dataset.subpanel === target);
+          p.style.display = p.dataset.subpanel === target ? "block" : "none";
+        }
+      });
+    });
+  });
+
+  async function callGemini(prompt, purpose, groundWith){
+    try {
+      const { data: result, error } = await sb.functions.invoke("call-gemini", {
+        body: { purpose: purpose || "general", prompt, groundWith: groundWith || "" },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (result?.error) return { ok: false, error: result.error };
+      return { ok: true, text: result.text, warning: result.warning };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  function onContentTypeChange(){
+    document.getElementById("content-tool-output").style.display = "none";
+    document.getElementById("content-tool-preview-list").style.display = "none";
+    document.getElementById("content-tool-status").textContent = "";
+  }
+
+  const CONTENT_SCHEMAS = {
+    weapon: `Return ONLY a valid JSON array (no markdown code fences, no commentary) of weapon objects, each with exactly these fields:
+{"name": string, "kingdom": one of Valoria/Frosthaven/Eldergrove/Pyrath/Aetheria/"Azure Reach"/"Khar'Duun"/Blackfen/Mordrath, "city": string (a real city in that kingdom), "shop_name": string, "tier": one of Common/Rare/Epic/Legendary, "classes": array of class name strings, "buy_price": integer, "sell_price": integer or null, "description": string, "stats": {"attack": integer}, "passive_name": string or null, "passive_effect": string or null}`,
+    armor: `Return ONLY a valid JSON array (no markdown code fences, no commentary) of armor objects, each with exactly these fields:
+{"name": string, "kingdom": one of Valoria/Frosthaven/Eldergrove/Pyrath/Aetheria/"Azure Reach"/"Khar'Duun"/Blackfen/Mordrath, "city": string, "shop_name": string, "tier": one of Common/Rare/Epic/Legendary, "classes": array of class name strings, "buy_price": integer, "sell_price": integer or null, "description": string or null, "defense_stat": string like "+20 Defense", "secondary_stat": string or null, "passive_name": string or null, "passive_effect": string or null}`,
+    consumable: `Return ONLY a valid JSON array (no markdown code fences, no commentary) of consumable objects, each with exactly these fields:
+{"name": string, "kingdom": one of Valoria/Frosthaven/Eldergrove/Pyrath/Aetheria/"Azure Reach"/"Khar'Duun"/Blackfen/Mordrath, "city": string, "shop_name": string, "tier": one of Common/Rare/Epic/Legendary, "buy_price": integer, "description": string or null, "effect_description": string}`,
+  };
+
+  const CONTENT_TABLES = { weapon: "weapon_items", armor: "armor_items", consumable: "consumable_items" };
+
+  function slugify(name){
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+  }
+
+  async function generateContent(){
+    const type = document.getElementById("content-tool-type").value;
+    const promptInput = document.getElementById("content-tool-prompt");
+    const btn = document.getElementById("content-tool-btn");
+    const statusEl = document.getElementById("content-tool-status");
+    const outputEl = document.getElementById("content-tool-output");
+    const previewEl = document.getElementById("content-tool-preview-list");
+    const userPrompt = promptInput.value.trim();
+
+    if (!userPrompt){
+      statusEl.textContent = "Describe what you want drafted first.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = "Drafting...";
+    statusEl.style.color = "var(--dim)";
+    outputEl.style.display = "none";
+    previewEl.style.display = "none";
+
+    if (type === "freeform"){
+      const result = await callGemini(userPrompt, "admin_content", "both");
+      btn.disabled = false;
+      if (!result.ok){
+        statusEl.textContent = result.error;
+        statusEl.style.color = "var(--crimson-bright)";
+        return;
+      }
+      statusEl.textContent = result.warning ? "⚠ " + result.warning : "";
+      statusEl.style.color = "var(--gold-bright)";
+      outputEl.textContent = result.text;
+      outputEl.style.display = "block";
+      return;
+    }
+
+    // Structured item mode
+    const fullPrompt = `${userPrompt}\n\n${CONTENT_SCHEMAS[type]}`;
+    const result = await callGemini(fullPrompt, "admin_content_structured", "both");
+    btn.disabled = false;
+
+    if (!result.ok){
+      statusEl.textContent = result.error;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    let items;
+    try {
+      const cleaned = result.text.replace(/```json|```/g, "").trim();
+      items = JSON.parse(cleaned);
+      if (!Array.isArray(items)) items = [items];
+    } catch (e){
+      statusEl.textContent = "Got a response, but couldn't parse it as structured data. Try rephrasing, or switch to Free-form.";
+      statusEl.style.color = "var(--crimson-bright)";
+      outputEl.textContent = result.text;
+      outputEl.style.display = "block";
+      return;
+    }
+
+    statusEl.textContent = result.warning ? "⚠ " + result.warning : `Drafted ${items.length} item(s) — review before adding.`;
+    statusEl.style.color = result.warning ? "var(--gold-bright)" : "var(--steel-bright)";
+    renderContentPreview(type, items);
+  }
+
+  function renderContentPreview(type, items){
+    const previewEl = document.getElementById("content-tool-preview-list");
+    previewEl.style.display = "block";
+    previewEl.innerHTML = items.map((item, i) => `
+      <div class="frame" style="margin-bottom:0.75rem;">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">${escapeAttr(item.name || "(unnamed)")} <span class="tag">${escapeAttr(item.tier || "?")}</span></h4>
+        <p class="mono" style="font-size:0.75rem; color:var(--dim); margin-bottom:0.5rem;">${escapeAttr(item.kingdom || "?")} — ${escapeAttr(item.city || "?")} — ${escapeAttr(item.shop_name || "?")}</p>
+        ${item.description ? `<p style="font-size:0.85rem; margin-bottom:0.5rem;">${escapeAttr(item.description)}</p>` : ""}
+        ${type === "weapon" ? `<p class="mono" style="font-size:0.8rem;">Attack: ${item.stats?.attack ?? "?"} | ${escapeAttr(item.passive_name || "no passive")}${item.passive_effect ? " — " + escapeAttr(item.passive_effect) : ""}</p>` : ""}
+        ${type === "armor" ? `<p class="mono" style="font-size:0.8rem;">${escapeAttr(item.defense_stat || "?")}${item.secondary_stat ? ", " + escapeAttr(item.secondary_stat) : ""} | ${escapeAttr(item.passive_name || "no passive")}</p>` : ""}
+        ${type === "consumable" ? `<p class="mono" style="font-size:0.8rem;">${escapeAttr(item.effect_description || "?")}</p>` : ""}
+        <p class="mono" style="font-size:0.8rem; margin-top:0.3rem;">Buy: ${item.buy_price ?? "?"} Gold${item.sell_price ? " | Sell: " + item.sell_price : ""}</p>
+        <button class="btn" style="margin-top:0.6rem;" onclick="addContentItem('${type}', ${i})">Add to Database</button>
+        <p class="placeholder-note" id="content-add-status-${i}" style="margin-top:0.4rem;"></p>
+      </div>
+    `).join("");
+    previewEl.dataset.items = JSON.stringify(items);
+  }
+
+  function escapeAttr(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function addContentItem(type, index){
+    const previewEl = document.getElementById("content-tool-preview-list");
+    const items = JSON.parse(previewEl.dataset.items);
+    const item = items[index];
+    const statusEl = document.getElementById("content-add-status-" + index);
+    statusEl.textContent = "Adding...";
+    statusEl.style.color = "var(--dim)";
+
+    const row = { ...item, slug: slugify(item.name || "item"), tier: item.tier || "Common" };
+
+    const { error } = await sb.from(CONTENT_TABLES[type]).insert(row);
+
+    if (error){
+      statusEl.textContent = "Couldn't add: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "✓ Added — now live in " + item.kingdom + "'s shop.";
+    statusEl.style.color = "var(--steel-bright)";
+  }
+
+  async function loadAiMemory(){
+    const { data: shared } = await sb.from("shared_site_settings").select("ai_memory_information, ai_memory_instructions, ai_memory_website_guide").maybeSingle();
+    document.getElementById("ai-memory-information-text").value = shared?.ai_memory_information || "";
+    document.getElementById("ai-memory-instructions-text").value = shared?.ai_memory_instructions || "";
+    document.getElementById("ai-memory-website-guide-text").value = shared?.ai_memory_website_guide || "";
+  }
+
+  async function saveAiMemory(column, textareaId, statusPrefix){
+    const value = document.getElementById(textareaId).value;
+    const statusEl = document.getElementById("status-" + statusPrefix);
+    const { data: userData } = await sb.auth.getUser();
+
+    const { error } = await sb.from("shared_site_settings").upsert({
+      id: true, [column]: value, set_by_user_id: userData.user.id, updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
+
+    statusEl.textContent = error ? "Couldn't save: " + error.message : "Saved — now live for every player.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+  }
+
+  async function saveApiKey(column, inputId, statusPrefix){
+    const input = document.getElementById(inputId);
+    const statusEl = document.getElementById("status-" + statusPrefix);
+    const value = input.value.trim();
+
+    if (!value){
+      statusEl.textContent = "Enter a key first.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_api_keys").upsert({
+      user_id: userData.user.id, [column]: value, updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+
+    if (error){
+      statusEl.textContent = "Couldn't save: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Saved.";
+    statusEl.style.color = "var(--steel-bright)";
+    input.value = "";
+    await loadApiKeys();
+  }
+
+  async function removeApiKey(column, inputId, statusPrefix){
+    const statusEl = document.getElementById("status-" + statusPrefix);
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_api_keys").upsert({
+      user_id: userData.user.id, [column]: null,
+    }, { onConflict: "user_id" });
+
+    statusEl.textContent = error ? "Couldn't remove: " + error.message : "Removed.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+    document.getElementById(inputId).value = "";
+    await loadApiKeys();
+  }
+</script>
+</body>
+</html>

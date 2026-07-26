@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Shop</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Shop</h2>
+      </div>
+
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="shop-tabs">
+      <button class="page-tab-btn active" data-tab="npc-shops">NPC Shops</button>
+      <button class="page-tab-btn" data-tab="weapons">Weapons</button>
+      <button class="page-tab-btn" data-tab="armor">Armor</button>
+      <button class="page-tab-btn" data-tab="consumables">Consumables</button>
+      <button class="page-tab-btn" data-tab="kingdom-armory">Kingdom Armory</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="npc-shops">
+      <section class="frame">
+        <h3>Universal Shops <span class="tag">every major city</span></h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Standard equipment, available everywhere:</p>
+        <ul class="clean">
+          <li><span>&#9876; Weapon Smith</span></li>
+          <li><span>&#128737; Armor Smith</span></li>
+          <li><span>&#129514; Potion Shop</span></li>
+          <li><span>&#127831; Food Shop</span></li>
+          <li><span>&#129525; Tailor</span></li>
+          <li><span>&#128014; Stable</span></li>
+          <li><span>&#127974; Bank</span></li>
+          <li><span>&#128722; General Store</span></li>
+        </ul>
+      </section>
+
+      <section class="frame" style="margin-top:1.25rem;">
+        <h3>Kingdom Specialties</h3>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">Each kingdom's signature market sells exclusive items found nowhere else.</p>
+        <p class="placeholder-note" style="margin-bottom:1rem; color:var(--crimson-bright);">Intended rule: buying from a kingdom's specialty shop should require actually being in that kingdom — either directly from the NPC running it, or as a reward from a quest they give. Not yet enforced, since player location tracking doesn't exist.</p>
+
+        <div class="card-grid">
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#127984; Valoria — Royal Equipment</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Lion's Square</p>
+            <p>Known for craftsmanship. Exclusive: Knight Armor, Royal Shields, Banners, Heavy Plate, Lances, Honor Medals.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Knight, Paladin, Templar</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#10052; Frosthaven — Survival Gear</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Icewind Bazaar</p>
+            <p>Exclusive: Fur Cloaks, Ice Weapons, Warm Potions, Snow Boots, Hunting Spears, Frost Charms.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Hunter, Ranger</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#127795; Eldergrove — Nature</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Bloom Market</p>
+            <p>Exclusive: Herbs, Seeds, Nature Staves, Spirit Charms, Animal Treats, Forest Cloaks.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Druid, Beastmaster</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#127755; Pyrath — Forging</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Ember Forge District</p>
+            <p>Exclusive: High-quality Weapons, Ores, Gems, Upgrade Stones, Tool Kits, Heavy Hammers.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Berserker, Engineer</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#9729; Aetheria — Magic</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Sky Arcane Exchange</p>
+            <p>Exclusive: Spell Books, Magic Crystals, Wands, Enchantments, Mana Potions, Scrolls.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Mage, Bard</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#127754; Azure Reach — Trading</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Blue Harbor Market</p>
+            <p>Exclusive: Fishing Gear, Maps, Ships, Navigation Tools, Rare Fish, Sea Charms, plus exotic imports.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Explorer, Ranger</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#127964; Khar'Duun — Ancient Relics</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Golden Dunes Bazaar</p>
+            <p>Exclusive: Ancient Coins, Relics, Sand Charms, Treasure Maps, Archaeology Tools, Rare Jewelry.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Treasure Hunters</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#9760; Blackfen — Alchemy</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Mist Hollow Market</p>
+            <p>Exclusive: Rare Mushrooms, Venoms, Poison Kits, Medicine, Swamp Herbs, Toxins.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Alchemist</p>
+          </div>
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">&#128302; Mordrath — Forbidden Items</h4>
+            <p class="mono" style="font-size:0.78rem; color:var(--dim); margin-bottom:0.5rem;">Signature market: Nightveil Exchange</p>
+            <p>Exclusive: Shadow Robes, Cursed Relics, Dark Crystals, Masks, Forgotten Books, Nightmare Charms.</p>
+            <p class="placeholder-note" style="margin-top:0.4rem;">Best for: Necromancer</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="frame" style="margin-top:1.25rem;">
+        <h3>Reputation Discounts</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Prices scale with how much a kingdom trusts you — not randomly.</p>
+        <ul class="clean">
+          <li><span>Citizen</span><span class="mono">Normal price</span></li>
+          <li><span>Trusted</span><span class="mono">5% discount</span></li>
+          <li><span>Hero</span><span class="mono">10% discount</span></li>
+          <li><span>Champion</span><span class="mono">15% discount</span></li>
+          <li><span>Legend</span><span class="mono">20% discount</span></li>
+        </ul>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="weapons">
+      <section class="frame">
+        <h3>General Weapon Shop <span class="tag">Common</span></h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Everyday starter weapons, no kingdom flavor.</p>
+        <div class="card-grid" id="general-weapons-list"></div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="kingdom-armory">
+      <section class="frame">
+        <h3>Kingdom Armory <span class="tag">72 named weapons, 8 per kingdom</span></h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Each kingdom forges weapons with its own combat identity. This is a reference catalog only — buying happens on the World Map, and only while you're actually in that kingdom.</p>
+        <select id="armory-kingdom-picker" onchange="loadArmoryKingdom(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <option value="Valoria">Valoria</option>
+          <option value="Frosthaven">Frosthaven</option>
+          <option value="Eldergrove">Eldergrove</option>
+          <option value="Pyrath">Pyrath</option>
+          <option value="Aetheria">Aetheria</option>
+          <option value="Azure Reach">Azure Reach</option>
+          <option value="Khar'Duun">Khar'Duun</option>
+          <option value="Blackfen">Blackfen</option>
+          <option value="Mordrath">Mordrath</option>
+        </select>
+        <div id="armory-identity-note" class="placeholder-note" style="margin-bottom:1rem;"></div>
+        <div class="card-grid" id="armory-weapon-list"></div>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Material Locations</h4>
+        <div id="armory-materials-list"></div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="armor">
+      <section class="frame">
+        <h3>General Armor Shop <span class="tag">Common</span></h3>
+        <div class="card-grid" id="general-armor-list"></div>
+      </section>
+
+      <section class="frame" style="margin-top:1.25rem;">
+        <h3>Kingdom Armor Shops <span class="tag">72 items, 8 per kingdom</span></h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
+        <select id="kingdom-armor-picker" onchange="loadKingdomArmor(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
+          <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
+          <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
+        </select>
+        <div class="card-grid" id="kingdom-armor-list"></div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="consumables">
+      <section class="frame">
+        <h3>Consumables</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Bring up to 2 into a duel during Pre-Battle Prep.</p>
+        <div class="card-grid" id="consumable-catalog-list"></div>
+      </section>
+
+      <section class="frame" style="margin-top:1.25rem;">
+        <h3>Kingdom Alchemist Shops <span class="tag">72 items, 8 per kingdom</span></h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
+        <select id="kingdom-consumable-picker" onchange="loadKingdomConsumables(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
+          <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
+          <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
+        </select>
+        <div class="card-grid" id="kingdom-consumable-list"></div>
+      </section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+<script>
+  document.querySelectorAll("#shop-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#shop-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  let shopMyCharacter = null;
+
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    const { data: character } = await sb.from("characters").select("*").eq("user_id", user.id).maybeSingle();
+    shopMyCharacter = character;
+
+    const goldNoteEl = document.getElementById("shop-gold-note");
+    if (goldNoteEl){
+      goldNoteEl.textContent = character
+        ? `Gold: ${character.gold ?? 0}${character.equipped_weapon ? " • Equipped: " + character.equipped_weapon : ""}`
+        : "Create a character in the Character tab to buy and equip anything below — browsing is fine either way.";
+    }
+
+    await loadShopConsumables();
+    await loadGeneralWeapons();
+    await loadGeneralArmor();
+  })();
+
+  async function loadShopConsumables(){
+    const { data: consumables, error } = await sb.from("consumable_catalog").select("*").order("id");
+    const listEl = document.getElementById("consumable-catalog-list");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load consumables: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    listEl.innerHTML = consumables.map((c) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(c.item_name)}</h4>
+        <p style="font-size:0.88rem; margin-bottom:0.6rem;">${escapeHtml(c.effect_description)}</p>
+        ${shopMyCharacter
+          ? `<button class="btn" onclick="shopBuyConsumable('${c.item_name}')">Buy — ${c.gold_cost} Gold</button>`
+          : `<button class="btn" disabled style="opacity:0.5;">Create a character first</button>`
+        }
+      </div>
+    `).join("");
+  }
+
+  async function refreshShopState(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+    const { data: character } = await sb.from("characters").select("*").eq("user_id", user.id).maybeSingle();
+    shopMyCharacter = character;
+    const goldNoteEl = document.getElementById("shop-gold-note");
+    if (goldNoteEl && character){
+      goldNoteEl.textContent = `Gold: ${character.gold ?? 0}${character.equipped_weapon ? " • Equipped: " + character.equipped_weapon : ""}`;
+    }
+    await loadShopConsumables();
+    await loadGeneralWeapons();
+    await loadGeneralArmor();
+  }
+
+  async function shopBuyWeapon(weaponType){
+    const { error } = await sb.rpc("buy_weapon", { p_weapon_type: weaponType });
+    if (error){ alert("Couldn't buy weapon: " + error.message); return; }
+    await refreshShopState();
+  }
+
+  async function shopEquipWeapon(weaponType){
+    const { error } = await sb.rpc("equip_weapon", { p_weapon_type: weaponType });
+    if (error){ alert("Couldn't equip weapon: " + error.message); return; }
+    await refreshShopState();
+  }
+
+  async function shopBuyArmor(armorPiece){
+    const { error } = await sb.rpc("buy_armor", { p_armor_piece: armorPiece });
+    if (error){ alert("Couldn't buy armor: " + error.message); return; }
+    await refreshShopState();
+  }
+
+  async function shopBuyConsumable(itemName){
+    const { error } = await sb.rpc("buy_consumable", { p_item_name: itemName });
+    if (error){ alert("Couldn't buy consumable: " + error.message); return; }
+    await refreshShopState();
+  }
+
+  function shopEscapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatStats(stats){
+    if (!stats) return "";
+    return Object.entries(stats).map(([k, v]) => `${k}: ${v}`).join(" · ");
+  }
+
+  async function loadArmoryKingdom(kingdom){
+    const identityEl = document.getElementById("armory-identity-note");
+    const listEl = document.getElementById("armory-weapon-list");
+    const materialsEl = document.getElementById("armory-materials-list");
+
+    const { data: identity } = await sb.from("kingdom_weapon_identity").select("*").eq("kingdom", kingdom).maybeSingle();
+    identityEl.textContent = identity ? identity.identity_summary : "";
+
+    const { data: items, error } = await sb.from("weapon_items").select("*").eq("kingdom", kingdom).order("id");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${shopEscapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    listEl.innerHTML = (items || []).map((w) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">${shopEscapeHtml(w.name)} <span class="tag">${shopEscapeHtml(w.tier)}</span></h4>
+        <p class="mono" style="font-size:0.72rem; color:var(--dim); margin-bottom:0.4rem;">${shopEscapeHtml(w.city || "")} — ${shopEscapeHtml(w.shop_name || "")} · ${(w.classes || []).join(", ")}</p>
+        ${w.description ? `<p style="font-size:0.85rem; margin-bottom:0.4rem;">${shopEscapeHtml(w.description)}</p>` : ""}
+        <p class="mono" style="font-size:0.78rem; color:var(--steel-bright); margin-bottom:0.4rem;">${formatStats(w.stats)}</p>
+        ${w.passive_name ? `<p style="font-size:0.82rem; margin-bottom:0.3rem;"><strong>${shopEscapeHtml(w.passive_name)}:</strong> ${shopEscapeHtml(w.passive_effect)}</p>` : ""}
+        ${w.hidden_passive_name ? `<p style="font-size:0.82rem; margin-bottom:0.5rem; color:var(--dim);"><strong>${shopEscapeHtml(w.hidden_passive_name)}:</strong> ${shopEscapeHtml(w.hidden_passive_effect)}</p>` : ""}
+        <p class="mono" style="font-size:0.75rem; color:var(--dim);">${w.buy_price} Gold — buy from the World Map while in ${shopEscapeHtml(kingdom)}.</p>
+      </div>
+    `).join("");
+
+    const { data: materials } = await sb.from("material_locations").select("*").eq("kingdom", kingdom).order("id");
+    materialsEl.innerHTML = (materials || []).map(m => `
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid var(--border);">
+        <span>${shopEscapeHtml(m.material)}</span><span class="mono" style="color:var(--dim);">${shopEscapeHtml(m.location)}</span>
+      </div>
+    `).join("");
+  }
+
+  async function loadGeneralWeapons(){
+    const listEl = document.getElementById("general-weapons-list");
+    if (!listEl) return;
+
+    const { data: items, error } = await sb.from("general_weapons").select("*").order("id");
+    if (error){ listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${shopEscapeHtml(error.message)}</p>`; return; }
+
+    let ownedNames = new Set();
+    const { data: sessionData } = await sb.auth.getSession();
+    if (sessionData.session){
+      const { data: owned } = await sb.from("player_inventory").select("item_name").eq("item_type", "General Weapon");
+      ownedNames = new Set((owned || []).map(o => o.item_name));
+    }
+
+    listEl.innerHTML = (items || []).map((w) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${shopEscapeHtml(w.name)}</h4>
+        <p class="mono" style="font-size:0.75rem; color:var(--dim); margin-bottom:0.4rem;">${(w.classes || []).join(", ")} · Attack ${shopEscapeHtml(w.attack_stat)}</p>
+        <p style="font-size:0.85rem; margin-bottom:0.6rem;">${shopEscapeHtml(w.description || "")}</p>
+        ${ownedNames.has(w.name)
+          ? `<span class="mono" style="color:var(--gold-bright);">Owned</span>`
+          : `<button class="btn" onclick="buyGeneralWeapon('${w.name}')">Buy — ${w.gold_cost} Gold</button>`
+        }
+      </div>
+    `).join("");
+  }
+
+  async function buyGeneralWeapon(name){
+    const { error } = await sb.rpc("buy_general_weapon", { p_name: name });
+    if (error){ alert("Couldn't buy: " + error.message); return; }
+    loadGeneralWeapons();
+  }
+
+  async function loadGeneralArmor(){
+    const listEl = document.getElementById("general-armor-list");
+    if (!listEl) return;
+
+    const { data: items, error } = await sb.from("general_armor").select("*").order("id");
+    if (error){ listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${shopEscapeHtml(error.message)}</p>`; return; }
+
+    let ownedNames = new Set();
+    const { data: sessionData } = await sb.auth.getSession();
+    if (sessionData.session){
+      const { data: owned } = await sb.from("player_inventory").select("item_name").eq("item_type", "General Armor");
+      ownedNames = new Set((owned || []).map(o => o.item_name));
+    }
+
+    listEl.innerHTML = (items || []).map((a) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${shopEscapeHtml(a.name)}</h4>
+        <p class="mono" style="font-size:0.75rem; color:var(--dim); margin-bottom:0.6rem;">${(a.classes || []).join(", ")} · Defense ${shopEscapeHtml(a.defense_stat)}</p>
+        ${ownedNames.has(a.name)
+          ? `<span class="mono" style="color:var(--gold-bright);">Owned</span>`
+          : `<button class="btn" onclick="buyGeneralArmor('${a.name.replace(/'/g, "\\'")}')">Buy — ${a.gold_cost} Gold</button>`
+        }
+      </div>
+    `).join("");
+  }
+
+  async function buyGeneralArmor(name){
+    const { error } = await sb.rpc("buy_general_armor", { p_name: name });
+    if (error){ alert("Couldn't buy: " + error.message); return; }
+    loadGeneralArmor();
+  }
+
+  async function loadKingdomArmor(kingdom){
+    const listEl = document.getElementById("kingdom-armor-list");
+    const { data: items, error } = await sb.from("armor_items").select("*").eq("kingdom", kingdom).order("id");
+    if (error){ listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${shopEscapeHtml(error.message)}</p>`; return; }
+
+    listEl.innerHTML = (items || []).map((a) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">${shopEscapeHtml(a.name)} <span class="tag">${shopEscapeHtml(a.tier)}</span></h4>
+        <p class="mono" style="font-size:0.72rem; color:var(--dim); margin-bottom:0.4rem;">${shopEscapeHtml(a.city || "")} — ${shopEscapeHtml(a.shop_name || "")} · ${(a.classes || []).join(", ")}</p>
+        ${a.description ? `<p style="font-size:0.85rem; margin-bottom:0.4rem;">${shopEscapeHtml(a.description)}</p>` : ""}
+        <p class="mono" style="font-size:0.78rem; color:var(--steel-bright); margin-bottom:0.4rem;">${shopEscapeHtml(a.defense_stat)}${a.secondary_stat ? " · " + shopEscapeHtml(a.secondary_stat) : ""}</p>
+        ${a.passive_name ? `<p style="font-size:0.82rem; margin-bottom:0.3rem;"><strong>${shopEscapeHtml(a.passive_name)}:</strong> ${shopEscapeHtml(a.passive_effect)}</p>` : ""}
+        <p class="mono" style="font-size:0.75rem; color:var(--dim);">${a.buy_price} Gold — buy from the World Map while in ${shopEscapeHtml(kingdom)}.</p>
+      </div>
+    `).join("") || `<p class="placeholder-note">No armor found for this kingdom.</p>`;
+  }
+
+  async function loadKingdomConsumables(kingdom){
+    const listEl = document.getElementById("kingdom-consumable-list");
+    const { data: items, error } = await sb.from("consumable_items").select("*").eq("kingdom", kingdom).order("id");
+    if (error){ listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${shopEscapeHtml(error.message)}</p>`; return; }
+
+    listEl.innerHTML = (items || []).map((c) => `
+      <div class="frame">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">${shopEscapeHtml(c.name)} <span class="tag">${shopEscapeHtml(c.tier)}</span></h4>
+        <p class="mono" style="font-size:0.72rem; color:var(--dim); margin-bottom:0.4rem;">${shopEscapeHtml(c.city || "")} — ${shopEscapeHtml(c.shop_name || "")}</p>
+        <p style="font-size:0.85rem; margin-bottom:0.4rem;">${shopEscapeHtml(c.effect_description)}</p>
+        <p class="mono" style="font-size:0.75rem; color:var(--dim);">${c.buy_price} Gold — buy from the World Map while in ${shopEscapeHtml(kingdom)}.</p>
+      </div>
+    `).join("") || `<p class="placeholder-note">No consumables found for this kingdom.</p>`;
+  }
+
+  loadArmoryKingdom("Valoria");
+  loadKingdomArmor("Valoria");
+  loadKingdomConsumables("Valoria");
+  loadGeneralWeapons();
+  loadGeneralArmor();
+</script>
+</body>
+</html>

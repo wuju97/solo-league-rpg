@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — World Map</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+<style>
+  .fighters{ display:flex; align-items:center; justify-content:center; gap:1.5rem; width:100%; margin-bottom:1.25rem; }
+  .fighter-card{ flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); padding:1rem; text-align:center; }
+  .fighter-card.me{ border-color:var(--gold); }
+  .fighter-card .name{ font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1rem; margin-bottom:0.6rem; }
+  .hp-bar-track{ width:100%; height:16px; background:var(--void); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:0.35rem; }
+  .hp-bar-fill{ height:100%; background:linear-gradient(90deg,#3a7d3a,#5cb85c); transition:width 0.4s ease, background 0.4s ease; }
+  .hp-bar-fill.low{ background:linear-gradient(90deg,var(--crimson),var(--crimson-bright)); }
+  .hp-text{ font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:var(--dim); }
+  .vs-glyph{ font-family:'Cinzel',serif; color:var(--gold); font-size:1.2rem; }
+  .action-row{ display:flex; gap:0.6rem; justify-content:center; margin-bottom:1rem; }
+  .action-btn{
+    font-family:'Cinzel',serif; font-weight:700; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase;
+    padding:0.7rem 1.3rem; border-radius:var(--radius); border:1px solid var(--gold); color:var(--gold-bright);
+    background:rgba(201,162,75,0.08); cursor:pointer;
+  }
+  .action-btn:hover{ background:rgba(201,162,75,0.18); }
+  .action-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  /* ---- Fireflies drifting over the World Map ---- */
+  .firefly{
+    position: absolute;
+    width: 1.5px;
+    height: 1.5px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 2px 1px var(--gold-bright), 0 0 5px 1.5px rgba(230,200,120,0.5);
+    pointer-events: none;
+    animation: fireflyDrift linear infinite, fireflyPulse ease-in-out infinite;
+  }
+  @keyframes fireflyDrift{
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(18vw, -12vh); }
+    50%  { transform: translate(-8vw, 14vh); }
+    75%  { transform: translate(14vw, 20vh); }
+    100% { transform: translate(0, 0); }
+  }
+  @keyframes fireflyPulse{
+    0%, 100% { opacity: 0; }
+    50%      { opacity: 0.9; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .firefly{ display: none; }
+    .rare-encounter-shake{ animation: none !important; }
+  }
+
+  @keyframes rareEncounterShake{
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-6px, 3px); }
+    20% { transform: translate(6px, -3px); }
+    30% { transform: translate(-5px, -2px); }
+    40% { transform: translate(5px, 3px); }
+    50% { transform: translate(-4px, 2px); }
+    60% { transform: translate(4px, -2px); }
+    70% { transform: translate(-3px, 1px); }
+    80% { transform: translate(3px, -1px); }
+    90% { transform: translate(-2px, 1px); }
+  }
+  .rare-encounter-shake{
+    animation: rareEncounterShake 0.5s ease-in-out;
+  }
+
+  /* ---- Whisper markers: small exclamation-mark icons per kingdom ---- */
+  .whisper-marker{
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--panel-raised);
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 15;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    transform: translate(-50%, -50%);
+  }
+  .whisper-marker:hover{ background: var(--gold); color: var(--void); }
+
+  /* ---- Kingdom tab bar: Map + 9 kingdoms, all on one line ---- */
+  .vertical-tabs{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .v-tab-btn{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.71rem;
+    padding: 0.5rem 0.7rem;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 1;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .v-tab-btn:hover{ border-color: var(--border-bright); color: var(--parchment); }
+  .v-tab-btn.active{ border-color: var(--gold); color: var(--gold-bright); background: var(--panel-raised); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>World Map</h2>
+      </div>
+    </div>
+
+    <div id="world-state-banner" class="frame" style="margin-bottom:0.75rem; padding:0.6rem 1rem; text-align:center;">
+      <span style="font-style:italic; font-size:0.85rem; color:var(--dim);" id="world-state-text">Loading the state of Solonia...</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+      <div class="vertical-tabs" id="worldmap-vertical-tabs">
+        <button class="v-tab-btn active" data-vtab="map">Map</button>
+        <button class="v-tab-btn" data-vtab="cinematic">Cinematic Map</button>
+        <button class="v-tab-btn" data-vtab="Valoria">Valoria</button>
+        <button class="v-tab-btn" data-vtab="Frosthaven">Frosthaven</button>
+        <button class="v-tab-btn" data-vtab="Eldergrove">Eldergrove</button>
+        <button class="v-tab-btn" data-vtab="Pyrath">Pyrath</button>
+        <button class="v-tab-btn" data-vtab="Aetheria">Aetheria</button>
+        <button class="v-tab-btn" data-vtab="Azure Reach">Azure Reach</button>
+        <button class="v-tab-btn" data-vtab="Khar'Duun">Khar'Duun</button>
+        <button class="v-tab-btn" data-vtab="Blackfen">Blackfen</button>
+        <button class="v-tab-btn" data-vtab="Mordrath">Mordrath</button>
+      </div>
+
+      <div style="width:100%;">
+        <div class="vtab-panel active" data-vpanel="map">
+
+    <div style="position:relative; width:100%;">
+      <div id="map-reveal-overlay" style="position:absolute; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:rgba(10,8,7,0.82); border-radius:var(--radius);">
+        <button class="btn" style="font-size:1rem; padding:0.9rem 1.6rem;" onclick="document.getElementById('map-reveal-overlay').remove(); if (typeof SoloLeagueAudio !== 'undefined') SoloLeagueAudio.init();">I solemnly swear I'm up to something</button>
+      </div>
+      <div style="position:relative; width:100%; overflow:hidden;">
+        <img id="world-map-image" src="images/world-map.jpeg" alt="Solo League RPG World Map" style="width:100%; height:auto; display:block; border-radius: var(--radius); border: 1px solid var(--border-bright); filter: brightness(1.15) saturate(1.0) contrast(1.0);">
+
+        <!-- Fireflies -- small glowing dots that drift and fade in/out
+             across the whole map. Generated by JS (see script below)
+             with randomized positions/timing so they don't look
+             mechanically synced. Purely decorative, no interaction,
+             no AI involved, never touches the map image itself.
+             Contained in this inner overflow:hidden wrapper only, so
+             they can't drift past the map edges without also
+             clipping the tooltip below (which needs to be free to
+             overflow near the map's top/bottom edges). -->
+        <div id="map-fireflies" aria-hidden="true"></div>
+      </div>
+
+      <div id="map-location-overlay" style="position:absolute; left:0.6rem; bottom:0.6rem; background:rgba(15,12,10,0.75); border:1px solid var(--border-bright); border-radius:var(--radius); padding:0.3rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--gold-bright); z-index:10;">(loading)</div>
+
+      <!-- Region name labels, positioned over the map. Adjust the
+           top/left percentages below if a label needs nudging.
+           Each one is clickable — opens the Explore tab below.
+           Hovering shows a short kingdom description tooltip. -->
+      <div class="map-label" style="top:12%; left:19%;" data-kingdom="Frosthaven" onclick="kingdomLabelClicked(event,'Frosthaven')" onmouseenter="showKingdomTooltip(event,'Frosthaven')" onmouseleave="hideKingdomTooltip()">Frosthaven</div>
+      <div class="map-label" style="top:12%; left:56%;" data-kingdom="Mordrath" onclick="kingdomLabelClicked(event,'Mordrath')" onmouseenter="showKingdomTooltip(event,'Mordrath')" onmouseleave="hideKingdomTooltip()">Mordrath</div>
+      <div class="map-label" style="top:12%; left:85%;" data-kingdom="Aetheria" onclick="kingdomLabelClicked(event,'Aetheria')" onmouseenter="showKingdomTooltip(event,'Aetheria')" onmouseleave="hideKingdomTooltip()">Aetheria</div>
+      <div class="map-label" style="top:40%; left:18%;" data-kingdom="Eldergrove" onclick="kingdomLabelClicked(event,'Eldergrove')" onmouseenter="showKingdomTooltip(event,'Eldergrove')" onmouseleave="hideKingdomTooltip()">Eldergrove</div>
+      <div class="map-label" style="top:44%; left:49%;" data-kingdom="Valoria" onclick="kingdomLabelClicked(event,'Valoria')" onmouseenter="showKingdomTooltip(event,'Valoria')" onmouseleave="hideKingdomTooltip()">Valoria</div>
+      <div class="map-label" style="top:40%; left:82%;" data-kingdom="Pyrath" onclick="kingdomLabelClicked(event,'Pyrath')" onmouseenter="showKingdomTooltip(event,'Pyrath')" onmouseleave="hideKingdomTooltip()">Pyrath</div>
+      <div class="map-label" style="top:68%; left:15%;" data-kingdom="Khar'Duun" onclick="kingdomLabelClicked(event,'Khar\'Duun')" onmouseenter="showKingdomTooltip(event,'Khar\'Duun')" onmouseleave="hideKingdomTooltip()">Khar'Duun</div>
+      <div class="map-label" style="top:88%; left:40%;" data-kingdom="Blackfen" onclick="kingdomLabelClicked(event,'Blackfen')" onmouseenter="showKingdomTooltip(event,'Blackfen')" onmouseleave="hideKingdomTooltip()">Blackfen</div>
+      <div class="map-label" style="top:76%; left:82%;" data-kingdom="Azure Reach" onclick="kingdomLabelClicked(event,'Azure Reach')" onmouseenter="showKingdomTooltip(event,'Azure Reach')" onmouseleave="hideKingdomTooltip()">Azure Reach</div>
+
+      <!-- Kingdom hover/lock tooltip -->
+      <div id="kingdom-tooltip" style="display:none; position:absolute; z-index:20; max-width:240px; background:var(--void); border:1px solid var(--gold); border-radius:var(--radius); padding:0.6rem 0.75rem; font-size:0.8rem; color:var(--parchment); pointer-events:none;"></div>
+
+      <!-- Player location dots (self + others), populated by JS -->
+      <div id="player-dots-layer"></div>
+
+      <!-- Shop markers (Kingdom Armory locations), populated by JS -->
+      <div id="shop-markers-layer"></div>
+
+      <!-- Shop hover/click popup -->
+      <div id="shop-popup" style="display:none; position:absolute; z-index:25; width:260px; max-height:320px; overflow-y:auto; background:var(--void); border:1px solid var(--gold); border-radius:var(--radius); padding:0.75rem; font-size:0.8rem; color:var(--parchment);"></div>
+    </div>
+
+        </div>
+
+        <div class="vtab-panel" data-vpanel="cinematic" style="display:none;">
+          <section class="frame">
+            <div id="cinematic-map-display" style="display:none;"></div>
+            <p class="placeholder-note" id="cinematic-map-empty">Nothing here yet.</p>
+          </section>
+        </div>
+
+        <div class="vtab-panel" data-vpanel="Valoria" style="display:none;">
+          <section class="frame">
+            <h3>Valoria</h3>
+            <div id="kingdom-media-display-valoria" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-valoria">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Frosthaven" style="display:none;">
+          <section class="frame">
+            <h3>Frosthaven</h3>
+            <div id="kingdom-media-display-frosthaven" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-frosthaven">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Eldergrove" style="display:none;">
+          <section class="frame">
+            <h3>Eldergrove</h3>
+            <div id="kingdom-media-display-eldergrove" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-eldergrove">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Pyrath" style="display:none;">
+          <section class="frame">
+            <h3>Pyrath</h3>
+            <div id="kingdom-media-display-pyrath" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-pyrath">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Aetheria" style="display:none;">
+          <section class="frame">
+            <h3>Aetheria</h3>
+            <div id="kingdom-media-display-aetheria" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-aetheria">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Azure Reach" style="display:none;">
+          <section class="frame">
+            <h3>Azure Reach</h3>
+            <div id="kingdom-media-display-azure-reach" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-azure-reach">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Khar'Duun" style="display:none;">
+          <section class="frame">
+            <h3>Khar'Duun</h3>
+            <div id="kingdom-media-display-kharduun" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-kharduun">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Blackfen" style="display:none;">
+          <section class="frame">
+            <h3>Blackfen</h3>
+            <div id="kingdom-media-display-blackfen" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-blackfen">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+        <div class="vtab-panel" data-vpanel="Mordrath" style="display:none;">
+          <section class="frame">
+            <h3>Mordrath</h3>
+            <div id="kingdom-media-display-mordrath" style="display:none;"></div>
+            <p class="placeholder-note" id="kingdom-media-empty-mordrath">No media uploaded yet for this kingdom.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Everything below here is separate from the map itself -->
+    <div class="channel-layout" style="margin-top:0.5rem;">
+      <div class="page-tabs" id="world-tabs">
+        <button class="page-tab-btn active" data-tab="general">Explore</button>
+      </div>
+
+      <div class="channel-content">
+        <div class="page-tab-panel active" data-panel="general">
+          <div class="channel-layout">
+            <div class="page-tabs" id="general-subtabs">
+              <button class="page-tab-btn active" data-subtab="world">World</button>
+              <button class="page-tab-btn" data-subtab="hierarchy">Hit List</button>
+              <button class="page-tab-btn" data-subtab="npcs">Quests</button>
+              <button class="page-tab-btn" data-subtab="party">Party</button>
+              <button class="page-tab-btn" data-subtab="black-market">Black Market</button>
+            </div>
+            <div class="channel-content">
+              <div class="page-tab-subpanel active" data-subpanel="world">
+                <section class="frame">
+                  <h3>World</h3>
+                  <p class="placeholder-note" id="current-location-note" style="margin-bottom:1rem;"></p>
+
+                  <div id="conquest-rank-display" class="frame" style="margin-bottom:1rem; padding:0.6rem 1rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                    <span style="font-family:'Cinzel',serif; color:var(--gold-bright);">Rank: <span id="conquest-rank-value" class="mono">--</span></span>
+                    <span class="placeholder-note" style="font-size:0.78rem;">Rank rises automatically from XP earned in any fight — creatures, hierarchy NPCs, PvP, or League KDA sync.</span>
+                  </div>
+
+                  <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Travel</h4>
+                  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                    <select id="travel-kingdom-select" onchange="loadCitiesForKingdom(this.value)" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+                      <option value="">Choose a kingdom...</option>
+                    </select>
+                    <select id="travel-city-select" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+                      <option value="">Choose a city...</option>
+                    </select>
+                    <button class="btn" onclick="travelNow()">Travel</button>
+                  </div>
+                  <p class="placeholder-note" id="travel-message" style="margin-top:0.6rem;"></p>
+                </section>
+              </div>
+              <div class="page-tab-subpanel" data-subpanel="hierarchy">
+                <section class="frame">
+                  <h3>Hit List</h3>
+                  <p class="placeholder-note" style="margin-bottom:0.75rem;">Each kingdom's political ladder — Warriors, Captains, Nobles, Generals, King, and its Champion. Defeat everyone in a tier to unlock the next. Defeated NPCs are on a 2-day cooldown before you can fight them again (3 days for a Champion) — and defeating a Champion resets this whole ladder, requiring a full re-climb from Warriors to challenge them a second time.</p>
+                  <div id="hierarchy-ladder-list"><p class="placeholder-note">Loading...</p></div>
+                </section>
+              </div>
+              <div class="page-tab-subpanel" data-subpanel="npcs">
+                <section class="frame">
+                  <h3>Quests</h3>
+                  <p class="placeholder-note">Travel the roads and you might cross paths with someone. Not every traveler has something to share — but some do.</p>
+                  <div style="display:flex; gap:0.5rem; margin:1rem 0;">
+                    <button class="btn" id="travel-btn" onclick="travelAndEncounter()">Travel the Roads</button>
+                    <button class="btn" id="roam-btn" onclick="roamAndEncounter()">Roam</button>
+                  </div>
+                  <p class="placeholder-note" style="font-size:0.78rem; margin-bottom:0.5rem;">Roaming encounter odds — 40% chance of any encounter per roam, then weighted by rank: <span class="mono">E 30% · D 22% · C 18%</span> (common, 70% combined) · <span class="mono">B 15% · A 10%</span> (less frequent, 25% combined) · <span class="mono">S 4% · SS 1%</span> (rare, 5% combined).</p>
+                  <div id="encounter-area"></div>
+
+                  <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Targeted Hunts</h4>
+                  <p class="placeholder-note" style="margin-bottom:0.75rem;">Once you've learned some (but not all) of a creature's abilities, track it directly instead of hoping to roam into it again.</p>
+                  <div id="trackable-creatures-list"><p class="placeholder-note">Loading...</p></div>
+                </section>
+              </div>
+              <div class="page-tab-subpanel" data-subpanel="party">
+                <section class="frame"><h3>Party</h3><p class="placeholder-note">Nothing here yet.</p></section>
+              </div>
+              <div class="page-tab-subpanel" data-subpanel="black-market">
+                <section class="frame"><h3>Black Market</h3><p class="placeholder-note">Nothing here yet — a shady, unpredictable stock that shifts location within the world.</p></section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<!-- Pre-Battle Screen: shared by Roam encounters, Targeted Hunts,
+     and Hierarchy challenges. Shows the enemy, lets the player pick
+     3 cards and check their equipped gear before a fight begins. -->
+<div id="prebattle-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,8,6,0.92); z-index:200; overflow-y:auto; padding:2rem 1rem;">
+  <div class="frame" style="max-width:700px; margin:0 auto;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+      <h3 id="prebattle-enemy-name" style="margin:0;">Enemy</h3>
+      <span id="prebattle-enemy-rank" class="tag"></span>
+    </div>
+    <p class="placeholder-note" id="prebattle-flavor" style="margin-bottom:1rem;"></p>
+    <video id="prebattle-video" style="display:none; width:100%; max-height:280px; border-radius:var(--radius); margin-bottom:1rem;" controls autoplay muted loop></video>
+
+    <div class="page-tabs" id="prebattle-subtabs" style="flex-direction:row; width:auto; margin-bottom:1rem;">
+      <button class="page-tab-btn active" data-prebattlesub="cards">Cards <span id="prebattle-cards-count" class="mono">(0/3)</span></button>
+      <button class="page-tab-btn" data-prebattlesub="equip">Equip</button>
+    </div>
+
+    <div class="prebattle-subpanel active" data-prebattlesubpanel="cards">
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Your Player Card <span class="tag">Always Included</span></h4>
+      <div id="prebattle-player-card"><p class="placeholder-note">Loading...</p></div>
+
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.25rem 0 0.5rem;">Creature Cards</h4>
+      <p class="placeholder-note" style="margin-bottom:0.75rem;">Optional — pick up to 3 from your collection. Your Player Card alone is enough to fight.</p>
+      <div id="prebattle-card-list" class="ability-card-grid"><p class="placeholder-note">Loading...</p></div>
+    </div>
+
+    <div class="prebattle-subpanel" data-prebattlesubpanel="equip" style="display:none;">
+      <p class="placeholder-note" style="margin-bottom:0.75rem;">Your currently equipped gear (change this anytime in Player → Inventory → Equip) plus any consumable to bring into this fight.</p>
+      <div id="prebattle-equip-summary"><p class="placeholder-note">Loading...</p></div>
+    </div>
+
+    <p class="mono" id="prebattle-win-chance" style="margin-top:1rem; font-size:0.85rem; color:var(--gold-bright); display:none;"></p>
+
+    <div style="display:flex; gap:0.75rem; margin-top:0.75rem;">
+      <button class="btn" id="prebattle-start-btn" onclick="startBattleFromPreBattle()" disabled>Start Battle</button>
+      <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="closePreBattleScreen()">Retreat</button>
+    </div>
+    <p class="placeholder-note" id="prebattle-status" style="margin-top:0.75rem;"></p>
+  </div>
+</div>
+
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  // ---- top-level tab switching (Explore / General) ----
+  document.querySelectorAll("#world-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#world-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  // ---- General sub-tabs (World / Hit List / Quests / Party) ----
+  document.querySelectorAll("#general-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", (evt) => {
+      evt.preventDefault();
+      document.querySelectorAll("#general-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.subtab;
+      document.querySelectorAll(".page-tab-subpanel[data-subpanel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-subpanel[data-subpanel="${target}"]`).classList.add("active");
+
+      // Explicitly keep the view where the tab bar itself is,
+      // rather than letting the browser jump anywhere on its own
+      // when a tall panel (like Hit List) suddenly becomes visible.
+      btn.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  });
+
+  // Called when a kingdom name on the map is clicked
+  let kingdomPositionCache = null;
+
+  async function getKingdomPositions(){
+    if (kingdomPositionCache) return kingdomPositionCache;
+    const { data } = await sb.from("kingdom_map_position").select("*");
+    kingdomPositionCache = {};
+    (data || []).forEach(k => { kingdomPositionCache[k.kingdom] = k; });
+    return kingdomPositionCache;
+  }
+
+  let lockedKingdom = null;
+
+  let currentlyHoveredKingdom = null;
+
+  // Flips the tooltip to open leftward (anchored by its right edge)
+  // when the marker is in the right portion of the map, so it never
+  // gets pushed past the map's right boundary and squeezed into a
+  // narrow vertical strip by the browser.
+  function positionTooltip(tooltip, xPct, yPct){
+    tooltip.style.top = (yPct + 6) + "%";
+    if (xPct > 55) {
+      tooltip.style.left = "auto";
+      tooltip.style.right = (100 - xPct) + "%";
+    } else {
+      tooltip.style.right = "auto";
+      tooltip.style.left = xPct + "%";
+    }
+  }
+
+  async function showKingdomTooltip(evt, kingdomName){
+    if (lockedKingdom) return; // a box is locked open — don't override it with hover previews
+    currentlyHoveredKingdom = kingdomName;
+    const positions = await getKingdomPositions();
+    const info = positions[kingdomName];
+    const tooltip = document.getElementById("kingdom-tooltip");
+    if (!info) return;
+    tooltip.style.pointerEvents = "none";
+
+    tooltip.innerHTML = mapEscapeHtml(info.short_description);
+    positionTooltip(tooltip, info.x_pct, info.y_pct);
+    tooltip.style.display = "block";
+  }
+
+  function hideKingdomTooltip(){
+    currentlyHoveredKingdom = null;
+    if (lockedKingdom) return; // keep the locked box visible
+    document.getElementById("kingdom-tooltip").style.display = "none";
+  }
+
+  async function kingdomLabelClicked(evt, kingdomName){
+    evt.stopPropagation();
+
+    if (evt.currentTarget.classList.contains("locked")){
+      const tooltip = document.getElementById("kingdom-tooltip");
+      tooltip.innerHTML = `<div>This kingdom is sealed behind mist — reach a higher rank to reconnect with it.</div>`;
+      positionTooltip(tooltip, parseFloat(evt.currentTarget.style.left), parseFloat(evt.currentTarget.style.top));
+      tooltip.style.display = "block";
+      setTimeout(() => { if (tooltip.innerHTML.includes("sealed")) tooltip.style.display = "none"; }, 2500);
+      return;
+    }
+
+    if (lockedKingdom === kingdomName){
+      // clicking the same kingdom again closes it
+      lockedKingdom = null;
+      document.getElementById("kingdom-tooltip").style.display = "none";
+      return;
+    }
+
+    lockedKingdom = kingdomName;
+    const positions = await getKingdomPositions();
+    const info = positions[kingdomName];
+    const tooltip = document.getElementById("kingdom-tooltip");
+    if (!info) return;
+
+    tooltip.style.pointerEvents = "auto";
+    tooltip.innerHTML = `
+      <div>${mapEscapeHtml(info.short_description)}</div>
+      <button class="btn" style="margin-top:0.6rem; width:100%; padding:0.4rem 0.6rem; font-size:0.72rem;" onclick="challengePrimordialFromMap('${kingdomName.replace(/'/g, "\\'")}')">🌌 Challenge Primordial</button>
+    `;
+    positionTooltip(tooltip, info.x_pct, info.y_pct);
+    tooltip.style.display = "block";
+  }
+
+  // Clicking anywhere else on the page closes a locked box
+  document.addEventListener("click", (evt) => {
+    if (!lockedKingdom) return;
+    const tooltip = document.getElementById("kingdom-tooltip");
+    if (tooltip.contains(evt.target)) return; // clicks inside the box (e.g. the button) don't close it
+    lockedKingdom = null;
+    tooltip.style.display = "none";
+  });
+
+  async function challengePrimordialFromMap(kingdomName){
+    const { data: elig, error: eligError } = await sb.rpc("check_pvg_eligibility");
+    if (eligError){
+      alert("Couldn't check eligibility: " + eligError.message);
+      return;
+    }
+    if (!elig.eligible){
+      alert(
+        `Not eligible yet. Requires all three:\n\n` +
+        `${elig.all_kingdoms_conquered ? "✅" : "⬜"} All 9 kingdoms conquered (${elig.kingdoms_owned}/9)\n` +
+        `${elig.all_champions_defeated ? "✅" : "⬜"} All 9 Champions/Monarchs defeated (${elig.champions_defeated}/9)\n` +
+        `${elig.all_ss_creatures_defeated ? "✅" : "⬜"} All SS-rank creatures defeated (${elig.ss_defeated}/${elig.ss_total})`
+      );
+      return;
+    }
+
+    const confirmed = confirm(`Challenge ${kingdomName}'s Primordial?\n\nThis takes you to Duel Chat to build your loadout. Continue?`);
+    if (!confirmed) return;
+
+    const { data: result, error } = await sb.rpc("challenge_primordial", { p_kingdom: kingdomName });
+    if (error || !result.success){
+      alert("Couldn't start the challenge: " + (error?.message || result.reason));
+      return;
+    }
+
+    window.location.href = "pvp-chat.html";
+  }
+
+  function mapEscapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadPlayerDots(){
+    const layer = document.getElementById("player-dots-layer");
+    const positions = await getKingdomPositions();
+    const { data: userData } = await sb.auth.getUser();
+    const myId = userData?.user?.id;
+
+    const { data: chars } = await sb.from("characters").select("user_id, name, current_kingdom, current_city");
+    if (!chars) return;
+
+    // group by kingdom so we can offset multiple players in the same kingdom
+    const byKingdom = {};
+    chars.forEach(c => {
+      if (!c.current_kingdom) return;
+      byKingdom[c.current_kingdom] = byKingdom[c.current_kingdom] || [];
+      byKingdom[c.current_kingdom].push(c);
+    });
+
+    let html = "";
+    Object.entries(byKingdom).forEach(([kingdom, players]) => {
+      const pos = positions[kingdom];
+      if (!pos) return;
+      players.forEach((p, i) => {
+        const isMe = p.user_id === myId;
+        const offsetX = (i % 3) * 2.2 - 2.2;
+        const offsetY = Math.floor(i / 3) * 2.2;
+        html += `
+          <div title="${mapEscapeHtml(p.name)} — ${mapEscapeHtml(p.current_city || kingdom)}"
+            style="position:absolute; left:${pos.x_pct + offsetX}%; top:${pos.y_pct + 8 + offsetY}%; width:10px; height:10px; border-radius:50%;
+            background:${isMe ? "var(--gold-bright)" : "var(--steel-bright)"}; border:1px solid var(--void); z-index:15; cursor:default;"></div>
+        `;
+      });
+    });
+    layer.innerHTML = html;
+  }
+
+  const KINGDOM_SHOP_ICONS = {
+    'Valoria': '🛡️', 'Frosthaven': '❄️', 'Eldergrove': '🌿', 'Pyrath': '🔥',
+    'Aetheria': '🔮', 'Azure Reach': '⚓', "Khar'Duun": '☀️', 'Blackfen': '☠️', 'Mordrath': '🌑'
+  };
+
+  const CATEGORY_ICONS = { weapon: '⚔', armor: '🛡', consumable: '🧪' };
+  const CATEGORY_LABELS = { weapon: 'Weapon Armory', armor: 'Armor Shop', consumable: 'Alchemist Shop' };
+  // small offsets so the 3 markers for one kingdom don't overlap
+  // Each kingdom gets its own scattered arrangement — deliberately
+  // different shapes, not the same triangle repeated everywhere.
+  const KINGDOM_CATEGORY_OFFSETS = {
+    'Frosthaven':  { weapon: { x: -5, y: 4  }, armor: { x: 3,  y: 7  }, consumable: { x: -1, y: 10 } },
+    'Mordrath':    { weapon: { x: -6, y: 3  }, armor: { x: 4,  y: 8  }, consumable: { x: -2, y: -4 } },
+    'Aetheria':    { weapon: { x: -8, y: 2  }, armor: { x: -2, y: 4  }, consumable: { x: 2,  y: 5  } },
+    'Eldergrove':  { weapon: { x: 4,  y: -6 }, armor: { x: -6, y: 2  }, consumable: { x: 2,  y: 8  } },
+    'Valoria':     { weapon: { x: -8, y: -3 }, armor: { x: 6,  y: 3  }, consumable: { x: -2, y: 9  } },
+    'Pyrath':      { weapon: { x: -9, y: -2 }, armor: { x: 3,  y: 7  }, consumable: { x: -4, y: 3  } },
+    "Khar'Duun":   { weapon: { x: 5,  y: -5 }, armor: { x: -3, y: 6  }, consumable: { x: 7,  y: 2  } },
+    'Blackfen':    { weapon: { x: -7, y: -4 }, armor: { x: -9, y: -3 }, consumable: { x: -2, y: 4  } },
+    'Azure Reach': { weapon: { x: -6, y: -5 }, armor: { x: 3,  y: 4  }, consumable: { x: -3, y: 8  } },
+  };
+
+  async function loadShopMarkers(){
+    const layer = document.getElementById("shop-markers-layer");
+    const positions = await getKingdomPositions();
+    const kingdoms = Object.keys(positions);
+    const categories = ["weapon", "armor", "consumable"];
+    const tableFor = { weapon: "weapon_items", armor: "armor_items", consumable: "consumable_items" };
+
+    // Fire all count queries at once instead of awaiting them one by
+    // one — 27 sequential round-trips was the cause of the load delay.
+    const jobs = [];
+    for (const kingdom of kingdoms){
+      for (const category of categories){
+        jobs.push(
+          sb.from(tableFor[category]).select("*", { count: "exact", head: true }).eq("kingdom", kingdom)
+            .then(({ count }) => ({ kingdom, category, count }))
+        );
+      }
+    }
+    const results = await Promise.all(jobs);
+
+    let html = "";
+    for (const { kingdom, category, count } of results){
+      if (!count) continue;
+      const pos = positions[kingdom];
+      const kingdomEscaped = kingdom.replace(/'/g, "\\'");
+      const off = (KINGDOM_CATEGORY_OFFSETS[kingdom] && KINGDOM_CATEGORY_OFFSETS[kingdom][category]) || { x: 0, y: 5 };
+      const shopName = `${kingdom} ${CATEGORY_LABELS[category]}`;
+      html += `
+        <div onclick="openShopPopup(event, '${kingdomEscaped}', '${category}')"
+          title="${mapEscapeHtml(shopName)} — ${count} items"
+          style="position:absolute; left:${pos.x_pct + off.x}%; top:${pos.y_pct + off.y}%; width:15px; height:15px; border-radius:3px;
+          background:var(--panel-raised); border:1px solid var(--gold); z-index:16; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:9px;">${CATEGORY_ICONS[category]}</div>
+      `;
+    }
+    layer.innerHTML = layer.innerHTML + html;
+  }
+
+  async function openShopPopup(evt, kingdom, category){
+    if (evt) evt.stopPropagation();
+
+    // Show the popup immediately with a loading state -- the
+    // network calls below still take the same time, but the click
+    // now feels instant instead of doing nothing for a moment.
+    const popup = document.getElementById("shop-popup");
+    popup.innerHTML = `<p class="placeholder-note">Loading...</p>`;
+    popup.style.display = "block";
+
+    const positions = await getKingdomPositions();
+    const pos = positions[kingdom];
+    popup.style.left = Math.min(65, pos.x_pct) + "%";
+    popup.style.top = pos.y_pct + "%";
+
+    const table = category === "weapon" ? "weapon_items" : category === "armor" ? "armor_items" : "consumable_items";
+    const priceField = category === "weapon" || category === "armor" ? "buy_price" : "buy_price";
+
+    // These two don't depend on each other -- run them together
+    // instead of one after the other.
+    const [{ data: items }, { data: userData }] = await Promise.all([
+      sb.from(table).select("*").eq("kingdom", kingdom).order("city"),
+      sb.auth.getUser(),
+    ]);
+
+    let myGold = 0;
+    let inThisKingdom = false;
+    if (userData.user){
+      const { data: character } = await sb.from("characters").select("gold, current_kingdom").eq("user_id", userData.user.id).maybeSingle();
+      myGold = character?.gold ?? 0;
+      inThisKingdom = character?.current_kingdom === kingdom;
+    }
+
+    function itemRow(item){
+      return `
+        <div style="border-top:1px solid var(--border); padding:0.4rem 0;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>${mapEscapeHtml(item.name)}</span>
+            <span class="mono" style="color:var(--gold-bright);">${item[priceField]}g</span>
+          </div>
+          ${inThisKingdom
+            ? `<button class="btn" style="margin-top:0.3rem; padding:0.25rem 0.5rem; font-size:0.68rem;" onclick="buyFromMapPopup('${category}','${item.slug}')">Buy</button>`
+            : `<span class="placeholder-note" style="font-size:0.68rem;">Travel here to buy</span>`
+          }
+        </div>
+      `;
+    }
+
+    popup.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <strong style="font-family:'Cinzel',serif; color:var(--gold-bright);">${CATEGORY_ICONS[category]} ${mapEscapeHtml(kingdom)} ${mapEscapeHtml(CATEGORY_LABELS[category])}</strong>
+        <span onclick="closeShopPopup()" style="cursor:pointer; color:var(--dim);">✕</span>
+      </div>
+      <p class="mono" style="color:var(--dim); font-size:0.72rem; margin-bottom:0.5rem;">Your Gold: ${myGold}${!inThisKingdom ? " · Not currently here" : ""}</p>
+      ${(items || []).map(itemRow).join("") || `<p class="placeholder-note">No items found.</p>`}
+    `;
+  }
+
+  function closeShopPopup(){
+    document.getElementById("shop-popup").style.display = "none";
+  }
+
+  // Clicking anywhere else on the page closes the shop popup too
+  document.addEventListener("click", (evt) => {
+    const popup = document.getElementById("shop-popup");
+    if (popup.style.display === "none") return;
+    if (popup.contains(evt.target)) return; // clicks inside the popup (e.g. Buy buttons) don't close it
+    popup.style.display = "none";
+  });
+
+  async function buyFromMapPopup(category, slug){
+    const rpcName = category === "weapon" ? "buy_weapon_item" : category === "armor" ? "buy_armor_item" : "buy_consumable_item";
+    const { error } = await sb.rpc(rpcName, { p_slug: slug });
+    if (error){ alert("Couldn't buy: " + error.message); return; }
+    alert("Purchased! Check Character → Equipment or Inventory.");
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---- Travel & Encounter: a simple escort quest, with a hidden
+  // chance of picking up gossip along the way ----
+  async function travelAndEncounter(){
+    const btn = document.getElementById("travel-btn");
+    const areaEl = document.getElementById("encounter-area");
+    btn.disabled = true;
+    areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Walking the roads...</p>`;
+
+    const { data: hasEncounter, error } = await sb.rpc("roll_for_encounter");
+    btn.disabled = false;
+
+    if (error){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Something went wrong: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!hasEncounter){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">The road is quiet. Nobody needs your help this time.</p>`;
+      return;
+    }
+
+    areaEl.innerHTML = `
+      <div class="frame" style="margin-top:1rem;">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">A Traveler's Request</h4>
+        <p>A nervous-looking traveler approaches. "I've got a riddle or two to pass the time on this road — solve one and there's coin in it for you."</p>
+        <div style="display:flex; gap:0.75rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn" onclick="startMysteryGame('pokedle')">PKMN</button>
+          <button class="btn" onclick="startMysteryGame('narutodle')">NRTO</button>
+          <button class="btn" onclick="startMysteryGame('loldle')">LOL</button>
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="declineOffer()">Decline</button>
+        </div>
+        <div id="mystery-game-area" style="margin-top:1rem;"></div>
+      </div>
+    `;
+  }
+
+  // A synthesized low rumbling "roar" cue for rare (S/SS) encounters
+  // -- no audio file needed, matches the site's existing pattern of
+  // synthesizing simple SFX tones via Web Audio API.
+  function playRareEncounterRoar(){
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(90, now);
+      osc.frequency.exponentialRampToValueAtTime(45, now + 0.6);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.25, now + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.9);
+    } catch (e) { /* audio not available, silently skip */ }
+  }
+
+  function triggerRareEncounterEffect(){
+    playRareEncounterRoar();
+    const areaEl = document.getElementById("encounter-area");
+    areaEl.classList.add("rare-encounter-shake");
+    setTimeout(() => areaEl.classList.remove("rare-encounter-shake"), 600);
+  }
+
+  async function loadHierarchyLadder(){
+    const listEl = document.getElementById("hierarchy-ladder-list");
+    if (!listEl) return;
+
+    const { data: ladder, error } = await sb.rpc("get_hierarchy_ladder");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!ladder || ladder.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Create your character first.</p>`;
+      return;
+    }
+
+    const tierOrder = ["Warriors", "Captains", "Nobles", "Generals", "King", "Champion"];
+    const byTier = {};
+    ladder.forEach(npc => {
+      if (!byTier[npc.tier]) byTier[npc.tier] = [];
+      byTier[npc.tier].push(npc);
+    });
+
+    listEl.innerHTML = tierOrder.filter(t => byTier[t]).map(tier => {
+      const npcs = byTier[tier];
+      const tierUnlocked = npcs[0].unlocked;
+      const rows = npcs.map(npc => `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; padding:0.6rem 0.8rem; ${npc.unlocked ? "" : "opacity:0.5;"}">
+          <div>
+            <strong style="color:var(--parchment);">${npc.unlocked ? "" : "🔒 "}${escapeHtml(npc.champion_title || npc.npc_name)}</strong>
+            ${npc.archetype ? `<span class="tag" style="margin-left:0.4rem;">${escapeHtml(npc.archetype)}</span>` : ""}
+            ${npc.defeated ? `<span class="tag" style="margin-left:0.4rem; border-color:var(--gold); color:var(--gold-bright);">Defeated ×${npc.times_defeated}</span>` : ""}
+            ${npc.on_cooldown ? `<span class="tag" style="margin-left:0.4rem; border-color:var(--crimson); color:var(--crimson-bright);">Cooldown until ${new Date(npc.cooldown_ends_at).toLocaleDateString()}</span>` : ""}
+          </div>
+          <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.78rem;" ${(npc.unlocked && !npc.on_cooldown) ? "" : "disabled"} onclick="challengeHierarchyNpc(${npc.npc_id}, '${(npc.champion_title || npc.npc_name).replace(/'/g, "\\'")}', '${npc.tier}')">Challenge</button>
+        </div>
+      `).join("");
+      return `
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">${escapeHtml(tier)} ${tierUnlocked ? "" : '<span class="tag">Locked</span>'}</h4>
+        ${rows}
+      `;
+    }).join("");
+  }
+
+  async function challengeHierarchyNpc(npcId, npcName, tier){
+    // Warriors=D, Captains=C, Nobles=B, Generals=A, King=S, Champion=SS
+    // -- matches the tier-to-rank mapping used when hierarchy_npcs
+    // was originally populated. rank_stat_baselines only has E-SS
+    // rows, so passing the raw tier name here (e.g. "Warriors")
+    // caused start_solo_battle to fail with unknown_enemy_rank.
+    const tierToRank = { Warriors: "D", Captains: "C", Nobles: "B", Generals: "A", King: "S", Champion: "SS" };
+    const { data: npcRow } = await sb.from("hierarchy_npcs").select("video_url").eq("id", npcId).maybeSingle();
+    openPreBattleScreen({
+      name: npcName,
+      rank: tierToRank[tier] || "D",
+      displayTier: tier,
+      flavor: "They square up, unwilling to yield their place in the hierarchy.",
+      source: "hierarchy",
+      npcId: npcId,
+      isChampion: tier === "Champion",
+      videoUrl: npcRow?.video_url || null,
+    });
+  }
+
+  async function loadTrackableCreatures(){
+    const listEl = document.getElementById("trackable-creatures-list");
+    if (!listEl) return;
+
+    const { data: creatures, error } = await sb.rpc("get_trackable_creatures");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!creatures || creatures.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Nothing partially learned yet — defeat a creature once via Roam to start tracking it.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = creatures.map(c => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; padding:0.6rem 0.8rem;">
+        <div>
+          <strong style="color:var(--parchment);">${escapeHtml(c.creature_name)}</strong>
+          <span class="tag" style="margin-left:0.4rem;">${escapeHtml(c.rank)}-Rank</span>
+          <span class="mono" style="margin-left:0.5rem; font-size:0.78rem; color:var(--dim);">${c.abilities_known}/${c.abilities_total} abilities known</span>
+        </div>
+        <button class="btn" style="padding:0.35rem 0.7rem; font-size:0.78rem;" onclick="huntTrackedCreature('${c.creature_name.replace(/'/g, "\\'")}')">Hunt</button>
+      </div>
+    `).join("");
+  }
+
+  async function huntTrackedCreature(creatureName){
+    const areaEl = document.getElementById("encounter-area");
+    areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Tracking ${escapeHtml(creatureName)}...</p>`;
+
+    const { data: result, error } = await sb.rpc("track_creature", { p_creature_name: creatureName });
+    if (error){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Something went wrong: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!result.found){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Couldn't find that creature here.</p>`;
+      return;
+    }
+
+    const abilitiesHtml = (result.abilities || []).map(a =>
+      `<li><span>${escapeHtml(a.ability_name)}</span><span class="mono" style="text-align:right;">${escapeHtml(a.effect_text)}${a.energy_cost ? " — " + a.energy_cost + " energy" : ""}</span></li>`
+    ).join("");
+
+    const isRare = result.rank === "S" || result.rank === "SS";
+    const huntFlavor = "You followed its trail — this time you found it, not the other way around.";
+    lastHuntEncounter = { name: result.creature_name, rank: result.rank, flavor: huntFlavor, source: "creature", kingdom: result.kingdom };
+
+    areaEl.innerHTML = `
+      <div class="frame" style="margin-top:1rem; ${isRare ? "border-color:var(--gold); box-shadow:0 0 20px rgba(230,200,120,0.35);" : ""}">
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">${escapeHtml(huntFlavor)}</p>
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">${escapeHtml(result.creature_name)} <span class="tag">${escapeHtml(result.rank)}-Rank</span> <span class="tag">Tracked</span></h4>
+        <ul class="clean">${abilitiesHtml}</ul>
+        <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+          <button class="btn" onclick="openPreBattleScreen(lastHuntEncounter)">Fight</button>
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="declineOffer()">Avoid</button>
+        </div>
+      </div>
+    `;
+    if (isRare) triggerRareEncounterEffect();
+  }
+
+  async function roamAndEncounter(){
+    const btn = document.getElementById("roam-btn");
+    const areaEl = document.getElementById("encounter-area");
+    btn.disabled = true;
+    areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Roaming off the beaten path...</p>`;
+
+    const { data: result, error } = await sb.rpc("roll_roaming_encounter");
+    btn.disabled = false;
+
+    if (error){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Something went wrong: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!result.encounter){
+      const msg = result.reason === "no_character" ? "Create your character first."
+        : result.reason === "no_creatures_in_kingdom" ? "Nothing roams this kingdom yet."
+        : "The wilds are quiet. Nothing crosses your path this time.";
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">${escapeHtml(msg)}</p>`;
+      return;
+    }
+
+    const abilitiesHtml = (result.abilities || []).map(a =>
+      `<li><span>${escapeHtml(a.ability_name)}</span><span class="mono" style="text-align:right;">${escapeHtml(a.effect_text)}${a.energy_cost ? " — " + a.energy_cost + " energy" : ""}</span></li>`
+    ).join("");
+
+    const isRare = result.rank === "S" || result.rank === "SS";
+    const flavorLine = isRare
+      ? "The ground trembles. Something far stronger than anything nearby has noticed you."
+      : "Something moves in the underbrush. It's found you first.";
+
+    // Stored in a variable rather than embedded inline in the
+    // onclick attribute -- flavor text can contain apostrophes
+    // (like "It's"), which would prematurely close a single-quoted
+    // onclick attribute and silently break the button.
+    lastRoamEncounter = { name: result.creature_name, rank: result.rank, flavor: flavorLine, source: "creature", kingdom: result.kingdom };
+
+    areaEl.innerHTML = `
+      <div class="frame" style="margin-top:1rem; ${isRare ? "border-color:var(--gold); box-shadow:0 0 20px rgba(230,200,120,0.35);" : ""}">
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">${escapeHtml(flavorLine)}</p>
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">${escapeHtml(result.creature_name)} <span class="tag">${escapeHtml(result.rank)}-Rank</span></h4>
+        <ul class="clean">${abilitiesHtml}</ul>
+        <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+          <button class="btn" onclick="openPreBattleScreen(lastRoamEncounter)">Fight</button>
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="declineOffer()">Avoid</button>
+        </div>
+      </div>
+    `;
+
+    if (isRare) triggerRareEncounterEffect();
+  }
+
+  let currentMysterySessionId = null;
+  let currentMysteryGameType = null;
+
+  const mysteryGameLabels = {
+    pokedle: { title: "PKMN — Guess the Pokemon", placeholder: "Pokemon name...", attrs: ["type1", "type2", "generation", "category"] },
+    narutodle: { title: "NRTO — Guess the Character", placeholder: "Character name...", attrs: ["village", "clan", "rank", "chakra_nature"] },
+    loldle: { title: "LOL — Guess the Champion", placeholder: "Champion name...", attrs: ["region", "role", "damage_type", "release_year"] },
+  };
+
+  const mysteryAttrLabels = {
+    type1: "Type 1", type2: "Type 2", generation: "Gen", category: "Category",
+    village: "Village", clan: "Clan", rank: "Rank", chakra_nature: "Nature",
+    region: "Region", role: "Role", damage_type: "Damage", release_year: "Year",
+  };
+
+  let mysteryValidNames = [];
+
+  async function startMysteryGame(gameType){
+    const { data: result, error } = await sb.rpc("start_mystery_game", { p_game_type: gameType });
+    if (error || !result.success){
+      alert("Couldn't start: " + (error?.message || result.reason));
+      return;
+    }
+    currentMysterySessionId = result.session_id;
+    currentMysteryGameType = gameType;
+    mysteryGuessHistory = [];
+
+    const { data: names, error: namesError } = await sb.rpc("get_mystery_game_valid_names", { p_game_type: gameType });
+    if (namesError){
+      console.error("get_mystery_game_valid_names failed:", namesError);
+    }
+    mysteryValidNames = (names || []).map(n => n.name);
+
+    renderMysteryGame([], namesError);
+  }
+
+  function renderMysteryGame(guessHistory, namesError){
+    const info = mysteryGameLabels[currentMysteryGameType];
+    const areaEl = document.getElementById("mystery-game-area");
+    const statusStyle = (status) => {
+      if (status === "match") return { bg: "rgba(120,200,120,0.25)", color: "#8fdb8f", suffix: "" };
+      if (status === "higher") return { bg: "rgba(200,160,80,0.2)", color: "#e0b88a", suffix: " ↑" };
+      if (status === "lower") return { bg: "rgba(200,160,80,0.2)", color: "#e0b88a", suffix: " ↓" };
+      return { bg: "rgba(200,80,80,0.2)", color: "#e08a8a", suffix: "" };
+    };
+    const rows = guessHistory.map(g => `
+      <div class="frame" style="padding:0.5rem 0.75rem; margin-bottom:0.4rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <strong style="min-width:100px;">${escapeHtml(g.name)}</strong>
+        ${info.attrs.map(a => {
+          const s = statusStyle(g.attributes[a].status);
+          return `<span class="mono" style="padding:0.15rem 0.5rem; border-radius:4px; font-size:0.75rem; background:${s.bg}; color:${s.color};">${escapeHtml(mysteryAttrLabels[a] || a)}: ${escapeHtml(g.attributes[a].value || 'None')}${s.suffix}</span>`;
+        }).join("")}
+      </div>
+    `).join("");
+
+    const listStatusText = namesError
+      ? `Couldn't load the name list: ${escapeHtml(namesError.message || namesError.reason || "unknown error")}`
+      : `Start typing to see valid names — ${mysteryValidNames.length} recognized — only names from this list will be recognized. Matches any part of the name, not just the start.`;
+
+    areaEl.innerHTML = `
+      <div class="frame" style="padding:0.75rem;">
+        <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">${info.title}</h5>
+        <p class="placeholder-note" style="margin-bottom:0.5rem; ${namesError ? 'color:var(--crimson-bright);' : ''}">${listStatusText}</p>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+          <input type="text" id="mystery-guess-input" autocomplete="off" placeholder="${info.placeholder}" oninput="onMysteryGuessInput(this.value)" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
+          <button class="btn" onclick="submitMysteryGuess()">Guess</button>
+        </div>
+        <div id="mystery-suggestions" style="display:none; margin-bottom:0.75rem; border:1px solid var(--gold); border-radius:var(--radius); max-height:220px; overflow-y:auto;"></div>
+        ${rows}
+        <p class="placeholder-note" id="mystery-game-status"></p>
+      </div>
+    `;
+  }
+
+  let mysteryGuessHistory = [];
+
+  function onMysteryGuessInput(value){
+    const suggestionsEl = document.getElementById("mystery-suggestions");
+    console.log("onMysteryGuessInput fired:", value, "| pool size:", mysteryValidNames.length, "| suggestionsEl found:", !!suggestionsEl);
+    const query = value.trim().toLowerCase();
+    if (!query){
+      suggestionsEl.style.display = "none";
+      suggestionsEl.innerHTML = "";
+      return;
+    }
+    const matches = mysteryValidNames.filter(n => n.toLowerCase().includes(query)).slice(0, 8);
+    if (matches.length === 0){
+      suggestionsEl.style.display = "none";
+      suggestionsEl.innerHTML = "";
+      return;
+    }
+    suggestionsEl.innerHTML = matches.map(n => `
+      <div class="mystery-suggestion-item" data-name="${escapeHtml(n)}" style="padding:0.5rem 0.7rem; cursor:pointer; border-bottom:1px solid var(--border);">${escapeHtml(n)}</div>
+    `).join("");
+    suggestionsEl.style.display = "block";
+  }
+
+  // Event delegation instead of inline onclick -- safer against
+  // names with apostrophes (Kai'Sa, Bel'Veth, etc.) breaking an
+  // inline JS string.
+  document.addEventListener("click", (evt) => {
+    const item = evt.target.closest(".mystery-suggestion-item");
+    if (item){
+      const input = document.getElementById("mystery-guess-input");
+      input.value = item.dataset.name;
+      document.getElementById("mystery-suggestions").style.display = "none";
+    }
+  });
+
+  async function submitMysteryGuess(){
+    const input = document.getElementById("mystery-guess-input");
+    const name = input.value.trim();
+    if (!name) return;
+    const statusEl = document.getElementById("mystery-game-status");
+    statusEl.textContent = "Checking...";
+
+    const { data: result, error } = await sb.rpc("guess_mystery_game", { p_session_id: currentMysterySessionId, p_guess_name: name });
+    if (error || !result.success){
+      statusEl.textContent = "Couldn't check that guess: " + (error?.message || result.reason);
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    mysteryGuessHistory.push({ name, attributes: result.attributes });
+    renderMysteryGame(mysteryGuessHistory);
+
+    if (result.correct){
+      const { data: reward } = await sb.rpc("claim_mystery_game_reward", { p_session_id: currentMysterySessionId });
+      const areaEl = document.getElementById("mystery-game-area");
+      const visualProfileHtml = result.attributes?.visual_profile ? `<p class="placeholder-note" style="margin-top:0.4rem; font-style:italic;">${escapeHtml(result.attributes.visual_profile)}</p>` : "";
+      areaEl.insertAdjacentHTML("beforeend", `<p style="color:var(--gold-bright); margin-top:0.5rem;">Correct — it was ${escapeHtml(result.target_name)}! +${reward?.gold_earned || 0} Gold.</p>${visualProfileHtml}`);
+      mysteryGuessHistory = [];
+      currentMysterySessionId = null;
+    }
+  }
+
+  async function acceptEscortQuest(){
+    const areaEl = document.getElementById("encounter-area");
+    areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Escorting the traveler...</p>`;
+
+    const { data, error } = await sb.rpc("resolve_escort_quest");
+
+    if (error){
+      areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">Something went wrong: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    const gotSecret = result && result.secret_title;
+    const gotArtifact = result && result.artifact_name;
+    const gotAmbush = result && result.ambush_creature_id;
+
+    if (gotAmbush){
+      areaEl.innerHTML = `
+        <div class="frame" style="margin-top:1rem; border-color:var(--crimson);">
+          <p style="color:var(--crimson-bright);">A ${escapeHtml(result.ambush_creature_name)} leaps out from the roadside!</p>
+          <p class="placeholder-note" style="margin-top:0.5rem;">Taking you to Duel Chat to fight it...</p>
+        </div>
+      `;
+      setTimeout(() => {
+        window.location.href = "pvp-chat.html?start_creature=" + result.ambush_creature_id;
+      }, 1200);
+      return;
+    }
+
+    let html = `
+      <div class="frame" style="margin-top:1rem;">
+        <p>You escort the traveler safely to their destination. They thank you and go on their way.</p>
+        <p class="mono" style="margin-top:0.4rem; font-size:0.85rem; color:var(--gold-bright);">+${result?.gold_earned || 0} Gold</p>
+    `;
+
+    if (gotSecret){
+      html += `
+        <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+          <p class="placeholder-note">Along the way, they mentioned something...</p>
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.5rem 0;">${escapeHtml(result.secret_title)}</h4>
+          <p>${escapeHtml(result.secret_content)}</p>
+          <p class="placeholder-note" style="margin-top:0.5rem;">Added to your Discoveries in World Lore.</p>
+        </div>
+      `;
+    }
+
+    if (gotArtifact){
+      html += `
+        <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+          <p class="placeholder-note">Something catches your eye along the roadside...</p>
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.5rem 0;">${escapeHtml(result.artifact_name)} <span class="tag">${escapeHtml(result.artifact_rarity)}</span></h4>
+          <p>${escapeHtml(result.artifact_description)}</p>
+          <p class="placeholder-note" style="margin-top:0.5rem;">Added to your collection in World Lore → Legendary Artifacts.</p>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    areaEl.innerHTML = html;
+  }
+
+  function declineOffer(){
+    const areaEl = document.getElementById("encounter-area");
+    areaEl.innerHTML = `<p class="placeholder-note" style="margin-top:1rem;">You decide not to get involved. The traveler continues alone.</p>`;
+  }
+
+  async function loadCitiesForKingdom(kingdom){
+    const citySelect = document.getElementById("travel-city-select");
+    citySelect.innerHTML = `<option value="">Choose a city...</option>`;
+    if (!kingdom) return;
+    const { data: cities, error } = await sb.from("kingdom_cities").select("city").eq("kingdom", kingdom).order("city");
+    if (error){
+      const msgEl = document.getElementById("travel-message");
+      if (msgEl){
+        msgEl.textContent = "Couldn't load cities: " + error.message;
+        msgEl.style.color = "var(--crimson-bright)";
+      }
+      return;
+    }
+    (cities || []).forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.city;
+      opt.textContent = c.city;
+      citySelect.appendChild(opt);
+    });
+  }
+
+  async function travelNow(){
+    const kingdom = document.getElementById("travel-kingdom-select").value;
+    const city = document.getElementById("travel-city-select").value;
+    const msgEl = document.getElementById("travel-message");
+
+    if (!kingdom || !city){
+      msgEl.textContent = "Choose both a kingdom and a city.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { error } = await sb.rpc("travel_to", { p_kingdom: kingdom, p_city: city });
+    if (error){
+      msgEl.textContent = "Couldn't travel: " + error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = `Traveled to ${city}, ${kingdom}.`;
+    msgEl.style.color = "var(--steel-bright)";
+    loadCurrentLocation();
+    loadPlayerDots();
+  }
+
+  async function loadCurrentLocation(){
+    const noteEl = document.getElementById("current-location-note");
+    const bannerEl = document.getElementById("map-location-overlay");
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+    const { data: character } = await sb.from("characters").select("current_kingdom, current_city").eq("user_id", userData.user.id).maybeSingle();
+    if (!character){
+      if (noteEl) noteEl.textContent = "Create your character first to start traveling.";
+      if (bannerEl) bannerEl.textContent = "no character yet";
+      return;
+    }
+    const text = character.current_city
+      ? `${character.current_city}, ${character.current_kingdom}`
+      : `${character.current_kingdom || "Valoria"} (no specific city set yet)`;
+    if (noteEl) noteEl.textContent = `You are currently in ${text}.`;
+    if (bannerEl) bannerEl.textContent = text;
+
+    // Keep the banner live — updates the instant current_kingdom/city
+    // changes, without needing a page refresh.
+    if (!window._locationChannelSubscribed){
+      window._locationChannelSubscribed = true;
+      sb.channel("map-location-" + userData.user.id)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "characters", filter: `user_id=eq.${userData.user.id}` },
+          () => loadCurrentLocation()
+        )
+        .subscribe();
+    }
+  }
+
+  // Storage keys reject spaces and most special characters -- strip
+  // them before using a filename in a storage path.
+  function sanitizeFileName(name){
+    return name
+      .normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  // Converts a kingdom name to a safe id string matching the HTML
+  // element ids generated for its upload/display elements.
+  function kingdomSafeId(kingdom){
+    return kingdom.replace(/'/g, "").replace(/ /g, "-").toLowerCase();
+  }
+
+  // Themed icon per kingdom, used to cover an AI-generation
+  // watermark that shows up in the bottom-right corner of every
+  // uploaded video.
+  const KINGDOM_ICONS = {
+    "Valoria": "&#128737;",      // shield
+    "Frosthaven": "&#10052;",    // snowflake
+    "Eldergrove": "&#127795;",   // deciduous tree
+    "Pyrath": "&#128293;",       // fire
+    "Aetheria": "&#10024;",      // sparkles
+    "Azure Reach": "&#9875;",    // anchor
+    "Khar'Duun": "&#9728;",      // sun
+    "Blackfen": "&#9760;",       // skull and crossbones
+    "Mordrath": "&#127769;",     // crescent moon
+    "Cinematic Map": "&#127760;", // globe
+  };
+
+  const KINGDOM_COLORS = {
+    "Valoria": "#C9A24B",
+    "Frosthaven": "#7EC8E3",
+    "Eldergrove": "#6B9E4F",
+    "Pyrath": "#E0622E",
+    "Aetheria": "#8B7FD6",
+    "Azure Reach": "#3E9E9E",
+    "Khar'Duun": "#D6A34F",
+    "Blackfen": "#8B5FA3",
+    "Mordrath": "#6B4A8B",
+    "Cinematic Map": "#C9A24B",
+  };
+
+  function watermarkOverlayHtml(kingdom){
+    const icon = KINGDOM_ICONS[kingdom] || "&#10024;";
+    const color = KINGDOM_COLORS[kingdom] || "#C9A24B";
+    return `<div style="position:absolute; right:0.2rem; bottom:0.2rem; width:26%; max-width:150px; height:11%; min-height:40px; max-height:56px; background:var(--void); border:1.5px solid ${color}; border-radius:24px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:${color}; box-shadow:0 2px 8px rgba(0,0,0,0.7); pointer-events:none;">${icon}</div>`;
+  }
+
+  function renderKingdomMedia(kingdom, url){
+    const safeId = kingdomSafeId(kingdom);
+    const displayEl = document.getElementById("kingdom-media-display-" + safeId);
+    const emptyEl = document.getElementById("kingdom-media-empty-" + safeId);
+    if (!displayEl) return;
+
+    if (!url){
+      displayEl.style.display = "none";
+      displayEl.innerHTML = "";
+      if (emptyEl) emptyEl.style.display = "block";
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = "none";
+    const isGif = /\.gif($|\?)/i.test(url);
+    const mediaTag = isGif
+      ? `<img src="${url}" style="width:100%; display:block; border-radius:var(--radius); border:1px solid var(--border-bright);">`
+      : `<video src="${url}" autoplay muted playsinline style="width:100%; display:block; border-radius:var(--radius); border:1px solid var(--border-bright); cursor:pointer;" title="Click to replay" onclick="this.currentTime=0; this.play();"></video>`;
+    displayEl.innerHTML = `<div style="position:relative;">${mediaTag}${watermarkOverlayHtml(kingdom)}</div>`;
+    displayEl.style.display = "block";
+  }
+
+  async function loadAllKingdomMedia(){
+    const { data } = await sb.from("kingdom_media").select("*");
+    (data || []).forEach(row => {
+      if (row.kingdom === "Cinematic Map") {
+        renderCinematicMap(row.media_url);
+      } else {
+        renderKingdomMedia(row.kingdom, row.media_url);
+      }
+    });
+  }
+
+  function renderCinematicMap(url){
+    const displayEl = document.getElementById("cinematic-map-display");
+    const emptyEl = document.getElementById("cinematic-map-empty");
+    if (!displayEl) return;
+    if (!url){
+      displayEl.style.display = "none";
+      if (emptyEl) emptyEl.style.display = "block";
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = "none";
+    const isGif = /\.gif($|\?)/i.test(url);
+    const mediaTag = isGif
+      ? `<img src="${url}" style="width:100%; display:block; border-radius:var(--radius); border:1px solid var(--border-bright);">`
+      : `<video src="${url}" autoplay muted playsinline style="width:100%; display:block; border-radius:var(--radius); border:1px solid var(--border-bright); cursor:pointer;" title="Click to replay" onclick="this.currentTime=0; this.play();"></video>`;
+    displayEl.innerHTML = `<div style="position:relative;">${mediaTag}${watermarkOverlayHtml("Cinematic Map")}</div>`;
+    displayEl.style.display = "block";
+  }
+
+  async function uploadKingdomMedia(kingdom, fileInputId, safeId){
+    const fileInput = document.getElementById(fileInputId);
+    const statusEl = document.getElementById("kingdom-media-status-" + safeId);
+    const file = fileInput.files[0];
+    if (!file){
+      statusEl.textContent = "Choose a file first.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploading...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: userData } = await sb.auth.getUser();
+    const safeName = sanitizeFileName(file.name);
+    const path = `${safeId}/${Date.now()}-${safeName}`;
+
+    const { error: uploadError } = await sb.storage.from("kingdom-media").upload(path, file, { upsert: true });
+    if (uploadError){
+      statusEl.textContent = "Upload failed: " + uploadError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: publicUrlData } = sb.storage.from("kingdom-media").getPublicUrl(path);
+    const publicUrl = publicUrlData.publicUrl;
+
+    const { error: saveError } = await sb.from("kingdom_media").upsert({
+      kingdom, media_url: publicUrl, uploaded_by: userData.user.id, uploaded_at: new Date().toISOString(),
+    }, { onConflict: "kingdom" });
+
+    if (saveError){
+      statusEl.textContent = "Uploaded, but couldn't save: " + saveError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploaded — now live for everyone.";
+    statusEl.style.color = "var(--steel-bright)";
+    fileInput.value = "";
+    renderKingdomMedia(kingdom, publicUrl);
+  }
+
+  async function removeKingdomMedia(kingdom, safeId){
+    const statusEl = document.getElementById("kingdom-media-status-" + safeId);
+    const { error } = await sb.from("kingdom_media").update({ media_url: null }).eq("kingdom", kingdom);
+    statusEl.textContent = error ? "Couldn't remove: " + error.message : "Removed for everyone.";
+    statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+    renderKingdomMedia(kingdom, null);
+  }
+
+
+  async function callGemini(prompt, purpose, groundWith){
+    try {
+      const { data: result, error } = await sb.functions.invoke("call-gemini", {
+        body: { purpose: purpose || "general", prompt, groundWith: groundWith || "" },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (result?.error) return { ok: false, error: result.error };
+      return { ok: true, text: result.text, warning: result.warning };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  const GOSSIP_KINGDOMS = ["Valoria", "Frosthaven", "Eldergrove", "Pyrath", "Aetheria", "Azure Reach", "Khar'Duun", "Blackfen", "Mordrath"];
+
+  // Offset per kingdom for the whisper (!) marker -- distinct from
+  // the 3 shop marker offsets already used for that kingdom, and
+  // from (0,0) where the kingdom's name label sits, so it never
+  // overlaps either.
+  // Positioned consistently "right after the name" for every
+  // kingdom -- same vertical height as the label text, with a
+  // horizontal offset scaled to that name's length. Labels are
+  // center-aligned on their x_pct point (translate(-50%,-50%)), so
+  // the right edge of the text sits at roughly half the name's
+  // width to the right of center -- offset needs to clear that
+  // half-width, not the full name length.
+  // Measures the ACTUAL rendered width of a kingdom's label in the
+  // browser (accounts for the font's real variable letter widths,
+  // letter-spacing, and the responsive clamp() font-size) instead
+  // of guessing from character count -- which was producing
+  // inconsistent, wrong gaps since a flat per-character estimate
+  // can't reflect how this specific font actually renders.
+  function whisperOffsetFor(kingdom){
+    const mapContainer = document.querySelector('[style*="position:relative; width:100%; overflow:hidden;"]');
+    const label = [...document.querySelectorAll(".map-label")].find(l => l.dataset.kingdom === kingdom);
+    const baseGapPct = 2; // widened from 1.2 -- the tighter gap was part of what let long names overlap the marker
+
+    const mapImg = document.getElementById("world-map-image");
+    // If the map image hasn't actually finished loading yet, the
+    // container's real rendered width isn't reliable -- fall back
+    // to a generous flat offset rather than measuring against a
+    // width that's still about to change.
+    if (mapImg && !mapImg.complete){
+      return { x: 9, y: 0 };
+    }
+
+    if (!label || !mapContainer){
+      return { x: 9, y: 0 }; // fallback if measurement isn't possible yet
+    }
+
+    const mapWidthPx = mapContainer.getBoundingClientRect().width;
+    const labelWidthPx = label.getBoundingClientRect().width;
+    if (!mapWidthPx || !labelWidthPx){
+      return { x: 9, y: 0 };
+    }
+
+    const halfLabelWidthPct = (labelWidthPx / 2 / mapWidthPx) * 100;
+    return { x: halfLabelWidthPct + baseGapPct, y: 0 };
+  }
+
+  // Cached once per calendar day, shared for everyone -- same
+  // reasoning as Kingdom News: whoever visits first that day
+  // triggers generation (using their own key), everyone else just
+  // reads what's already there. One whisper per kingdom, refreshed
+  // together as a batch when the day's cache is stale, rather than
+  // one random kingdom per visit.
+  async function loadGossip(){
+    const { data: existing } = await sb.from("kingdom_gossip").select("*");
+    const existingMap = {};
+    (existing || []).forEach(g => { existingMap[g.kingdom] = g; });
+
+    renderGossipMarkers(existingMap);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const staleKingdoms = GOSSIP_KINGDOMS.filter(k => {
+      const g = existingMap[k];
+      if (!g) return true;
+      return new Date(g.generated_at).toISOString().slice(0, 10) !== today;
+    });
+    if (staleKingdoms.length === 0) return;
+
+    // Refresh just ONE stale kingdom per page load, not all nine at
+    // once -- still converges to fully fresh within a few visits
+    // across the group, without ever spending more than one Gemini
+    // call per person per day on this feature.
+    const kingdom = staleKingdoms[Math.floor(Math.random() * staleKingdoms.length)];
+    const prompt = `Write one short (1 sentence) piece of in-world gossip or rumor set in the kingdom of ${kingdom}, in the dark-fantasy world of Solonia. Tone: witty, funny, a little sarcastic -- like a gossiping NPC who can't help being a smartass -- while still actually being informative about something going on in the kingdom, not just a joke with no content. Also invent a plausible NPC name who might be saying it (a commoner, guard, merchant, etc. -- not a named ruler). Respond in EXACTLY this format, nothing else: SPEAKER: <name> | WHISPER: <the gossip line>`;
+    const result = await callGemini(prompt, "npc_gossip", "information");
+    if (!result.ok) return; // silent -- flavor only, page works fine without it
+
+    const match = result.text.match(/SPEAKER:\s*(.+?)\s*\|\s*WHISPER:\s*(.+)/is);
+    const speaker = match ? match[1].trim() : "A passerby";
+    const content = match ? match[2].trim() : result.text.trim();
+
+    await sb.from("kingdom_gossip").upsert({ kingdom, speaker, content, generated_at: new Date().toISOString() }, { onConflict: "kingdom" });
+
+    existingMap[kingdom] = { kingdom, speaker, content, generated_at: new Date().toISOString() };
+    renderGossipMarkers(existingMap);
+  }
+
+  function renderGossipMarkers(gossipMap){
+    let layer = document.getElementById("gossip-markers-layer");
+    if (!layer){
+      layer = document.createElement("div");
+      layer.id = "gossip-markers-layer";
+      document.getElementById("shop-markers-layer").insertAdjacentElement("afterend", layer);
+    }
+
+    getKingdomPositions().then(positions => {
+      layer.innerHTML = GOSSIP_KINGDOMS.map(kingdom => {
+        const gossip = gossipMap[kingdom];
+        if (!gossip) return "";
+        const pos = positions[kingdom];
+        const off = whisperOffsetFor(kingdom);
+        const kingdomEscaped = kingdom.replace(/'/g, "\\'");
+        const clampedX = Math.min(97, Math.max(3, pos.x_pct + off.x));
+        const clampedY = Math.min(97, Math.max(3, pos.y_pct + off.y));
+        return `
+          <div class="whisper-marker" style="left:${clampedX}%; top:${clampedY}%;"
+            onmouseenter="showWhisperTooltip(event, '${kingdomEscaped}')" onmouseleave="hideWhisperTooltip()">!</div>
+        `;
+      }).join("");
+    });
+  }
+
+  function showWhisperTooltip(evt, kingdom){
+    sb.from("kingdom_gossip").select("*").eq("kingdom", kingdom).maybeSingle().then(({ data }) => {
+      if (!data) return;
+      const tooltip = document.getElementById("kingdom-tooltip");
+      if (lockedKingdom) return;
+      tooltip.innerHTML = `<span class="tag" style="margin-bottom:0.3rem; display:inline-block;">${escapeHtml(data.speaker || "A passerby")}, ${escapeHtml(kingdom)}</span><p style="font-style:italic; font-size:0.85rem;">"${escapeHtml(data.content)}"</p>`;
+      const xPct = parseFloat(evt.target.style.left);
+      const yPct = parseFloat(evt.target.style.top) + 3;
+      positionTooltip(tooltip, xPct, yPct);
+      tooltip.style.display = "block";
+    });
+  }
+
+  function hideWhisperTooltip(){
+    if (lockedKingdom) return;
+    document.getElementById("kingdom-tooltip").style.display = "none";
+  }
+
+  // Cached once per calendar day, shared for everyone -- same
+  // reasoning as Kingdom News on the Dashboard: whoever visits
+  // first that day generates it, everyone else just reads it.
+  async function loadWorldState(){
+    const textEl = document.getElementById("world-state-text");
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { data: existing } = await sb.from("daily_world_state").select("content").eq("state_date", today).maybeSingle();
+    if (existing){
+      textEl.textContent = existing.content;
+      return;
+    }
+
+    const prompt = `Write one short (1-2 sentence), ambient line describing the overall mood or state of the world of Solonia today -- weather, a general feeling, something subtle happening across the realm. Not tied to any single kingdom. Tone: witty, funny, a little sarcastic, like a dry narrator who's seen it all -- while still actually conveying real information about the world's current state, not just a throwaway joke. No preamble, just the line itself.`;
+    const result = await callGemini(prompt, "world_state", "information");
+    if (!result.ok){
+      textEl.textContent = "The realm of Solonia continues on, as it always has.";
+      return;
+    }
+
+    textEl.textContent = result.text;
+    await sb.from("daily_world_state").insert({ state_date: today, content: result.text });
+  }
+
+  // Vertical tab bar (Map + 9 kingdoms)
+  document.querySelectorAll("#worldmap-vertical-tabs .v-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#worldmap-vertical-tabs .v-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.vtab;
+      document.querySelectorAll(".vtab-panel").forEach((p) => {
+        const match = p.dataset.vpanel === target;
+        p.classList.toggle("active", match);
+        p.style.display = match ? "block" : "none";
+        if (match) {
+          const video = p.querySelector("video");
+          if (video) { video.currentTime = 0; video.play().catch(() => {}); }
+        }
+      });
+    });
+  });
+
+
+  async function loadKingdomUnlocks(){
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: unlocks, error } = await sb.rpc("get_my_kingdom_unlocks");
+    if (error || !unlocks) return;
+
+    const unlockedSet = new Set(unlocks.filter(u => u.unlocked).map(u => u.kingdom));
+
+    document.querySelectorAll(".map-label").forEach(label => {
+      const kingdom = label.dataset.kingdom;
+      if (!kingdom) return; // safety: skip anything without the attribute rather than guess
+      label.classList.toggle("locked", !unlockedSet.has(kingdom));
+    });
+
+    const select = document.getElementById("travel-kingdom-select");
+    if (select){
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Choose a kingdom...</option>' +
+        [...unlockedSet].map(k => `<option>${escapeHtml(k)}</option>`).join("");
+      if ([...unlockedSet].includes(currentValue)) select.value = currentValue;
+    }
+  }
+
+  async function loadConquestRank(){
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+    const { data: character } = await sb.from("characters").select("conquest_rank").eq("user_id", userData.user.id).maybeSingle();
+    const rankEl = document.getElementById("conquest-rank-value");
+    if (rankEl) rankEl.textContent = character?.conquest_rank || "E";
+  }
+
+  loadPlayerDots();
+  loadShopMarkers();
+  loadCurrentLocation();
+  loadGossip();
+
+  // The offset math depends on the map's real rendered width --
+  // re-run it once the image has actually finished loading, in
+  // case loadGossip() above ran before that happened.
+  const worldMapImgEl = document.getElementById("world-map-image");
+  if (worldMapImgEl && !worldMapImgEl.complete){
+    worldMapImgEl.addEventListener("load", () => loadGossip());
+  }
+  loadAllKingdomMedia();
+  loadKingdomUnlocks();
+  loadConquestRank();
+  loadTrackableCreatures();
+  loadHierarchyLadder();
+  function spawnFireflies(){
+    const container = document.getElementById("map-fireflies");
+    if (!container) return;
+    const FIREFLY_COUNT = 18;
+
+    for (let i = 0; i < FIREFLY_COUNT; i++){
+      const firefly = document.createElement("div");
+      firefly.className = "firefly";
+      firefly.style.left = (2 + Math.random() * 94) + "%";
+      firefly.style.top = (5 + Math.random() * 88) + "%";
+      firefly.style.animationDuration = (40 + Math.random() * 48) + "s, " + (20 + Math.random() * 24) + "s";
+      firefly.style.animationDelay = (Math.random() * -96) + "s, " + (Math.random() * -40) + "s";
+      container.appendChild(firefly);
+    }
+  }
+
+  // ---- Pre-Battle Screen ----
+  let preBattleEnemy = null;
+  let lastRoamEncounter = null;
+  let lastHuntEncounter = null;
+  let preBattleSelectedCards = new Set();
+
+  function openPreBattleScreen(enemy){
+    // enemy = { name, rank, flavor, source }  where source is
+    // 'creature' or 'hierarchy', used only for display right now
+    preBattleEnemy = enemy;
+    preBattleSelectedCards = new Set();
+
+    document.getElementById("prebattle-enemy-name").textContent = enemy.name;
+    document.getElementById("prebattle-enemy-rank").textContent = enemy.displayTier ? enemy.displayTier + "-Rank" : enemy.rank + "-Rank";
+    document.getElementById("prebattle-flavor").textContent = enemy.flavor || "";
+    const prebattleVideoEl = document.getElementById("prebattle-video");
+    if (enemy.videoUrl){
+      prebattleVideoEl.src = enemy.videoUrl;
+      prebattleVideoEl.style.display = "block";
+    } else {
+      prebattleVideoEl.style.display = "none";
+      prebattleVideoEl.removeAttribute("src");
+    }
+    document.getElementById("prebattle-overlay").style.display = "block";
+    document.getElementById("prebattle-status").textContent = "";
+    updatePreBattleStartButton();
+
+    loadMyCardsForSelection();
+    loadPreBattlePlayerCard();
+    loadEquipSummaryForPreBattle();
+  }
+
+  function closePreBattleScreen(){
+    document.getElementById("prebattle-overlay").style.display = "none";
+    preBattleEnemy = null;
+  }
+
+  async function loadPreBattlePlayerCard(){
+    const el = document.getElementById("prebattle-player-card");
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+    const { data: character } = await sb.from("characters").select("class, conquest_rank").eq("user_id", userData.user.id).maybeSingle();
+    if (!character){ el.innerHTML = `<p class="placeholder-note">Create your character first.</p>`; return; }
+
+    const { data: abilities } = await sb.from("card_catalog").select("*").eq("source_type", "class").eq("source_name", character.class).order("unlock_position");
+    const rows = (abilities || []).map(a => `<li><span>${escapeHtml(a.ability_name)}</span><span class="mono" style="text-align:right;">${escapeHtml(a.effect_text)} — ${a.energy_cost} energy</span></li>`).join("");
+
+    el.innerHTML = `
+      <div class="frame" style="padding:0.6rem 0.8rem;">
+        <strong style="color:var(--parchment);">${escapeHtml(character.class)}</strong>
+        <span class="tag" style="margin-left:0.4rem;">${escapeHtml(character.conquest_rank)}-Rank</span>
+        <ul class="clean" style="margin-top:0.4rem;">${rows}</ul>
+      </div>
+    `;
+  }
+
+  async function loadMyCardsForSelection(){
+    const listEl = document.getElementById("prebattle-card-list");
+    const { data: userData } = await sb.auth.getUser();
+    const { data: myParty } = await sb.from("party_members").select("party_id").eq("user_id", userData.user.id).limit(1).maybeSingle();
+
+    const { data: cards, error } = myParty
+      ? await sb.rpc("get_party_pool_cards")
+      : await sb.rpc("get_my_cards");
+
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load your cards: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!cards || cards.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">You don't own any cards yet — defeat creatures or hierarchy NPCs to earn ability-fragments.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = cards.map(c => `
+      <label class="ability-card selectable" data-card-id="${c.card_id}">
+        <input type="checkbox" onchange="togglePreBattleCard(${c.card_id}, this.checked)">
+        <span class="ability-card-rank-tag">${escapeHtml(c.rank)}</span>
+        <div class="ability-card-name">${escapeHtml(c.ability_name)}</div>
+        <div class="mono" style="font-size:0.6rem; color:var(--dim); margin-bottom:0.25rem;">${escapeHtml(c.source_name)}${myParty && !c.is_mine ? ` · ${escapeHtml(c.owner_gamer_name)}'s` : ""}</div>
+        <div class="ability-card-effect">${escapeHtml(c.effect_text)}</div>
+        <hr class="ability-card-divider">
+        <div class="ability-card-energy-label">${c.energy_cost} energy</div>
+      </label>
+    `).join("");
+  }
+
+  function togglePreBattleCard(cardId, checked){
+    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (checked){
+      if (preBattleSelectedCards.size >= 3){
+        // revert the checkbox visually since we're refusing a 4th
+        event.target.checked = false;
+        document.getElementById("prebattle-status").textContent = "Only 3 cards allowed — uncheck one first.";
+        document.getElementById("prebattle-status").style.color = "var(--crimson-bright)";
+        return;
+      }
+      preBattleSelectedCards.add(cardId);
+      if (cardEl) cardEl.classList.add("selected");
+    } else {
+      preBattleSelectedCards.delete(cardId);
+      if (cardEl) cardEl.classList.remove("selected");
+    }
+    document.getElementById("prebattle-status").textContent = "";
+    document.getElementById("prebattle-cards-count").textContent = `(${preBattleSelectedCards.size}/3)`;
+    updatePreBattleStartButton();
+  }
+
+  async function updatePreBattleStartButton(){
+    const btn = document.getElementById("prebattle-start-btn");
+    btn.disabled = preBattleSelectedCards.size > 3;
+
+    const chanceEl = document.getElementById("prebattle-win-chance");
+    if (!preBattleEnemy){
+      chanceEl.style.display = "none";
+      return;
+    }
+
+    const { data: chance, error } = await sb.rpc("preview_battle_win_chance", {
+      p_card_ids: [...preBattleSelectedCards],
+      p_enemy_source: preBattleEnemy.source,
+      p_creature_name: preBattleEnemy.source === "creature" ? preBattleEnemy.name : null,
+      p_kingdom: preBattleEnemy.source === "creature" ? preBattleEnemy.kingdom : null,
+      p_npc_id: preBattleEnemy.source === "hierarchy" ? preBattleEnemy.npcId : null,
+    });
+
+    if (error || chance === null){
+      chanceEl.style.display = "none";
+      return;
+    }
+    chanceEl.textContent = `Estimated win chance with this loadout: ${Math.round(chance)}%`;
+    chanceEl.style.display = "block";
+  }
+
+  let preBattleSelectedConsumable = null;
+  let preBattleSelectedWeapon = null;
+  let preBattleSelectedArmor = null;
+
+  async function loadEquipSummaryForPreBattle(){
+    const summaryEl = document.getElementById("prebattle-equip-summary");
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+    const { data: character } = await sb.from("characters").select("equipped_weapon, equipped_armor").eq("user_id", userData.user.id).maybeSingle();
+    const { data: consumables } = await sb.rpc("get_my_consumables");
+    const { data: weapons } = await sb.rpc("get_my_owned_weapons");
+    const { data: armors } = await sb.rpc("get_my_owned_armor");
+
+    preBattleSelectedConsumable = null;
+    preBattleSelectedWeapon = null;
+    preBattleSelectedArmor = null;
+
+    const weaponOptions = (weapons || []).map(w => `<option value="${escapeHtml(w.item_name)}">${escapeHtml(w.item_name)}</option>`).join("");
+    const armorOptions = (armors || []).map(a => `<option value="${escapeHtml(a.item_name)}">${escapeHtml(a.item_name)}</option>`).join("");
+    const consumableOptions = (consumables || []).map(c =>
+      `<option value="${escapeHtml(c.item_name)}">${escapeHtml(c.item_name)} ×${c.quantity} — ${escapeHtml(c.description || "")}</option>`
+    ).join("");
+
+    summaryEl.innerHTML = `
+      <h5 class="mono" style="color:var(--gold-bright); font-size:0.8rem; text-transform:uppercase;">Weapon (optional — defaults to equipped)</h5>
+      <select id="prebattle-weapon-picker" onchange="preBattleSelectedWeapon = this.value || null" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem; margin:0.4rem 0 1rem;">
+        <option value="">Use equipped (${escapeHtml(character?.equipped_weapon || "None")})</option>
+        ${weaponOptions}
+      </select>
+
+      <h5 class="mono" style="color:var(--gold-bright); font-size:0.8rem; text-transform:uppercase;">Armor (optional — defaults to equipped)</h5>
+      <select id="prebattle-armor-picker" onchange="preBattleSelectedArmor = this.value || null" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem; margin:0.4rem 0 1rem;">
+        <option value="">Use equipped (${escapeHtml(character?.equipped_armor || "None")})</option>
+        ${armorOptions}
+      </select>
+
+      <h5 class="mono" style="color:var(--gold-bright); font-size:0.8rem; text-transform:uppercase;">Consumable (optional)</h5>
+      ${consumables && consumables.length ? `
+        <select id="prebattle-consumable-picker" onchange="preBattleSelectedConsumable = this.value || null" style="width:100%; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem; margin-top:0.4rem;">
+          <option value="">None</option>
+          ${consumableOptions}
+        </select>
+      ` : `<p class="placeholder-note" style="margin-top:0.4rem;">None owned — buy some from a shop marker while in that kingdom.</p>`}
+    `;
+  }
+
+  async function startBattleFromPreBattle(){
+    const statusEl = document.getElementById("prebattle-status");
+    statusEl.textContent = "Locking in loadout...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("start_card_battle", {
+      p_enemy_name: preBattleEnemy.name,
+      p_enemy_rank: preBattleEnemy.rank,
+      p_enemy_source: preBattleEnemy.source,
+      p_flavor_text: preBattleEnemy.flavor,
+      p_card_ids: [...preBattleSelectedCards],
+      p_kingdom: preBattleEnemy.kingdom || null,
+      p_hierarchy_npc_id: preBattleEnemy.npcId || null,
+      p_is_champion: preBattleEnemy.isChampion || false,
+      p_consumable: preBattleSelectedConsumable || null,
+      p_weapon: preBattleSelectedWeapon || null,
+      p_armor: preBattleSelectedArmor || null,
+    });
+
+    if (error){
+      statusEl.textContent = "Couldn't start battle: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (!result.success){
+      const reasonText = result.reason === "rank_locked"
+        ? `This creature is ${result.rank}-rank — you need more kingdoms unlocked first (B/A need 3, S needs 5, SS needs 7).`
+        : result.reason;
+      statusEl.textContent = "Couldn't start battle: " + reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    // Champions require a party per spec -- if the player's in a
+    // forming party, tag this pending battle as part of that
+    // party's shared attempt instead of a solo one.
+    if (preBattleEnemy.isChampion){
+      const { data: partyResult } = await sb.rpc("tag_pending_battle_as_party");
+      if (partyResult && partyResult.success){
+        statusEl.textContent = "Loadout locked in — waiting on the rest of your party to ready up in the Party tab, then your leader can start the fight.";
+        statusEl.style.color = "var(--gold-bright)";
+        return; // don't navigate yet -- the leader triggers the actual start
+      }
+    }
+
+    statusEl.textContent = "Loadout locked in — heading to Duel Chat...";
+    statusEl.style.color = "var(--steel-bright)";
+    window.location.href = "pvp-chat.html";
+  }
+
+  document.querySelectorAll("#prebattle-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#prebattle-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.prebattlesub;
+      document.querySelectorAll(".prebattle-subpanel").forEach((p) => {
+        const match = p.dataset.prebattlesubpanel === target;
+        p.classList.toggle("active", match);
+        p.style.display = match ? "block" : "none";
+      });
+    });
+  });
+
+  loadWorldState();
+  spawnFireflies();
+</script>
+</body>
+</html>

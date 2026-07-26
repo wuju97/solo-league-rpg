@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Guild</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Guild</h2>
+      </div>
+
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="guild-tabs">
+      <button class="page-tab-btn active" data-tab="guild">Guild</button>
+      <button class="page-tab-btn" data-tab="guild-bosses">Guild Bosses</button>
+      <button class="page-tab-btn" data-tab="guild-quests">Guild Quests</button>
+      <button class="page-tab-btn" data-tab="guild-shop">Guild Shop</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="guild">
+      <section class="frame">
+        <h3>Guilds</h3>
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.5rem 0 0.5rem;">Philosophy</h4>
+        <p>Every NPC belongs to something. Every city belongs to something. Every kingdom has politics, every guild has rivals, every organization has secrets. There are four major categories: Kingdom Organizations, Universal Guilds, Secret Orders, and Criminal Syndicates.</p>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Kingdom Organizations</h4>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">Every kingdom has organizations unique to it, beyond what's covered in each kingdom's Politics tab.</p>
+        <div class="card-grid">
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#128081; Valoria</h4><p>Royal Valorian Legion (largest military in Solonia — Knights, Archers, Cavalry, Scouts, Battle Mages, Engineers, elite Silver Guard), the Hall of Justice (law, trials, judges, investigations), the Merchant Assembly (taxes, trade routes, markets), and the Royal Intelligence Bureau (official spies, unknown to most citizens).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#10052; Frosthaven</h4><p>The White Wolves (elite monster hunters), the Frostguard (protect the royal family), the Glacier Rangers (explore frozen lands), and the Brotherhood of Hunters (largest hunting organization).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#127795; Eldergrove</h4><p>The Circle of Roots (protects the World Tree), the Forest Wardens (protect wildlife), the Spirit Walkers (communicate with nature spirits), and the Emerald Rangers (patrol forests).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#127755; Pyrath</h4><p>The Great Forge Council (controls industry), the Engineers Consortium (inventors, builders, scientists), the Mountain Rangers (protect mines), and the Royal Smithing Guild (the highest-ranked blacksmiths).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#9729; Aetheria</h4><p>The Celestial Assembly (kingdom government), the Academy of Arcana (largest magical academy), the Sky Navigators (chart wind routes), and the Astronomer's Circle (studies the stars).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#127754; Azure Reach</h4><p>The Grand Fleet (protects the seas), the Explorer's Guild (discovers islands), the Cartographer Society (makes maps), and the Harbor Authority (controls ports).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#127964; Khar'Duun</h4><p>The Imperial Archaeological Society (largest archaeology organization), the Desert Rangers (protect caravans), the Temple Guardians (protect tombs), and the Caravan Guild (trade).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#9760; Blackfen</h4><p>The Circle of Reeds (protect wetlands), the Great Hunters (monster specialists), the Marsh Guides (escort travelers), and the River Wardens (protect waterways).</p></div>
+          <div class="frame"><h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">&#128302; Mordrath</h4><p>The Keepers (government), the Library of Silence (protect forbidden knowledge), the Shadow Watch (investigate strange events), and the Dream Scholars (research dreams).</p></div>
+        </div>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Universal Guilds</h4>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">These exist in every kingdom.</p>
+        <ul class="clean">
+          <li><span>&#9876; Adventurer's Guild</span><span class="mono">The most famous guild, accepts anyone. Ranks F→E→D→C→B→A→S→SS→SSS. Members get jobs, rewards, housing, and reputation.</span></li>
+          <li><span>&#127993; Hunter's Guild</span><span class="mono">Monster hunting, tracking, creature research</span></li>
+          <li><span>&#128296; Craftsman's Guild</span><span class="mono">Blacksmiths, builders, tailors</span></li>
+          <li><span>&#129514; Alchemist Guild</span><span class="mono">Potions, poisons, medicine</span></li>
+          <li><span>&#128218; Scholar's Guild</span><span class="mono">History, research, ancient ruins</span></li>
+          <li><span>&#128674; Explorer's Guild</span><span class="mono">Maps, ruins, unknown lands</span></li>
+          <li><span>&#127973; Healer's Guild</span><span class="mono">Hospitals, medicine, emergency aid</span></li>
+          <li><span>&#127917; Artist Guild</span><span class="mono">Music, painting, stories, festivals</span></li>
+          <li><span>Merchant Guild</span><span class="mono">Banks, trading, loans, markets, auctions</span></li>
+        </ul>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Secret Organizations</h4>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">These shape the world's biggest mysteries — global, not tied to one kingdom.</p>
+        <ul class="clean">
+          <li><span>&#11088; The Order of Nine</span><span class="mono">Nobody knows if they exist — nine members, one per kingdom, protecting balance. Even kings don't know them all.</span></li>
+          <li><span>&#11088; The First Keepers</span><span class="mono">The oldest organization, possibly older than the kingdoms. Protects Ancient ruins, never interferes openly.</span></li>
+          <li><span>&#11088; Children of Twilight</span><span class="mono">Operate inside Mordrath, protecting forgotten knowledge</span></li>
+          <li><span>&#11088; Emerald Circle</span><span class="mono">Protects nature, works across kingdoms</span></li>
+          <li><span>&#11088; Ember Circle</span><span class="mono">Legendary craftsmen, invite-only masters</span></li>
+          <li><span>&#11088; Astral Circle</span><span class="mono">Studies space, moons, ancient sky technology</span></li>
+          <li><span>&#11088; The Deep Cartographers</span><span class="mono">Map places nobody should know exist</span></li>
+          <li><span>&#11088; Keepers of History</span><span class="mono">Collect forgotten books — some believe they know why the Ancients disappeared</span></li>
+        </ul>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Criminal Syndicates</h4>
+        <ul class="clean">
+          <li><span>Crimson Jackals</span><span class="mono">Valoria — smuggling</span></li>
+          <li><span>Ice Reavers</span><span class="mono">Frosthaven — illegal crystal trade</span></li>
+          <li><span>Black Furnace</span><span class="mono">Pyrath — weapon smuggling</span></li>
+          <li><span>Black Scarabs</span><span class="mono">Khar'Duun — artifact theft</span></li>
+          <li><span>Silent Market</span><span class="mono">Mordrath — illegal relics</span></li>
+          <li><span>Mire Rats</span><span class="mono">Blackfen — monster trafficking</span></li>
+          <li><span>Crimson Tide</span><span class="mono">Azure Reach — pirates</span></li>
+          <li><span>Sky Syndicate</span><span class="mono">Aetheria — technology theft</span></li>
+          <li><span>Iron Axe</span><span class="mono">Eldergrove — illegal logging</span></li>
+        </ul>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Global Organizations</h4>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">These operate everywhere, across all nine kingdoms.</p>
+        <ul class="clean">
+          <li><span>Monster Research Commission</span><span class="mono">Documents creatures, studies ecosystems, updates bestiaries</span></li>
+          <li><span>Ancient Ruins Authority</span><span class="mono">Protects major ruins, sometimes competes with archaeologists</span></li>
+          <li><span>World Arena Association</span><span class="mono">Runs tournaments, PvP championships, seasonal leagues</span></li>
+          <li><span>Grand Postal Service</span><span class="mono">Messengers, deliveries, world announcements</span></li>
+          <li><span>Royal Banking Consortium</span><span class="mono">Handles money between kingdoms</span></li>
+          <li><span>World Trade Commission</span><span class="mono">Sets prices, approves trade, handles disputes</span></li>
+        </ul>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Guild Headquarters</h4>
+        <ul class="clean">
+          <li><span>Adventurer's Guild</span><span class="mono">Crownfall (Valoria)</span></li>
+          <li><span>Explorer's Guild</span><span class="mono">Blueharbor (Azure Reach)</span></li>
+          <li><span>Scholar's Guild</span><span class="mono">Skyreach (Aetheria)</span></li>
+          <li><span>Hunter's Guild</span><span class="mono">Winterhold Keep (Frosthaven)</span></li>
+          <li><span>Craftsman's Guild</span><span class="mono">Emberforge (Pyrath)</span></li>
+          <li><span>Archaeological Society</span><span class="mono">Sol'Kareth (Khar'Duun)</span></li>
+        </ul>
+        <p class="placeholder-note" style="margin-top:0.5rem;">Becoming a high-ranking member unlocks exclusive facilities, mentors, contracts, and long-term questlines.</p>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">The Great Secret</h4>
+        <p>All organizations, even the oldest ones, unknowingly reference a forgotten symbol in their oldest records: a circle divided into nine sections, with a tenth empty space at its center. No surviving document explains its meaning. The Order of Nine refuses to discuss it. The Keepers of History have removed several books that mention it. Some scholars believe the symbol predates the Ancients themselves.</p>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="guild-bosses">
+      <section class="frame"><h3>Guild Bosses</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="guild-quests">
+      <section class="frame"><h3>Guild Quests</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="guild-shop">
+      <section class="frame"><h3>Guild Shop</h3><p class="placeholder-note">Nothing here yet — items purchasable with guild reputation or shared guild currency, once guilds exist.</p></section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+<script>
+  document.querySelectorAll("#guild-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#guild-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  (async () => {
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+    const { data: character } = await sb.from("characters").select("gold").eq("user_id", user.id).maybeSingle();
+    const el = document.getElementById("my-gold-display");
+    if (el) el.textContent = character ? `${character.gold} Gold` : "";
+  })();
+</script>
+</body>
+</html>

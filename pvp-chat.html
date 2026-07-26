@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Duel Chat</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+<style>
+  .chat-window{
+    display:flex;
+    flex-direction:column;
+    height: 60vh;
+    min-height: 360px;
+  }
+  .chat-messages{
+    flex:1;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:0.6rem;
+    padding-right: 0.5rem;
+  }
+  .chat-msg{ font-size:0.92rem; }
+
+  /* ---- combat cards: the new turn-by-turn feed ---- */
+  .turn-card{
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    background: var(--panel-raised);
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.5rem;
+    animation: cardIn 0.25s ease;
+  }
+  .turn-card .turn-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.35rem;
+  }
+  .turn-card .turn-actor{
+    font-family:'Cinzel',serif;
+    font-size: 0.95rem;
+  }
+  .turn-card .turn-actor.mine{ color: var(--steel-bright); }
+  .turn-card .turn-actor.theirs{ color: var(--crimson-bright); }
+  .turn-card .turn-result{
+    margin-top: 0.35rem;
+    font-size: 0.88rem;
+    color: var(--parchment);
+  }
+  .turn-card .dmg-num{ color: var(--crimson-bright); font-weight:700; }
+  .turn-card .heal-num{ color: #5cb85c; font-weight:700; }
+  .turn-card .buff-num{ color: var(--gold-bright); font-weight:700; }
+  .turn-card .debuff-num{ color: #a97fd6; font-weight:700; }
+  .turn-card .combo-banner{
+    margin-top:0.4rem; padding: 0.3rem 0.5rem;
+    background: rgba(201,162,75,0.12); border:1px solid var(--gold);
+    border-radius: var(--radius); font-family:'Cinzel',serif;
+    font-size: 0.8rem; color: var(--gold-bright); text-align:center;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform: translateY(4px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+  .victory-card{
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .victory-card .trophy{ font-size: 2rem; margin-bottom: 0.5rem; }
+
+  /* ---- Critical Moments: subtle glow when both fighters are below 20% HP ---- */
+  .critical-moment .hp-bar-fill.low{
+    animation: criticalPulse 1s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--crimson-bright);
+  }
+  .critical-moment .fighter-card{
+    border-color: var(--crimson-bright);
+  }
+  @keyframes criticalPulse{
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.4); }
+  }
+  .chat-msg .who{ color: var(--crimson-bright); font-family:'Cinzel',serif; font-size:0.8rem; }
+  .chat-input-row{
+    display:flex;
+    gap:0.6rem;
+    margin-top:1rem;
+    border-top:1px solid var(--border);
+    padding-top:1rem;
+  }
+  .chat-input-row input{
+    flex:1;
+    background: var(--panel-raised);
+    border:1px solid var(--border-bright);
+    border-radius: var(--radius);
+    color: var(--parchment);
+    padding: 0.6rem 0.8rem;
+    font-family:'Spectral',serif;
+    font-size:0.95rem;
+  }
+  .chat-input-row input:focus{ outline: 1px solid var(--crimson); }
+
+  /* ---- embedded duel battle ---- */
+  .fighters{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 1.5rem;
+    width:100%;
+    margin-bottom: 1.25rem;
+  }
+  .fighter-card{
+    flex:1;
+    background: var(--panel-raised);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align:center;
+  }
+  .fighter-card.me{ border-color: var(--gold); }
+  .fighter-card .name{
+    font-family:'Cinzel',serif;
+    color: var(--gold-bright);
+    font-size:1rem;
+    margin-bottom:0.6rem;
+  }
+  .hp-bar-track{
+    width:100%;
+    height: 16px;
+    background: var(--void);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow:hidden;
+    margin-bottom:0.35rem;
+  }
+  .hp-bar-fill{
+    height:100%;
+    background: linear-gradient(90deg, #3a7d3a, #5cb85c);
+    transition: width 0.4s ease, background 0.4s ease;
+  }
+  .hp-bar-fill.low{
+    background: linear-gradient(90deg, var(--crimson), var(--crimson-bright));
+  }
+  .hp-text{ font-family:'JetBrains Mono', monospace; font-size:0.75rem; color: var(--dim); }
+  .vs-glyph{ font-family:'Cinzel',serif; color: var(--gold); font-size:1.2rem; }
+  .turn-indicator{ text-align:center; font-family:'Cinzel',serif; color: var(--gold-bright); font-size:0.95rem; margin-bottom:0.4rem; }
+  .turn-timer{ font-family:'JetBrains Mono', monospace; font-size:1.6rem; color: var(--crimson-bright); text-align:center; margin-bottom:1rem; }
+  .action-row{ display:flex; gap:0.6rem; justify-content:center; margin-bottom:1rem; }
+  .action-btn{
+    font-family:'Cinzel',serif; font-weight:700; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase;
+    padding:0.7rem 1.3rem; border-radius: var(--radius); border:1px solid var(--gold); color: var(--gold-bright);
+    background: rgba(201,162,75,0.08); cursor:pointer;
+  }
+  .action-btn:hover{ background: rgba(201,162,75,0.18); }
+  .action-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .action-btn.surrender{ border-color: var(--crimson); color: var(--crimson-bright); }
+  .duel-result{ text-align:center; padding: 1.5rem; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<div class="battle-result-banner" id="battle-result-banner">
+  <h1 id="battle-result-text"></h1>
+</div>
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Chat</div>
+        <h2 style="color:var(--crimson-bright)">Duel Chat</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="duel-chat-tabs">
+      <button class="page-tab-btn active" data-tab="pvp">PvP</button>
+      <button class="page-tab-btn" data-tab="card-battle">PvE</button>
+      <button class="page-tab-btn" data-tab="pvg">PvG</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="pvp">
+    <section class="frame chat-window">
+      <!-- Pre-Battle Prep — shown while a duel is being set up -->
+      <div id="duel-prep-box" class="frame" style="display:none; margin-bottom:0.75rem;">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.6rem;">Prepare for Battle</h4>
+        <p class="mono" id="prep-weapon-display" style="font-size:0.72rem; color:var(--dim); margin-bottom:0.5rem;"></p>
+
+        <p class="placeholder-note" style="margin-bottom:0.4rem;">⚔ Weapons owned:</p>
+        <div id="prep-weapon-list" class="card-grid" style="margin-bottom:1rem;"></div>
+
+        <p class="placeholder-note" style="margin-bottom:0.4rem;">🛡 Armor owned:</p>
+        <div id="prep-armor-list" class="card-grid" style="margin-bottom:1rem;"></div>
+
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">Choose up to 2 consumables to bring:</p>
+        <div id="prep-consumable-list" style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;"></div>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.75rem 0 0.5rem;">Cards <span class="tag" style="font-size:0.65rem;">up to 3 — your Player Card is always included too</span></h4>
+        <div id="prep-card-list" style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;"></div>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0.75rem 0 0.5rem;">💰 Bet <span class="tag" style="font-size:0.65rem;">optional — winner takes the whole pot</span></h4>
+        <div id="prep-bet-box">
+          <div style="display:flex; gap:0.75rem; margin-bottom:0.6rem; flex-wrap:wrap;">
+            <label class="mono" style="font-size:0.72rem; color:var(--dim);">Gold
+              <input type="number" id="prep-bet-gold" min="0" value="0" style="display:block; width:110px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.4rem 0.5rem; margin-top:0.3rem;">
+            </label>
+            <label class="mono" style="font-size:0.72rem; color:var(--dim);">AP
+              <input type="number" id="prep-bet-ap" min="0" value="0" style="display:block; width:80px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.4rem 0.5rem; margin-top:0.3rem;">
+            </label>
+          </div>
+          <p class="placeholder-note" style="margin-bottom:0.4rem;">Items to wager:</p>
+          <div id="prep-bet-items-list" style="display:flex; flex-direction:column; gap:0.3rem; margin-bottom:0.75rem; max-height:150px; overflow-y:auto;"></div>
+          <button class="btn" id="prep-lock-bet-btn" onclick="lockDuelBet()" style="border-color:var(--crimson); color:var(--crimson-bright);">Lock In Bet</button>
+        </div>
+        <p class="placeholder-note" id="prep-bet-status" style="margin-top:0.5rem; display:none;"></p>
+
+        <button class="btn" id="prep-ready-btn" onclick="markReady()" style="margin-top:0.75rem;">Ready</button>
+        <button class="btn" id="prep-cancel-btn" onclick="cancelDuel()" style="margin-top:0.75rem; margin-left:0.5rem; border-color:var(--crimson); color:var(--crimson-bright);">Cancel Duel</button>
+        <p class="placeholder-note" id="prep-status-text" style="margin-top:0.6rem;"></p>
+      </div>
+
+      <!-- Compact battlefield status bar — shown only during an active duel -->
+      <div id="duel-status-bar" style="display:none; margin-bottom:0.75rem;">
+        <p class="mono" id="battle-code-display" style="text-align:center; color:var(--dim); font-size:0.7rem; margin-bottom:0.2rem;"></p>
+        <p class="mono" id="arena-display" style="text-align:center; color:var(--dim); font-size:0.72rem; margin-bottom:0.5rem;"></p>
+        <p class="mono" id="spawn-side-display" style="text-align:center; color:var(--dim); font-size:0.68rem; margin-bottom:0.5rem;"></p>
+        <div id="disconnect-claim-area" style="text-align:center; margin-bottom:0.5rem;"></div>
+        <div class="fighters" style="margin-bottom:0.5rem;">
+          <div class="fighter-card me">
+            <div class="name" id="fighter-a-name">--</div>
+            <div class="hp-bar-track"><div class="hp-bar-fill" id="fighter-a-hp-bar" style="width:100%;"></div></div>
+            <div class="hp-text" id="fighter-a-hp-text">100 / 100 HP</div>
+            <div class="mono" id="fighter-a-resource-text" style="font-size:0.7rem; color:var(--steel-bright); margin-top:0.3rem;"></div>
+            <div class="mono" style="font-size:0.65rem; color:var(--dim); margin-top:0.4rem; cursor:help; border-bottom:1px dotted var(--dim); display:inline-block;" title="Builds from attacking and using abilities, decays when passive. At 25/50/75/100 it grants small temporary bonuses: extra crit chance and bonus damage.">Momentum ⓘ</div>
+            <div class="hp-bar-track" style="height:8px; margin-top:0.2rem;"><div id="fighter-a-momentum-bar" style="height:100%; width:0%; background:var(--gold); transition:width 0.4s ease;"></div></div>
+            <div class="mono" id="fighter-a-position-text" style="font-size:0.68rem; color:var(--dim); margin-top:0.3rem;"></div>
+            <div id="fighter-a-status" style="font-size:0.9rem; margin-top:0.3rem;"></div>
+          </div>
+          <div class="vs-glyph">VS</div>
+          <div class="fighter-card">
+            <div class="name" id="fighter-b-name">--</div>
+            <div class="hp-bar-track"><div class="hp-bar-fill" id="fighter-b-hp-bar" style="width:100%;"></div></div>
+            <div class="hp-text" id="fighter-b-hp-text">100 / 100 HP</div>
+            <div class="mono" style="font-size:0.65rem; color:var(--dim); margin-top:0.4rem; cursor:help; border-bottom:1px dotted var(--dim); display:inline-block;" title="Builds from attacking and using abilities, decays when passive. At 25/50/75/100 it grants small temporary bonuses: extra crit chance and bonus damage.">Momentum ⓘ</div>
+            <div class="hp-bar-track" style="height:8px; margin-top:0.2rem;"><div id="fighter-b-momentum-bar" style="height:100%; width:0%; background:var(--gold); transition:width 0.4s ease;"></div></div>
+            <div class="mono" id="fighter-b-position-text" style="font-size:0.68rem; color:var(--dim); margin-top:0.3rem;"></div>
+            <div id="fighter-b-status" style="font-size:0.9rem; margin-top:0.3rem;"></div>
+          </div>
+        </div>
+        <div class="turn-indicator" id="turn-indicator" style="margin-bottom:0.2rem;">--</div>
+        <div class="turn-timer" id="turn-timer" style="font-size:1.2rem; margin-bottom:0;">--</div>
+      </div>
+
+      <!-- The empty battleground / message feed — shared by normal chat
+           AND the live combat log, so battle plays out as real text here -->
+      <div class="chat-messages" id="chat-messages">
+        <p class="placeholder-note" id="chat-empty-note">Loading chat...</p>
+      </div>
+
+      <!-- Normal chat input — hidden during an active duel -->
+      <div class="chat-input-row" id="chat-input-row">
+        <input type="text" id="pvp-chat-input" placeholder="Type a message...">
+        <button class="btn" id="pvp-chat-send">Send</button>
+      </div>
+
+      <!-- Duel actions — shown only during an active duel, in place of chat input -->
+      <div id="duel-action-row" style="display:none; flex-direction:column; gap:0.6rem;">
+        <div class="action-row" style="margin-bottom:0;">
+          <button class="action-btn" id="attack-btn" onclick="doDuelAction('attack')">⚔ Attack</button>
+          <button class="action-btn" id="guard-btn" onclick="doDuelAction('guard')">🛡 Guard</button>
+          <button class="action-btn surrender" id="surrender-btn" onclick="doDuelAction('surrender')">🏳 Surrender</button>
+        </div>
+        <div class="action-row" id="ability-buttons-row" style="margin-bottom:0;"></div>
+        <div class="action-row" id="consumable-buttons-row" style="margin-bottom:0;"></div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span class="mono" style="font-size:0.72rem; color:var(--dim);">Position:</span>
+          <button class="btn" id="pos-front-btn" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="setPosition('front')">Front</button>
+          <button class="btn" id="pos-middle-btn" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="setPosition('middle')">Middle</button>
+          <button class="btn" id="pos-back-btn" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="setPosition('back')">Back</button>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+          <div style="display:flex; gap:0.4rem;">
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('👍')">👍</button>
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('😄')">😄</button>
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('⚔')">⚔</button>
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('😱')">😱</button>
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('👏')">👏</button>
+            <button class="btn" style="padding:0.35rem 0.6rem;" onclick="sendEmote('😈')">😈</button>
+          </div>
+          <label class="mono" style="font-size:0.72rem; color:var(--dim); display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+            <input type="checkbox" id="combat-log-toggle" checked onchange="toggleCombatLog()"> Combat Log
+          </label>
+        </div>
+      </div>
+
+      <div id="duel-finished-box" style="display:none;" class="duel-result"></div>
+    </section>
+    </div>
+
+
+    <div class="page-tab-panel" data-panel="card-battle">
+      <div class="page-tabs" id="pve-type-subtabs" style="flex-direction:row; width:auto; margin-bottom:1rem;">
+        <button class="page-tab-btn active" data-pvetype="creature">vs Creature</button>
+        <button class="page-tab-btn" data-pvetype="characters">vs Characters</button>
+      </div>
+
+      <section class="frame" id="card-battle-empty-state">
+        <h3>PvE</h3>
+        <p class="placeholder-note">Start a fight from World Map → Explore → Quests (Roam or a Targeted Hunt) for a creature, or the Hierarchy tab for a political NPC/Champion — it'll bring you here automatically once your loadout is locked in.</p>
+      </section>
+
+      <section class="frame" id="card-battle-active-state" style="display:none;">
+        <h3 id="card-battle-enemy-name">Enemy</h3>
+        <p class="placeholder-note" id="card-battle-flavor" style="margin-bottom:1rem;"></p>
+        <video id="card-battle-video" style="display:none; width:100%; max-height:280px; border-radius:var(--radius); margin-bottom:1rem;" controls autoplay muted loop></video>
+
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Your Loadout</h4>
+        <div id="card-battle-loadout" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
+
+        <button class="btn" id="begin-battle-btn" onclick="beginRealBattle()">Begin Battle</button>
+        <p class="placeholder-note" id="party-battle-note" style="margin-top:0.5rem; display:none;"></p>
+        <div id="card-battle-result" style="display:none; margin-top:1rem;"></div>
+      </section>
+
+      <!-- The real, in-progress fight -- works for both solo and party -->
+      <section class="frame" id="card-battle-live-state" style="display:none;">
+        <div id="live-hp-bars" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;"></div>
+
+        <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+          <button class="action-btn" onclick="battleAction('attack')">⚔ Attack</button>
+          <button class="action-btn" onclick="battleAction('guard')">🛡 Guard</button>
+          <button class="action-btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="battleAction('surrender')">🏳 Surrender</button>
+        </div>
+
+        <div id="live-card-buttons" class="ability-card-grid" style="margin-bottom:1rem;"></div>
+        <p class="placeholder-note" id="waiting-for-party-note" style="display:none; margin-bottom:1rem;">Waiting for the rest of your party to choose their action...</p>
+
+        <div id="live-battle-log" style="display:flex; flex-direction:column-reverse; gap:0.3rem; max-height:220px; overflow-y:auto; font-size:0.82rem;"></div>
+        <div id="live-battle-outcome" style="display:none; margin-top:1rem;"></div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="pvg">
+      <section class="frame">
+        <h3>PvG — Primordial Fights</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Unlocked once all three of these are true:</p>
+        <p class="placeholder-note" style="margin-bottom:0.75rem; color:var(--gold-bright);">Once eligible, click a country's name on the World Map — a "Challenge Primordial" button appears there, letting you fight that country's Primordial specifically. The picker below works too, but the map is the intended way in.</p>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Every Primordial fight requires a party at first. Once you've been part of a party that's defeated 3 different Primordials, you can challenge any of the remaining ones solo.</p>
+        <div id="pvg-objectives"><p class="placeholder-note">Loading...</p></div>
+
+        <div id="pvg-challenge-area" style="margin-top:1rem;"></div>
+      </section>
+    </div>
+
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  let myUserId = null;
+  let currentDuelId = null;
+  let currentDuel = null;
+  let dwNameCache = {};
+  let duelTimerInterval = null;
+
+  function dwEscapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function getGamerNameFor(userId){
+    if (dwNameCache[userId]) return dwNameCache[userId];
+    const { data } = await sb.from("profiles").select("gamer_name").eq("user_id", userId).maybeSingle();
+    const name = data?.gamer_name || "Unknown";
+    dwNameCache[userId] = name;
+    return name;
+  }
+
+  async function initDuelCheck(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+    myUserId = user.id;
+
+    // Check the URL first (arriving from a fresh accept/redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    let duelId = urlParams.get("duel");
+
+    if (!duelId){
+      // Otherwise check if any active or prepping duel already involves us
+      const { data: activeDuel } = await sb
+        .from("duels")
+        .select("id")
+        .in("status", ["active", "prep"])
+        .or(`challenger_id.eq.${myUserId},opponent_id.eq.${myUserId}`)
+        .limit(1)
+        .maybeSingle();
+      if (activeDuel) duelId = activeDuel.id;
+    }
+
+    if (!duelId){
+      initPvpChat();
+      return;
+    } // no active duel — just show chat as normal
+
+    currentDuelId = duelId;
+    enterDuelMode();
+    await loadDuel();
+    await loadExistingBattleLog();
+
+    sb.channel("duel-embed-" + duelId)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "duels", filter: `id=eq.${duelId}` }, () => loadDuel())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "duel_actions", filter: `duel_id=eq.${duelId}` }, (payload) => appendBattleLogEntry(payload.new))
+      .subscribe();
+
+    duelTimerInterval = setInterval(tickDuelTimer, 1000);
+  }
+
+  function enterDuelMode(){
+    document.getElementById("chat-input-row").style.display = "none";
+    // Clear the mockup chat messages — this is now the actual battleground
+    const messagesEl = document.getElementById("chat-messages");
+    messagesEl.innerHTML = `<p class="placeholder-note" id="chat-empty-note">The duel begins. Every move plays out here.</p>`;
+  }
+
+  function exitDuelMode(){
+    document.getElementById("duel-status-bar").style.display = "none";
+    document.getElementById("chat-input-row").style.display = "flex";
+    document.getElementById("duel-action-row").style.display = "none";
+    document.getElementById("duel-finished-box").style.display = "none";
+  }
+
+  async function loadExistingBattleLog(){
+    const { data: actions } = await sb
+      .from("duel_actions")
+      .select("*")
+      .eq("duel_id", currentDuelId)
+      .order("created_at", { ascending: true });
+
+    if (actions && actions.length > 0){
+      document.getElementById("chat-empty-note")?.remove();
+      for (const action of actions){
+        await appendBattleLogEntry(action, false);
+      }
+    }
+  }
+
+  let lastAbilityUsed = { name: null, playerId: null };
+
+  const ACTION_ICONS = {
+    attack: "⚔", attack_crit: "🎯", guard: "🛡", surrender: "🏳",
+    timeout: "⏱", emote: "", stunned: "⚡", burn_tick: "🔥", position: "👣",
+    consumable_1: "🎒", consumable_2: "🎒"
+  };
+
+  function highlightNumbers(text){
+    // wraps "N damage" / "N HP" heal mentions / crit callouts in colored spans
+    return dwEscapeHtmlLocal(text)
+      .replace(/(\d+) damage/gi, '<span class="dmg-num">$1 damage</span>')
+      .replace(/healed for (\d+)/gi, 'healed for <span class="heal-num">$1</span>')
+      .replace(/drained (\d+)/gi, 'drained <span class="heal-num">$1</span>')
+      .replace(/burning damage/gi, '<span class="dmg-num">burning damage</span>')
+      .replace(/Applied (\w+)/gi, 'Applied <span class="debuff-num">$1</span>')
+      .replace(/CRITICAL[!\s]*(HIT!)?/gi, '<span class="dmg-num">🎯 CRITICAL!</span>');
+  }
+
+  async function appendBattleLogEntry(action, animate = true){
+    if (!combatLogVisible) return;
+    const messagesEl = document.getElementById("chat-messages");
+    document.getElementById("chat-empty-note")?.remove();
+
+    const name = await getGamerNameFor(action.player_id);
+    const isMine = action.player_id === myUserId;
+    const icon = ACTION_ICONS[action.action_type.replace(/_crit$/, "")] ?? (action.action_type.startsWith("ability_") ? "✨" : "⚔");
+
+    const card = document.createElement("div");
+    card.className = "turn-card";
+
+    if (action.action_type === "emote"){
+      card.innerHTML = `
+        <div class="turn-actor ${isMine ? "mine" : "theirs"}">${dwEscapeHtmlLocal(name)}</div>
+        <div class="turn-result" style="font-size:1.3rem;">${dwEscapeHtmlLocal(action.log_text)}</div>
+      `;
+      messagesEl.appendChild(card);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return;
+    }
+
+    // Combo detection: does this ability's use follow the specific
+    // ability its combo_note says it follows?
+    let comboBanner = "";
+    if (action.action_type.startsWith("ability_") && cachedClassAbilities){
+      const usedAbility = cachedClassAbilities.find(a => action.log_text.includes(a.ability_name));
+      if (usedAbility?.combo_note && lastAbilityUsed.playerId === action.player_id){
+        const triggerName = usedAbility.combo_note.split("→")[0].trim();
+        if (lastAbilityUsed.name === triggerName){
+          comboBanner = `<div class="combo-banner">🔥 COMBO! ${dwEscapeHtmlLocal(usedAbility.combo_note)}</div>`;
+        }
+      }
+      if (usedAbility) lastAbilityUsed = { name: usedAbility.ability_name, playerId: action.player_id };
+    }
+
+    card.innerHTML = `
+      <div class="turn-label">Turn ${action.turn_number}</div>
+      <div class="turn-actor ${isMine ? "mine" : "theirs"}">${icon} ${dwEscapeHtmlLocal(name)}</div>
+      <div class="turn-result">${highlightNumbers(action.log_text)}</div>
+      ${comboBanner}
+    `;
+    messagesEl.appendChild(card);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  let combatLogVisible = true;
+  function toggleCombatLog(){
+    combatLogVisible = document.getElementById("combat-log-toggle").checked;
+    document.getElementById("chat-messages").style.display = combatLogVisible ? "flex" : "none";
+  }
+
+
+  async function sendEmote(emoji){
+    const { error } = await sb.rpc("send_duel_emote", { p_duel_id: currentDuelId, p_emoji: emoji });
+    if (error){
+      alert("Couldn't send emote: " + error.message);
+    }
+  }
+
+  async function requestRematch(){
+    const isChallenger = currentDuel.challenger_id === myUserId;
+    const oppId = isChallenger ? currentDuel.opponent_id : currentDuel.challenger_id;
+    const { data: newDuelId, error } = await sb.rpc("challenge_player", { p_opponent_id: oppId });
+    if (error){
+      alert("Couldn't send rematch: " + error.message);
+      return;
+    }
+    alert("Rematch challenge sent! They'll see it under Pending Challenges in Duel Trade.");
+    closeDuelPanel();
+  }
+
+  function dwEscapeHtmlLocal(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadDuel(){
+    const { data: duel, error } = await sb.from("duels").select("*").eq("id", currentDuelId).maybeSingle();
+    if (error || !duel) return;
+
+    currentDuel = duel;
+    document.getElementById("battle-code-display").textContent = duel.battle_code || "";
+
+    if (duel.status === "finished"){
+      document.getElementById("duel-prep-box").style.display = "none";
+      document.getElementById("duel-status-bar").style.display = "none";
+      document.getElementById("duel-action-row").style.display = "none";
+      showDuelResult(duel);
+      return;
+    }
+
+    if (duel.status === "prep"){
+      document.getElementById("duel-status-bar").style.display = "none";
+      document.getElementById("duel-action-row").style.display = "none";
+      document.getElementById("duel-finished-box").style.display = "none";
+      document.getElementById("duel-prep-box").style.display = "block";
+      await loadPrepScreen(duel);
+      return;
+    }
+
+    if (duel.status !== "active") return;
+
+    document.getElementById("duel-prep-box").style.display = "none";
+    document.getElementById("duel-status-bar").style.display = "none";
+    document.getElementById("duel-action-row").style.display = "none";
+    document.getElementById("duel-finished-box").style.display = "none";
+
+    // From here on, PvP uses the exact same battle engine and
+    // display as every other fight type -- reusing currentBattleId/
+    // isPartyBattle/renderLiveBattleState wholesale rather than a
+    // second parallel rendering path.
+    if (duel.battle_instance_id){
+      currentBattleId = duel.battle_instance_id;
+      isPartyBattle = true; // 2 real participants, no NPC turn -- same simultaneous-submission code path as party battles
+      isPvpBattle = true;
+      document.getElementById("card-battle-live-state").style.display = "block";
+      if (window.SoloLeagueAudio) window.SoloLeagueAudio.playBattleMusic();
+      await renderLiveBattleState();
+    }
+    return;
+
+    const isChallenger = myUserId === duel.challenger_id;
+    const myHp = isChallenger ? duel.challenger_hp : duel.opponent_hp;
+    const oppHp = isChallenger ? duel.opponent_hp : duel.challenger_hp;
+    const myMaxHp = isChallenger ? duel.challenger_max_hp : duel.opponent_max_hp;
+    const oppMaxHp = isChallenger ? duel.opponent_max_hp : duel.challenger_max_hp;
+    const myId = isChallenger ? duel.challenger_id : duel.opponent_id;
+    const oppId = isChallenger ? duel.opponent_id : duel.challenger_id;
+    const myResource = isChallenger ? duel.challenger_resource : duel.opponent_resource;
+    const myMomentum = isChallenger ? duel.challenger_momentum : duel.opponent_momentum;
+    const oppMomentum = isChallenger ? duel.opponent_momentum : duel.challenger_momentum;
+    const myPosition = isChallenger ? duel.challenger_position : duel.opponent_position;
+    const oppPosition = isChallenger ? duel.opponent_position : duel.challenger_position;
+    const myStatus = isChallenger ? duel.challenger_status : duel.opponent_status;
+    const oppStatus = isChallenger ? duel.opponent_status : duel.challenger_status;
+    const myCooldowns = isChallenger ? duel.challenger_cooldowns : duel.opponent_cooldowns;
+    const mySpawnSide = isChallenger ? duel.challenger_spawn_side : duel.opponent_spawn_side;
+    const oppLastSeen = isChallenger ? duel.opponent_last_seen : duel.challenger_last_seen;
+
+    const myName = await getGamerNameFor(myId);
+    const oppName = await getGamerNameFor(oppId);
+
+    document.getElementById("fighter-a-name").textContent = myName + " (You)";
+    setHpBar("fighter-a-hp-bar", (myHp / myMaxHp) * 100);
+    document.getElementById("fighter-a-hp-text").textContent = `${myHp} / ${myMaxHp} HP`;
+    document.getElementById("fighter-a-resource-text").textContent = `${myResource} Resource`;
+    document.getElementById("fighter-a-momentum-bar").style.width = myMomentum + "%";
+    document.getElementById("fighter-a-position-text").textContent = `Position: ${myPosition}`;
+    document.getElementById("fighter-a-status").innerHTML = renderStatusIcons(myStatus);
+
+    document.getElementById("fighter-b-name").textContent = oppName;
+    setHpBar("fighter-b-hp-bar", (oppHp / oppMaxHp) * 100);
+    document.getElementById("fighter-b-hp-text").textContent = `${oppHp} / ${oppMaxHp} HP`;
+    document.getElementById("fighter-b-momentum-bar").style.width = oppMomentum + "%";
+    document.getElementById("fighter-b-position-text").textContent = `Position: ${oppPosition}`;
+    document.getElementById("fighter-b-status").innerHTML = renderStatusIcons(oppStatus);
+    // Fog of War: opponent's resource and cooldowns are never shown — only ours above
+
+    document.getElementById("spawn-side-display").textContent = mySpawnSide ? `You spawned: ${mySpawnSide}` : "";
+
+    // Critical Moments: subtle visual flair when both fighters are below 20% HP
+    const bothCritical = (myHp / myMaxHp) <= 0.20 && (oppHp / oppMaxHp) <= 0.20;
+    document.getElementById("duel-status-bar").classList.toggle("critical-moment", bothCritical);
+
+    // Disconnect Protection: heartbeat + claim button
+    startHeartbeat();
+    renderDisconnectClaim(oppLastSeen);
+
+    const isMyTurn = duel.turn_player_id === myUserId;
+    document.getElementById("turn-indicator").textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
+    document.getElementById("attack-btn").disabled = !isMyTurn;
+    document.getElementById("guard-btn").disabled = !isMyTurn;
+
+    ["front", "middle", "back"].forEach((pos) => {
+      const btn = document.getElementById(`pos-${pos}-btn`);
+      btn.disabled = !isMyTurn || myPosition === pos;
+      btn.style.opacity = myPosition === pos ? "1" : "0.7";
+      btn.style.borderColor = myPosition === pos ? "var(--gold-bright)" : "";
+    });
+
+    await renderAbilityButtons(isMyTurn, myResource, myCooldowns);
+    renderConsumableButtons(isMyTurn, duel, isChallenger);
+  }
+
+  let heartbeatInterval = null;
+  function startHeartbeat(){
+    if (heartbeatInterval) return; // already running
+    sb.rpc("record_heartbeat", { p_duel_id: currentDuelId });
+    heartbeatInterval = setInterval(() => {
+      sb.rpc("record_heartbeat", { p_duel_id: currentDuelId });
+    }, 10000);
+  }
+
+  function stopHeartbeat(){
+    if (heartbeatInterval){
+      clearInterval(heartbeatInterval);
+      heartbeatInterval = null;
+    }
+  }
+
+  function renderDisconnectClaim(oppLastSeen){
+    const area = document.getElementById("disconnect-claim-area");
+    if (!oppLastSeen){ area.innerHTML = ""; return; }
+    const secondsSince = (Date.now() - new Date(oppLastSeen).getTime()) / 1000;
+    if (secondsSince > 60){
+      area.innerHTML = `<button class="btn" style="border-color:var(--crimson-bright); color:var(--crimson-bright);" onclick="claimDisconnectForfeit()">Claim Victory — Opponent Disconnected</button>`;
+    } else {
+      area.innerHTML = "";
+    }
+  }
+
+  async function claimDisconnectForfeit(){
+    const { error } = await sb.rpc("claim_disconnect_forfeit", { p_duel_id: currentDuelId });
+    if (error){
+      alert("Couldn't claim: " + error.message);
+      return;
+    }
+    loadDuel();
+  }
+
+
+  const STATUS_ICONS = {
+    Stunned: "💫", Frozen: "❄", Burning: "🔥", Rooted: "🌿", Silenced: "🔇",
+    Blinded: "🌫", Marked: "🎯", Terrified: "😱", Exhausted: "😮‍💨", Inspired: "✨",
+    Shielded: "🛡", Fortified: "🏰", Enraged: "😡", Weakened: "📉", Shocked: "⚡",
+    Sleep: "💤", Curse: "☠", Cursed: "☠", Blessing: "🙏", Camouflage: "🍃"
+  };
+
+  function renderStatusIcons(statusArray){
+    if (!statusArray || statusArray.length === 0) return "";
+    return statusArray.map(s => `<span title="${dwEscapeHtmlLocal(s.effect)} (${s.turns}t)">${STATUS_ICONS[s.effect] || "❔"}</span>`).join(" ");
+  }
+
+  let cachedClassAbilities = null;
+
+  function renderConsumableButtons(isMyTurn, duel, isChallenger){
+    const container = document.getElementById("consumable-buttons-row");
+    const c1 = isChallenger ? duel.challenger_consumable1 : duel.opponent_consumable1;
+    const c2 = isChallenger ? duel.challenger_consumable2 : duel.opponent_consumable2;
+    const c1Used = isChallenger ? duel.challenger_consumable1_used : duel.opponent_consumable1_used;
+    const c2Used = isChallenger ? duel.challenger_consumable2_used : duel.opponent_consumable2_used;
+
+    const slots = [
+      { name: c1, used: c1Used, action: "consumable_1" },
+      { name: c2, used: c2Used, action: "consumable_2" },
+    ].filter(s => s.name);
+
+    if (slots.length === 0){
+      container.innerHTML = "";
+      return;
+    }
+
+    container.innerHTML = slots.map(s => `
+      <button class="action-btn" style="font-size:0.7rem; padding:0.6rem 0.9rem;" ${(!isMyTurn || s.used) ? "disabled" : ""} onclick="doDuelAction('${s.action}')">
+        🎒 ${dwEscapeHtmlLocal(s.name)}${s.used ? " (used)" : ""}
+      </button>
+    `).join("");
+  }
+
+  async function renderAbilityButtons(isMyTurn, myResource, myCooldowns){
+    const container = document.getElementById("ability-buttons-row");
+    if (!cachedClassAbilities){
+      const { data: character } = await sb.from("characters").select("class").eq("user_id", myUserId).maybeSingle();
+      if (!character){
+        container.innerHTML = "";
+        return;
+      }
+      const { data: abilities } = await sb
+        .from("class_abilities")
+        .select("*")
+        .eq("class", character.class)
+        .in("slot", ["ability_1", "ability_2", "ability_3"])
+        .order("id");
+      cachedClassAbilities = abilities || [];
+    }
+
+    container.innerHTML = cachedClassAbilities.map((a) => {
+      const cooldownLeft = (myCooldowns && myCooldowns[a.ability_name]) || 0;
+      const canAfford = myResource >= a.resource_cost;
+      const disabled = !isMyTurn || cooldownLeft > 0 || !canAfford;
+      let label = a.ability_name;
+      if (cooldownLeft > 0) label += ` (CD ${cooldownLeft})`;
+      return `<button class="action-btn" style="font-size:0.7rem; padding:0.6rem 0.9rem;" title="${dwEscapeHtmlLocal(a.effect_description)} — ${a.resource_cost} ${dwEscapeHtmlLocal(a.resource_name)}, CD ${a.cooldown}${a.position_req ? ', ' + a.position_req + ' only' : ''}" ${disabled ? "disabled" : ""} onclick="doDuelAction('${a.slot}')">${dwEscapeHtmlLocal(label)}</button>`;
+    }).join("");
+  }
+
+  async function setPosition(pos){
+    const { error } = await sb.rpc("set_duel_position", { p_duel_id: currentDuelId, p_position: pos });
+    if (error){ alert("Couldn't change position: " + error.message); }
+  }
+
+  let prepSelectedConsumables = [];
+
+  async function loadPrepScreen(duel){
+    const isChallenger = myUserId === duel.challenger_id;
+    const myReady = isChallenger ? duel.challenger_ready : duel.opponent_ready;
+    const oppReady = isChallenger ? duel.opponent_ready : duel.challenger_ready;
+
+    const { data: character } = await sb.from("characters").select("equipped_weapon, equipped_armor").eq("user_id", myUserId).maybeSingle();
+    document.getElementById("prep-weapon-display").textContent =
+      `Equipped weapon: ${character?.equipped_weapon || "none"}  •  Equipped armor: ${character?.equipped_armor || "none"}`;
+
+    // Weapon/Armor pickers — rebuild every poll since equip state can
+    // change (unlike consumables, this isn't a one-time selection)
+    const { data: allItems } = await sb.from("player_inventory").select("*");
+    const weapons = (allItems || []).filter(i => ["Weapon", "Weapon Item", "General Weapon"].includes(i.item_type));
+    const armorItems = (allItems || []).filter(i => ["Armor", "General Armor"].includes(i.item_type));
+
+    const weaponListEl = document.getElementById("prep-weapon-list");
+    weaponListEl.innerHTML = weapons.length === 0
+      ? `<p class="placeholder-note">No weapons owned yet.</p>`
+      : weapons.map(w => {
+          const equipped = character?.equipped_weapon === w.item_name;
+          return `
+            <div class="frame">
+              <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem; font-size:0.85rem;">${dwEscapeHtmlLocal(w.item_name)}</h4>
+              ${equipped
+                ? `<span class="mono" style="color:var(--gold-bright);">Equipped</span>`
+                : `<button class="btn" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="equipForPrep('${w.item_type}', '${w.item_name.replace(/'/g, "\\'")}')">Equip</button>`
+              }
+            </div>
+          `;
+        }).join("");
+
+    const armorListEl = document.getElementById("prep-armor-list");
+    armorListEl.innerHTML = armorItems.length === 0
+      ? `<p class="placeholder-note">No armor owned yet.</p>`
+      : armorItems.map(a => {
+          const equipped = character?.equipped_armor === a.item_name;
+          return `
+            <div class="frame">
+              <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem; font-size:0.85rem;">${dwEscapeHtmlLocal(a.item_name)}</h4>
+              ${equipped
+                ? `<span class="mono" style="color:var(--gold-bright);">Equipped</span>`
+                : `<button class="btn" style="padding:0.3rem 0.6rem; font-size:0.72rem;" onclick="equipForPrep('${a.item_type}', '${a.item_name.replace(/'/g, "\\'")}')">Equip</button>`
+              }
+            </div>
+          `;
+        }).join("");
+
+    // Only build the consumable picker once (avoid wiping selections on every poll)
+    const listEl = document.getElementById("prep-consumable-list");
+    if (!listEl.dataset.loaded){
+      const items = (allItems || []).filter(i => ["Consumable", "Consumable Item"].includes(i.item_type));
+      if (items.length === 0){
+        listEl.innerHTML = `<p class="placeholder-note">No consumables owned — buy some in the Shop or a Kingdom Alchemist.</p>`;
+      } else {
+        listEl.innerHTML = items.map((item) => `
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" class="prep-consumable-check" value="${dwEscapeHtmlLocal(item.item_name)}" onchange="onPrepConsumableToggle(this)">
+            ${dwEscapeHtmlLocal(item.item_name)} <span class="mono" style="color:var(--dim); font-size:0.75rem;">x${item.quantity}</span>
+          </label>
+        `).join("");
+      }
+      listEl.dataset.loaded = "true";
+    }
+
+    // Card picker — same load-once pattern
+    const cardListEl = document.getElementById("prep-card-list");
+    if (!cardListEl.dataset.loaded){
+      const { data: cards } = await sb.rpc("get_my_cards");
+      if (!cards || cards.length === 0){
+        cardListEl.innerHTML = `<p class="placeholder-note">No cards owned yet — your Player Card alone is enough to duel.</p>`;
+      } else {
+        cardListEl.className = "ability-card-grid";
+        cardListEl.innerHTML = cards.map((c) => `
+          <label class="ability-card selectable" data-card-id="${c.card_id}">
+            <input type="checkbox" class="prep-card-check" value="${c.card_id}" onchange="onPrepCardToggle(this)">
+            <span class="ability-card-rank-tag">${dwEscapeHtmlLocal(c.rank)}</span>
+            <div class="ability-card-name">${dwEscapeHtmlLocal(c.ability_name)}</div>
+            <div class="mono" style="font-size:0.6rem; color:var(--dim); margin-bottom:0.25rem;">${dwEscapeHtmlLocal(c.source_name)}</div>
+            <div class="ability-card-effect">${dwEscapeHtmlLocal(c.effect_text || "")}</div>
+            <hr class="ability-card-divider">
+            <div class="ability-card-energy-label">${c.energy_cost || 0} energy</div>
+          </label>
+        `).join("");
+      }
+      cardListEl.dataset.loaded = "true";
+    }
+
+    // Bet item picker — built once, same reasoning as consumables
+    const betItemsEl = document.getElementById("prep-bet-items-list");
+    if (!betItemsEl.dataset.loaded){
+      if (!allItems || allItems.length === 0){
+        betItemsEl.innerHTML = `<p class="placeholder-note">No items owned to wager.</p>`;
+      } else {
+        betItemsEl.innerHTML = allItems.map((item) => `
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" class="prep-bet-item-check" value="${dwEscapeHtmlLocal(item.item_name)}">
+            ${dwEscapeHtmlLocal(item.item_name)} <span class="mono" style="color:var(--dim); font-size:0.72rem;">(${dwEscapeHtmlLocal(item.item_type)})</span>
+          </label>
+        `).join("");
+      }
+      betItemsEl.dataset.loaded = "true";
+    }
+
+    const myBetLocked = isChallenger ? duel.challenger_bet_locked : duel.opponent_bet_locked;
+    const oppBetLocked = isChallenger ? duel.opponent_bet_locked : duel.challenger_bet_locked;
+    const myBetGold = isChallenger ? duel.challenger_bet_gold : duel.opponent_bet_gold;
+    const myBetAp = isChallenger ? duel.challenger_bet_ap : duel.opponent_bet_ap;
+    const betStatusEl = document.getElementById("prep-bet-status");
+    const betBoxEl = document.getElementById("prep-bet-box");
+    if (myBetLocked){
+      betBoxEl.style.display = "none";
+      betStatusEl.style.display = "block";
+      betStatusEl.textContent = `Your bet is locked in: ${myBetGold} Gold, ${myBetAp} AP` +
+        (oppBetLocked ? " — opponent's bet is locked too." : " — waiting on opponent's bet.");
+    } else {
+      betBoxEl.style.display = "block";
+      betStatusEl.style.display = "none";
+    }
+
+    const statusEl = document.getElementById("prep-status-text");
+    const btnEl = document.getElementById("prep-ready-btn");
+    if (myReady){
+      statusEl.textContent = oppReady ? "Both ready — starting..." : "Waiting for opponent...";
+      btnEl.disabled = true;
+    } else {
+      statusEl.textContent = "";
+      btnEl.disabled = false;
+    }
+  }
+
+  async function lockDuelBet(){
+    const gold = parseInt(document.getElementById("prep-bet-gold").value, 10) || 0;
+    const ap = parseInt(document.getElementById("prep-bet-ap").value, 10) || 0;
+    const itemChecks = document.querySelectorAll(".prep-bet-item-check:checked");
+    const itemNames = Array.from(itemChecks).map(c => c.value);
+
+    if (gold === 0 && ap === 0 && itemNames.length === 0){
+      if (!confirm("You're betting nothing. Lock in an empty bet and continue?")) return;
+    } else if (!confirm(`Lock in this bet: ${gold} Gold, ${ap} AP, ${itemNames.length} item(s)? This is escrowed immediately and only returns to you if you win.`)){
+      return;
+    }
+
+    const { error } = await sb.rpc("set_duel_bet", { p_duel_id: currentDuelId, p_gold: gold, p_ap: ap, p_item_names: itemNames });
+    if (error){ alert("Couldn't lock in bet: " + error.message); return; }
+    await loadPrepScreen(currentDuel);
+  }
+
+  function onPrepConsumableToggle(checkbox){
+    const checks = document.querySelectorAll(".prep-consumable-check");
+    const checked = Array.from(checks).filter(c => c.checked);
+    if (checked.length > 2){
+      checkbox.checked = false;
+      alert("You can only bring 2 consumables.");
+    }
+  }
+
+  function onPrepCardToggle(checkbox){
+    const checks = document.querySelectorAll(".prep-card-check");
+    const checked = Array.from(checks).filter(c => c.checked);
+    if (checked.length > 3){
+      checkbox.checked = false;
+      alert("You can only bring 3 cards — your Player Card is included automatically on top of these.");
+      return;
+    }
+    checkbox.closest(".ability-card")?.classList.toggle("selected", checkbox.checked);
+  }
+
+  async function equipForPrep(itemType, itemName){
+    const { error } = await sb.rpc("equip_inventory_item", { p_item_type: itemType, p_item_name: itemName });
+    if (error){ alert("Couldn't equip: " + error.message); return; }
+    await loadPrepScreen(currentDuel);
+  }
+
+  async function cancelDuel(){
+    if (!confirm("Cancel this duel? Any locked-in bet (gold, AP, items) will be refunded to whoever staked it.")) return;
+    const { data: result, error } = await sb.rpc("cancel_duel_prep", { p_duel_id: currentDuelId });
+    if (error || !result.success){
+      alert("Couldn't cancel: " + (error?.message || result.reason));
+      return;
+    }
+    window.location.href = "pvp-chat.html";
+  }
+
+  async function markReady(){
+    const consumableChecks = document.querySelectorAll(".prep-consumable-check:checked");
+    const chosenConsumables = Array.from(consumableChecks).map(c => c.value);
+    // NOTE: the new engine supports one consumable per fight, not
+    // two -- taking the first checked one; the second checkbox is
+    // effectively unused now, kept visually for now since removing
+    // it isn't necessary for this to function.
+    const cardChecks = document.querySelectorAll(".prep-card-check:checked");
+    const chosenCardIds = Array.from(cardChecks).map(c => parseInt(c.value));
+
+    const statusEl = document.getElementById("prep-status-text");
+    statusEl.textContent = "Readying up...";
+
+    const { data: result, error } = await sb.rpc("set_duel_ready_v2", {
+      p_duel_id: currentDuelId,
+      p_consumable: chosenConsumables[0] || null,
+      p_card_ids: chosenCardIds,
+    });
+    if (error || !result.success){
+      const reasonText = {
+        duel_not_in_prep: "This duel is no longer in prep.",
+        not_your_duel: "This isn't your duel.",
+        max_3_creature_cards: "You can only bring 3 creature cards.",
+      }[result?.reason] || (error?.message || result?.reason || "Unknown error.");
+      statusEl.textContent = "Couldn't ready up: " + reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (result.waiting_for_opponent){
+      statusEl.textContent = "Ready! Waiting for your opponent...";
+    }
+    loadDuel();
+  }
+
+  function setHpBar(elId, hp){
+    const bar = document.getElementById(elId);
+    bar.style.width = Math.max(0, hp) + "%";
+    bar.classList.toggle("low", hp <= 30);
+  }
+
+  function tickDuelTimer(){
+    if (!currentDuel || currentDuel.status !== "active" || !currentDuel.turn_deadline) return;
+    const deadline = new Date(currentDuel.turn_deadline).getTime();
+    const secondsLeft = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    document.getElementById("turn-timer").textContent = secondsLeft;
+    if (secondsLeft <= 0){
+      sb.rpc("resolve_timeout", { p_duel_id: currentDuelId });
+    }
+
+    const isChallenger = myUserId === currentDuel.challenger_id;
+    const oppLastSeen = isChallenger ? currentDuel.opponent_last_seen : currentDuel.challenger_last_seen;
+    renderDisconnectClaim(oppLastSeen);
+  }
+
+  async function doDuelAction(action){
+    if (action !== "surrender"){
+      document.getElementById("attack-btn").disabled = true;
+      document.getElementById("guard-btn").disabled = true;
+    }
+    const { error } = await sb.rpc("submit_duel_action", { p_duel_id: currentDuelId, p_action: action });
+    if (error){
+      alert("Couldn't submit action: " + error.message);
+      loadDuel();
+    }
+  }
+
+  async function showDuelResult(duel){
+    clearInterval(duelTimerInterval);
+    stopHeartbeat();
+    const won = duel.winner_id === myUserId;
+    if (window.SoloLeagueAudio){
+      window.SoloLeagueAudio.stopBattleMusic();
+      won ? window.SoloLeagueAudio.playVictory() : window.SoloLeagueAudio.playDefeat();
+    }
+    document.getElementById("duel-finished-box").style.display = "block";
+    document.getElementById("attack-btn").disabled = true;
+    document.getElementById("guard-btn").disabled = true;
+    document.getElementById("surrender-btn").disabled = true;
+
+    const winnerName = await getGamerNameFor(duel.winner_id);
+
+    // Pay out the bet pot to the winner -- safe to call even if
+    // this function somehow runs twice for the same duel, since
+    // distribute_duel_bet checks bet_distributed and no-ops if
+    // it's already been paid.
+    const { data: betResult } = await sb.rpc("distribute_duel_bet", { p_duel_id: duel.id });
+    if (won && betResult?.success && (betResult.gold_won > 0 || betResult.ap_won > 0 || betResult.items_won > 0)){
+      const wonParts = [
+        betResult.gold_won > 0 ? `${betResult.gold_won} Gold` : null,
+        betResult.ap_won > 0 ? `${betResult.ap_won} AP` : null,
+        betResult.items_won > 0 ? `${betResult.items_won} item${betResult.items_won !== 1 ? "s" : ""}` : null,
+      ].filter(Boolean).join(", ");
+      const betEl = document.createElement("p");
+      betEl.style.cssText = "color:var(--gold-bright); margin-top:0.5rem; font-family:'Cinzel',serif;";
+      betEl.textContent = `You won the wager: ${wonParts}!`;
+      document.getElementById("duel-finished-box").appendChild(betEl);
+    }
+
+    // ---- pull full battle data for the summary ----
+    const { data: actions } = await sb.from("duel_actions").select("*").eq("duel_id", duel.id).order("created_at", { ascending: true });
+    let totalDamage = 0, crits = 0, durationText = "--", mvpSkill = "Attack";
+
+    if (actions && actions.length > 0){
+      const myActions = actions.filter(a => a.player_id === myUserId);
+      totalDamage = myActions.reduce((sum, a) => sum + (a.damage_dealt || 0), 0);
+      crits = myActions.filter(a => a.action_type.endsWith("_crit")).length;
+
+      const start = new Date(actions[0].created_at).getTime();
+      const end = duel.finished_at ? new Date(duel.finished_at).getTime() : Date.now();
+      const seconds = Math.max(0, Math.round((end - start) / 1000));
+      durationText = `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+
+      // MVP skill: whichever of my actions dealt the most total damage
+      const dmgByAction = {};
+      myActions.forEach(a => {
+        const key = a.action_type.replace(/_crit$/, "");
+        dmgByAction[key] = (dmgByAction[key] || 0) + (a.damage_dealt || 0);
+      });
+      const topAction = Object.entries(dmgByAction).sort((a, b) => b[1] - a[1])[0];
+      if (topAction) mvpSkill = topAction[0] === "attack" ? "Attack" : (topAction[0].startsWith("ability_") ? "an Ability" : topAction[0]);
+    }
+
+    document.getElementById("duel-finished-box").innerHTML = `
+      <div class="victory-card">
+        <div class="trophy">${won ? "🏆" : "💀"}</div>
+        <h3 style="font-size:1.4rem; color:${won ? "var(--gold-bright)" : "var(--crimson-bright)"}; margin-bottom:0.75rem;">${won ? "VICTORY" : "DEFEAT"}</h3>
+        <ul class="clean" style="text-align:left; max-width:320px; margin:0 auto;">
+          <li><span>Winner</span><span class="mono">${dwEscapeHtmlLocal(winnerName)}</span></li>
+          <li><span>Duration</span><span class="mono">${durationText}</span></li>
+          <li><span>Your Damage</span><span class="mono">${totalDamage}</span></li>
+          <li><span>Critical Hits</span><span class="mono">${crits}</span></li>
+          <li><span>MVP Skill</span><span class="mono">${dwEscapeHtmlLocal(mvpSkill)}</span></li>
+        </ul>
+        <div id="battle-narration-box" style="margin-top:1rem; padding:0.75rem; background:rgba(201,162,75,0.08); border:1px solid var(--border); border-radius:var(--radius); font-style:italic; font-size:0.85rem; display:none;"></div>
+        <p class="placeholder-note" style="margin-top:0.75rem;">Saved to your Battle Log → PvP.</p>
+        <div style="display:flex; gap:0.6rem; justify-content:center; margin-top:1rem;">
+          <button class="btn" onclick="requestRematch()">Rematch</button>
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="closeDuelPanel()">Back to Chat</button>
+        </div>
+      </div>
+    `;
+
+    generateBattleNarration({ won, winnerName, durationText, totalDamage, crits, mvpSkill });
+  }
+
+  async function callGemini(prompt, purpose, groundWith){
+    try {
+      const { data: result, error } = await sb.functions.invoke("call-gemini", {
+        body: { purpose: purpose || "general", prompt, groundWith: groundWith || "" },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (result?.error) return { ok: false, error: result.error };
+      return { ok: true, text: result.text, warning: result.warning };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  async function generateBattleNarration(stats){
+    const box = document.getElementById("battle-narration-box");
+    if (!box) return;
+    const prompt = `Write a short (2-3 sentence), dramatic but concise combat narration for a duel that just ended. Result: ${stats.won ? "the player WON" : "the player LOST"}. Winner: ${stats.winnerName}. Duration: ${stats.durationText}. Player's total damage dealt: ${stats.totalDamage}. Critical hits landed: ${stats.crits}. Most-used skill: ${stats.mvpSkill}. Write it as an in-world battle recap, second person ("You..."), fantasy tone matching a dark-fantasy RPG. No preamble, just the narration itself.`;
+    const result = await callGemini(prompt, "battle_narration", "");
+    if (result.ok){
+      box.textContent = result.text;
+      box.style.display = "block";
+    }
+    // Silent on failure (e.g. no Gemini key set) -- narration is a
+    // bonus, not required, and the victory/defeat card already
+    // shown works fine without it.
+  }
+
+  function closeDuelPanel(){
+    exitDuelMode();
+    window.history.replaceState({}, "", "pvp-chat.html");
+  }
+
+  // ---- Real PvP chat (separate channel from the lobby bubble) ----
+  async function initPvpChat(){
+    const messagesEl = document.getElementById("chat-messages");
+    const inputEl = document.getElementById("pvp-chat-input");
+    const sendBtn = document.getElementById("pvp-chat-send");
+    const myName = await getMyGamerName();
+
+    async function renderPvpMessage(msg){
+      document.getElementById("chat-empty-note")?.remove();
+      const isMine = msg.sender_id === myUserId;
+      const div = document.createElement("div");
+      div.className = "chat-msg";
+      div.innerHTML = `<span class="who" style="color:${isMine ? "var(--gold-bright)" : "var(--crimson-bright)"};">${dwEscapeHtmlLocal(msg.sender_name)}:</span> ${dwEscapeHtmlLocal(msg.message)}`;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    const { data: history } = await sb
+      .from("chat_messages")
+      .select("*")
+      .eq("channel", "pvp")
+      .order("created_at", { ascending: true })
+      .limit(50);
+
+    messagesEl.innerHTML = "";
+    if (history && history.length > 0){
+      history.forEach(renderPvpMessage);
+    } else {
+      messagesEl.innerHTML = `<p class="placeholder-note" id="chat-empty-note">No messages yet — say something.</p>`;
+    }
+
+    async function sendPvpMessage(){
+      const text = inputEl.value.trim();
+      if (!text) return;
+      inputEl.value = "";
+      const { error } = await sb.from("chat_messages").insert({
+        sender_id: myUserId,
+        sender_name: myName,
+        message: text,
+        channel: "pvp",
+      });
+      if (error) console.error("Failed to send PvP chat message:", error.message);
+    }
+
+    sendBtn.addEventListener("click", sendPvpMessage);
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendPvpMessage();
+    });
+
+    sb.channel("pvp-chat-room")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: "channel=eq.pvp" }, (payload) => {
+        renderPvpMessage(payload.new);
+      })
+      .subscribe();
+  }
+
+  document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  // ============================================================
+  // PvE Tab — handles both Creature and Boss fights, launched via
+  // URL params from World Map (?start_creature=ID or ?start_boss=ID)
+  // ============================================================
+  document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  function escapeHtml(str){
+    if (str === null || str === undefined) return "";
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  let currentBattleId = null;
+  let pendingSelectedCardIds = [];
+  let pendingSelectedConsumable = null;
+  let isPartyBattle = false;
+  let isPvpBattle = false;
+  let battleRealtimeChannel = null;
+
+  async function beginRealBattle(){
+    const btn = document.getElementById("begin-battle-btn");
+    btn.disabled = true;
+    btn.textContent = "Starting...";
+
+    const { data: partyInfo } = await sb.rpc("get_my_party");
+    const inReadyParty = partyInfo?.in_party && partyInfo.members.length > 1 && partyInfo.members.every(m => m.ready);
+
+    let result, error;
+    if (inReadyParty){
+      ({ data: result, error } = await sb.rpc("start_party_battle"));
+    } else {
+      ({ data: result, error } = await sb.rpc("start_solo_battle", { p_card_ids: pendingSelectedCardIds }));
+    }
+
+    if (error || !result.success){
+      const resultEl = document.getElementById("card-battle-result");
+      resultEl.style.display = "block";
+      const reasonText = result?.reason === "solo_primordial_locked"
+        ? `You need to have helped defeat ${result.defeats_needed} Primordials as a party first (${result.defeats_so_far}/${result.defeats_needed} so far) before you can challenge one solo.`
+        : result?.reason === "not_in_that_kingdom"
+        ? `You need to be in ${result.kingdom_required} to challenge this NPC — you're currently in ${result.current_kingdom || "another kingdom"}.`
+        : (error?.message || result?.reason);
+      resultEl.innerHTML = `<p class="placeholder-note">Couldn't start battle: ${escapeHtml(reasonText)}</p>`;
+      btn.disabled = false;
+      btn.textContent = "Begin Battle";
+      return;
+    }
+
+    currentBattleId = result.battle_id;
+    isPartyBattle = !!inReadyParty;
+    isPvpBattle = false;
+
+    if (pendingSelectedConsumable){
+      await sb.rpc("use_consumable_in_battle", { p_battle_id: currentBattleId, p_item_name: pendingSelectedConsumable });
+    }
+
+    document.getElementById("card-battle-active-state").style.display = "none";
+    document.getElementById("card-battle-live-state").style.display = "block";
+    subscribeToBattleUpdates();
+    await renderLiveBattleState();
+  }
+
+  function subscribeToBattleUpdates(){
+    if (battleRealtimeChannel) sb.removeChannel(battleRealtimeChannel);
+    battleRealtimeChannel = sb.channel(`battle-${currentBattleId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "battle_instances", filter: `id=eq.${currentBattleId}` }, () => renderLiveBattleState())
+      .on("postgres_changes", { event: "*", schema: "public", table: "battle_participants", filter: `battle_id=eq.${currentBattleId}` }, () => renderLiveBattleState())
+      .subscribe();
+  }
+
+  async function renderLiveBattleState(){
+    const { data: battle, error: battleErr } = await sb.from("battle_instances").select("*").eq("id", currentBattleId).maybeSingle();
+    const { data: userData } = await sb.auth.getUser();
+    const { data: allParts, error: partsErr } = await sb.from("battle_participants").select("*").eq("battle_id", currentBattleId);
+    const { data: cards, error: cardsErr } = await sb.from("battle_cards").select("*, card_catalog(*)").eq("battle_id", currentBattleId).eq("user_id", userData.user.id);
+
+    if (battleErr || partsErr || cardsErr || !battle){
+      console.error("renderLiveBattleState failed:", battleErr, partsErr, cardsErr);
+      document.getElementById("live-hp-bars").innerHTML = `<p class="placeholder-note">Couldn't load battle state: ${escapeHtml((battleErr || partsErr || cardsErr)?.message || "battle not found")}</p>`;
+      return;
+    }
+
+    // Fetch gamer names separately (profiles, not characters -- no
+    // direct FK from battle_participants to characters for PostgREST
+    // to auto-join on, and gamer_name lives in profiles anyway).
+    const partUserIds = (allParts || []).map(p => p.user_id);
+    const { data: profs } = await sb.from("profiles").select("user_id, gamer_name").in("user_id", partUserIds);
+    const nameFor = {};
+    (profs || []).forEach(p => { nameFor[p.user_id] = p.gamer_name; });
+
+    const myPart = (allParts || []).find(p => p.user_id === userData.user.id);
+
+    // HP bars: all party members plus the enemy
+    const hpBarsEl = document.getElementById("live-hp-bars");
+    const memberBars = (allParts || []).map(p => `
+      <div style="flex:1; min-width:150px; ${p.is_alive ? "" : "opacity:0.5;"}">
+        <strong style="color:var(--parchment); font-size:0.85rem;">${escapeHtml(nameFor[p.user_id] || "Player")} (${escapeHtml(p.class_name)})${p.user_id === userData.user.id ? " — You" : ""}</strong>
+        <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${Math.max(0, (p.current_hp / p.max_hp) * 100)}%;"></div></div>
+        <span class="mono" style="font-size:0.72rem;">${p.current_hp} / ${p.max_hp} HP</span>
+      </div>
+    `).join("");
+    const enemyBar = `
+      <div style="flex:1; min-width:150px; text-align:right;">
+        <strong style="color:var(--crimson-bright); font-size:0.85rem;">${escapeHtml(battle.enemy_name)} (${escapeHtml(battle.enemy_rank)}-Rank)</strong>
+        <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${Math.max(0, (battle.enemy_hp / battle.enemy_max_hp) * 100)}%; background:var(--crimson);"></div></div>
+        <span class="mono" style="font-size:0.72rem;">${battle.enemy_hp} / ${battle.enemy_max_hp} HP</span>
+      </div>
+    `;
+    hpBarsEl.innerHTML = memberBars + enemyBar;
+
+    const cardBtnsEl = document.getElementById("live-card-buttons");
+    if (!cards || cards.length === 0){
+      cardBtnsEl.innerHTML = `<p class="placeholder-note">No cards loaded for this battle — try refreshing.</p>`;
+    } else {
+    cardBtnsEl.innerHTML = (cards || []).map(bc => {
+      const cc = bc.card_catalog;
+      const usable = bc.current_energy >= cc.energy_cost;
+      const energyPct = Math.min(100, (bc.current_energy / bc.energy_cap) * 100);
+      return `
+        <button class="ability-card" ${usable ? "" : "disabled"} onclick="battleUseCard(${cc.id})">
+          <div class="ability-card-name">${escapeHtml(cc.ability_name)}</div>
+          <span class="ability-card-cost">${cc.energy_cost} energy</span>
+          <div class="ability-card-effect">${escapeHtml(cc.effect_text)}</div>
+          <hr class="ability-card-divider">
+          <div class="hp-bar-track" style="height:7px;"><div class="hp-bar-fill" style="width:${energyPct}%; background:var(--gold-bright);"></div></div>
+          <div class="ability-card-energy-label">${bc.current_energy}/${bc.energy_cap} energy</div>
+        </button>
+      `;
+    }).join("");
+    }
+
+    const logEl = document.getElementById("live-battle-log");
+    logEl.innerHTML = (battle.battle_log || []).map(entry => `<div>${escapeHtml(entry.text)}</div>`).join("");
+
+    // In a party battle, show "waiting" state once you've submitted
+    // but the round hasn't resolved yet (i.e. your HP/energy hasn't
+    // changed but you've already picked an action this round)
+    const waitingNote = document.getElementById("waiting-for-party-note");
+    const actionButtonsDisabled = isPartyBattle && myPart?.has_submitted;
+    waitingNote.style.display = actionButtonsDisabled ? "block" : "none";
+    document.querySelectorAll("#card-battle-live-state .action-btn, #live-card-buttons button").forEach(b => {
+      if (actionButtonsDisabled) b.disabled = true;
+    });
+
+    if (battle.status !== "active"){
+      if (battleRealtimeChannel) sb.removeChannel(battleRealtimeChannel);
+      await handleBattleEnd(battle.status);
+    }
+  }
+
+  let lastSurrenderGoldLost = null;
+
+  async function battleAction(type){
+    let rpcName;
+    if (isPvpBattle){
+      const { error } = await sb.rpc("submit_pvp_action", { p_battle_id: currentBattleId, p_action: type });
+      if (error){ alert("Something went wrong: " + error.message); return; }
+      await renderLiveBattleState();
+      return;
+    }
+    if (isPartyBattle){
+      const { error } = await sb.rpc("submit_party_action", { p_battle_id: currentBattleId, p_action: type });
+      if (error){ alert("Something went wrong: " + error.message); return; }
+      await renderLiveBattleState();
+      return;
+    }
+    rpcName = type === "attack" ? "battle_action_attack" : type === "guard" ? "battle_action_guard" : "battle_action_surrender";
+    const { data, error } = await sb.rpc(rpcName, { p_battle_id: currentBattleId });
+    if (type === "surrender" && data && data.gold_lost !== undefined){
+      lastSurrenderGoldLost = data.gold_lost;
+    }
+    if (error){
+      alert("Something went wrong: " + error.message);
+      return;
+    }
+    await renderLiveBattleState();
+  }
+
+  async function battleUseCard(cardId){
+    if (isPvpBattle){
+      const { error } = await sb.rpc("submit_pvp_action", { p_battle_id: currentBattleId, p_action: "use_card", p_card_id: cardId });
+      if (error){ alert("Something went wrong: " + error.message); return; }
+      await renderLiveBattleState();
+      return;
+    }
+    if (isPartyBattle){
+      const { error } = await sb.rpc("submit_party_action", { p_battle_id: currentBattleId, p_action: "use_card", p_card_id: cardId });
+      if (error){ alert("Something went wrong: " + error.message); return; }
+      await renderLiveBattleState();
+      return;
+    }
+    const { error } = await sb.rpc("battle_action_use_card", { p_battle_id: currentBattleId, p_card_id: cardId });
+    if (error){
+      alert("Something went wrong: " + error.message);
+      return;
+    }
+    await renderLiveBattleState();
+  }
+
+  function showBattleResultBanner(text, isWin, detailsHtml, delayNextButton){
+    const banner = document.getElementById("battle-result-banner");
+    const textEl = document.getElementById("battle-result-text");
+    textEl.textContent = text;
+    textEl.className = isWin ? "win" : "loss";
+
+    let detailsEl = document.getElementById("battle-result-details");
+    if (!detailsEl){
+      detailsEl = document.createElement("div");
+      detailsEl.id = "battle-result-details";
+      detailsEl.style.cssText = "text-align:center; margin-top:1rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem; color:var(--parchment);";
+      banner.appendChild(detailsEl);
+    }
+    detailsEl.innerHTML = detailsHtml || "";
+
+    let nextBtn = document.getElementById("battle-result-next-btn");
+    if (!nextBtn){
+      nextBtn = document.createElement("button");
+      nextBtn.id = "battle-result-next-btn";
+      nextBtn.className = "btn";
+      nextBtn.textContent = "Next";
+      nextBtn.style.marginTop = "1.5rem";
+      nextBtn.onclick = () => { window.location.href = "world.html"; };
+      banner.appendChild(nextBtn);
+    }
+    nextBtn.style.display = delayNextButton ? "none" : "inline-block";
+
+    banner.style.display = "flex";
+    banner.style.flexDirection = "column";
+  }
+
+  async function showChampionMysteryCards(npcId){
+    const banner = document.getElementById("battle-result-banner");
+    let mysteryEl = document.getElementById("champion-mystery-cards");
+    if (!mysteryEl){
+      mysteryEl = document.createElement("div");
+      mysteryEl.id = "champion-mystery-cards";
+      mysteryEl.style.cssText = "display:flex; flex-direction:column; align-items:center; margin-top:1.5rem;";
+      banner.appendChild(mysteryEl);
+    }
+    mysteryEl.innerHTML = `<p style="margin-bottom:0.75rem; font-family:'Cinzel',serif; color:var(--gold-bright);">Choose one</p>`;
+    const cardsRow = document.createElement("div");
+    cardsRow.style.cssText = "display:flex; gap:1rem;";
+    for (let i = 0; i < 3; i++){
+      const card = document.createElement("button");
+      card.className = "ability-card";
+      card.style.cssText = "width:110px; min-height:140px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--gold-bright);";
+      card.textContent = "?";
+      card.onclick = async () => {
+        Array.from(cardsRow.children).forEach(c => { c.disabled = true; c.style.opacity = "0.5"; });
+        const { data: prize, error } = await sb.rpc("resolve_champion_mystery_reward", { p_npc_id: npcId });
+        if (error || !prize.success){
+          mysteryEl.innerHTML = `<p class="placeholder-note">Couldn't reveal the prize: ${escapeHtml(error?.message || prize.reason)}</p>`;
+          document.getElementById("battle-result-next-btn").style.display = "inline-block";
+          return;
+        }
+        let revealHtml;
+        if (prize.prize_type === "gold"){
+          revealHtml = `<p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.3rem;">+${prize.gold_amount} Gold</p>`;
+        } else {
+          revealHtml = `
+            <p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.1rem;">${escapeHtml(prize.ability_name)}</p>
+            <p style="font-size:0.85rem; margin-top:0.3rem;">${escapeHtml(prize.effect_text)}</p>
+            <p class="mono" style="font-size:0.7rem; color:var(--dim); margin-top:0.3rem;">${escapeHtml(prize.rank)}-Rank ability from ${escapeHtml(prize.source_name)} — added to your cards</p>
+          `;
+        }
+        mysteryEl.innerHTML = `<div style="text-align:center;">${revealHtml}</div>`;
+        document.getElementById("battle-result-next-btn").style.display = "inline-block";
+      };
+      cardsRow.appendChild(card);
+    }
+    mysteryEl.appendChild(cardsRow);
+  }
+
+  async function handleBattleEnd(status){
+    const outcomeEl = document.getElementById("live-battle-outcome");
+    outcomeEl.style.display = "block";
+
+    if (isPvpBattle){
+      // battle_instances.status is shared between both players --
+      // "won" alone doesn't say who. Check this player's own
+      // is_alive to know if they're the winner or the loser.
+      const { data: userData } = await sb.auth.getUser();
+      const { data: myPart } = await sb.from("battle_participants").select("is_alive").eq("battle_id", currentBattleId).eq("user_id", userData.user.id).maybeSingle();
+      if (myPart && myPart.is_alive){
+        outcomeEl.innerHTML = `<div class="frame" style="padding:1rem; border-color:var(--gold);"><strong style="color:var(--gold-bright);">Victory! You won the duel.</strong></div>`;
+        showBattleResultBanner("You Won", true);
+      } else {
+        outcomeEl.innerHTML = `<div class="frame" style="padding:1rem; border-color:var(--crimson);"><strong style="color:var(--crimson-bright);">Defeated.</strong> Your opponent won this duel.</div>`;
+        showBattleResultBanner("You Lost", false);
+      }
+      return;
+    }
+
+    if (status === "surrendered"){
+      const goldText = lastSurrenderGoldLost !== null ? ` Lost ${lastSurrenderGoldLost} Gold.` : "";
+      const surrenderDetailHtml = lastSurrenderGoldLost !== null ? `<p class="mono" style="margin-top:0.5rem; font-size:0.78rem; color:var(--crimson-bright);">-${lastSurrenderGoldLost} Gold</p>` : "";
+      outcomeEl.innerHTML = `<div class="frame" style="padding:0.75rem 1rem;"><strong>You retreated from the fight.</strong> No reward this time.${goldText}</div>`;
+      showBattleResultBanner("You Lost", false, surrenderDetailHtml);
+      return;
+    }
+    if (status === "lost"){
+      const { data: penalty } = await sb.rpc("resolve_hierarchy_loss", { p_battle_id: currentBattleId });
+      let penaltyHtml = "";
+      if (penalty && penalty.success){
+        penaltyHtml = `<p class="mono" style="margin-top:0.5rem; font-size:0.78rem; color:var(--crimson-bright);">-${penalty.xp_lost} XP</p>`;
+        if (penalty.level_dropped) penaltyHtml += `<p style="margin-top:0.3rem; color:var(--crimson-bright);">Fell to Level ${penalty.new_level}.</p>`;
+        if (penalty.rank_dropped) penaltyHtml += `<p style="margin-top:0.3rem; color:var(--crimson-bright);">Rank fell to ${escapeHtml(penalty.new_rank)}.</p>`;
+      }
+      outcomeEl.innerHTML = `<div class="frame" style="padding:0.75rem 1rem; border-color:var(--crimson);"><strong style="color:var(--crimson-bright);">Defeated.</strong> No reward this time — try again once you're stronger.${penaltyHtml}</div>`;
+      showBattleResultBanner("You Lost", false, penaltyHtml);
+      return;
+    }
+
+    // Won -- trigger the real reward resolution built earlier
+    outcomeEl.innerHTML = `<p class="placeholder-note">Victory! Resolving reward...</p>`;
+    const { data: result, error } = await sb.rpc("resolve_pending_battle");
+    if (error || !result.success){
+      outcomeEl.innerHTML = `<p class="placeholder-note">Won the fight, but couldn't resolve the reward: ${escapeHtml(error?.message || result?.reason || "unknown error")}</p>`;
+      return;
+    }
+
+    let html = "";
+    if (result.fully_learned){
+      html = `<strong style="color:var(--gold-bright);">You already know everything this creature can teach.</strong>`;
+    } else if (result.gained_ability === true){
+      html = `<strong style="color:var(--gold-bright);">You gained: ${escapeHtml(result.ability_name)}!</strong><p style="margin-top:0.4rem; font-size:0.85rem;">${escapeHtml(result.effect_text)}</p><p class="mono" style="margin-top:0.3rem; font-size:0.75rem; color:var(--dim);">Ability ${result.unlocked_position} of ${result.total_abilities} learned from this creature</p>`;
+    } else if (result.gained_ability === false){
+      html = `<em>${escapeHtml(result.message)}</em><p class="mono" style="margin-top:0.4rem; font-size:0.78rem; color:var(--dim);">Next attempt: ${result.next_chance}% chance.</p>`;
+    } else if (result.ownership_claimed){
+      html = `<h3 style="color:var(--gold-bright); margin-bottom:0.5rem;">👑 ${escapeHtml(result.kingdom)} is yours.</h3><p>${result.dethroned_previous_owner ? "You've dethroned the previous owner and claimed the throne." : "You are its first owner."}</p>`;
+    } else if (result.tier){
+      html = `<strong style="color:var(--gold-bright);">${escapeHtml(result.npc_name)} defeated.</strong><p style="margin-top:0.4rem; font-size:0.85rem;">${escapeHtml(result.tier)} tier progress recorded — the next tier may now be open.</p>`;
+    } else if (result.primordial_name){
+      const cardsHtml = (result.cards_granted || []).map(c => `<li><span>${escapeHtml(c.ability_name)}</span><span class="mono" style="text-align:right;">${escapeHtml(c.effect_text)}</span></li>`).join("");
+      html = `
+        <h3 style="color:var(--gold-bright); margin-bottom:0.5rem;">🌌 ${escapeHtml(result.primordial_name)} falls.</h3>
+        <p style="margin-bottom:0.5rem;">${escapeHtml(result.kingdom)}'s Primordial is defeated.</p>
+        <p class="mono" style="color:var(--gold-bright); margin-bottom:0.5rem;">+${result.gold_earned} Gold</p>
+        <ul class="clean">${cardsHtml}</ul>
+        <p class="placeholder-note" style="margin-top:0.5rem;">Primordials defeated (as party or solo): ${result.primordial_defeats_total}/9${result.primordial_defeats_total < 3 ? ` — reach 3 to unlock solo challenges for the rest.` : ""}</p>
+      `;
+    } else {
+      html = `<p>${escapeHtml(JSON.stringify(result))}</p>`;
+    }
+
+    if (result.xp && result.xp.success){
+      html += `<p class="mono" style="margin-top:0.6rem; font-size:0.78rem; color:var(--dim);">+${result.xp.xp_gained} XP (Level ${result.xp.new_level})</p>`;
+      if (result.xp.rank_up){
+        const unlocks = (result.xp.newly_unlocked_kingdoms || []).length
+          ? ` New kingdoms unlocked: ${result.xp.newly_unlocked_kingdoms.join(", ")}.`
+          : "";
+        html += `<p style="margin-top:0.4rem; color:var(--gold-bright);">Rank up! Now ${escapeHtml(result.xp.new_rank)}-Rank.${unlocks}</p>`;
+      }
+    }
+    outcomeEl.innerHTML = `<div class="frame" style="padding:1rem;">${html}</div>`;
+
+    if (result.ownership_claimed && result.npc_id){
+      showBattleResultBanner("You Won", true, html, true);
+      await showChampionMysteryCards(result.npc_id);
+    } else {
+      showBattleResultBanner("You Won", true, html);
+    }
+  }
+
+  async function loadPendingCardBattle(){
+    const { data: result, error } = await sb.rpc("get_my_pending_battle");
+    if (error || !result || !result.found) return;
+
+    // A pending battle exists -- switch to that tab and show it
+    document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === "card-battle"));
+    document.querySelectorAll(".page-tab-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === "card-battle"));
+
+    // Auto-select the matching PvE subtab (creature vs. hierarchy/Champion)
+    const matchingSubtype = result.enemy_source === "creature" ? "creature" : "characters";
+    document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.pvetype === matchingSubtype));
+
+    document.getElementById("card-battle-empty-state").style.display = "none";
+    document.getElementById("card-battle-active-state").style.display = "block";
+    document.getElementById("card-battle-enemy-name").textContent = `${result.enemy_name} (${result.enemy_rank}-Rank)`;
+    document.getElementById("card-battle-flavor").textContent = result.flavor_text || "";
+    const videoEl = document.getElementById("card-battle-video");
+    if (result.video_url){
+      videoEl.src = result.video_url;
+      videoEl.style.display = "block";
+    } else {
+      videoEl.style.display = "none";
+      videoEl.removeAttribute("src");
+    }
+
+    const loadoutEl = document.getElementById("card-battle-loadout");
+    loadoutEl.innerHTML = (result.cards || []).map(c => `
+      <div class="frame" style="padding:0.5rem 0.7rem;">
+        <strong style="color:var(--parchment);">${escapeHtml(c.ability_name)}</strong>
+        <span class="tag" style="margin-left:0.4rem;">${escapeHtml(c.rank)}</span>
+        <span class="mono" style="margin-left:0.4rem; font-size:0.75rem; color:var(--dim);">${escapeHtml(c.source_name)}</span>
+        <div style="font-size:0.78rem; color:var(--dim); margin-top:0.2rem;">${escapeHtml(c.effect_text)} — ${c.energy_cost} energy</div>
+      </div>
+    `).join("");
+
+    pendingSelectedCardIds = (result.cards || []).map(c => c.card_id);
+    pendingSelectedConsumable = result.selected_consumable || null;
+
+    if (result.resolved){
+      document.getElementById("begin-battle-btn").style.display = "none";
+      const resultEl = document.getElementById("card-battle-result");
+      resultEl.style.display = "block";
+      resultEl.innerHTML = `<p class="placeholder-note">This battle was already resolved — start a new one from World Map to fight again.</p>`;
+    } else {
+      const btn = document.getElementById("begin-battle-btn");
+      btn.style.display = "inline-block";
+      btn.disabled = false;
+      btn.textContent = "Begin Battle";
+      document.getElementById("card-battle-result").style.display = "none";
+      document.getElementById("card-battle-live-state").style.display = "none";
+    }
+  }
+
+  async function loadPvgObjectives(){
+    const objEl = document.getElementById("pvg-objectives");
+    const challengeEl = document.getElementById("pvg-challenge-area");
+    if (!objEl) return;
+
+    const { data: elig, error } = await sb.rpc("check_pvg_eligibility");
+    if (error){
+      objEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    const row = (met, label) => `
+      <li><span>${met ? "✅" : "⬜"} ${escapeHtml(label)}</span></li>
+    `;
+    objEl.innerHTML = `
+      <ul class="clean">
+        ${row(elig.all_kingdoms_conquered, `All 9 kingdoms conquered (${elig.kingdoms_owned}/${elig.kingdoms_total})`)}
+        ${row(elig.all_champions_defeated, `All 9 Champions/Monarchs defeated (${elig.champions_defeated}/${elig.champions_total})`)}
+        ${row(elig.all_ss_creatures_defeated, `All SS-rank creatures defeated across every kingdom (${elig.ss_defeated}/${elig.ss_total})`)}
+      </ul>
+    `;
+
+    if (!elig.eligible){
+      challengeEl.innerHTML = `<p class="placeholder-note">Not yet eligible — complete all three above.</p>`;
+      return;
+    }
+
+    challengeEl.innerHTML = `
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Challenge a Primordial</h4>
+      <select id="pvg-kingdom-picker" style="width:100%; max-width:280px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem; margin-bottom:0.5rem;">
+        <option value="Valoria">Valoria — The Crown Stag</option>
+        <option value="Frosthaven">Frosthaven — The Frost Father</option>
+        <option value="Mordrath">Mordrath — The Veiled Shadow</option>
+        <option value="Azure Reach">Azure Reach — The Endless Tide</option>
+        <option value="Eldergrove">Eldergrove — The First Root</option>
+        <option value="Pyrath">Pyrath — The World Forge</option>
+        <option value="Aetheria">Aetheria — The Sky Loom</option>
+        <option value="Khar'Duun">Khar'Duun — The Golden Sun</option>
+        <option value="Blackfen">Blackfen — The Mire Heart</option>
+      </select>
+      <br>
+      <button class="btn" onclick="challengePrimordialFromPvg()">Challenge</button>
+      <p class="placeholder-note" id="pvg-challenge-status" style="margin-top:0.5rem;"></p>
+    `;
+  }
+
+  async function challengePrimordialFromPvg(){
+    const kingdom = document.getElementById("pvg-kingdom-picker").value;
+    const statusEl = document.getElementById("pvg-challenge-status");
+    statusEl.textContent = "Challenging...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("challenge_primordial", { p_kingdom: kingdom });
+    if (error || !result.success){
+      statusEl.textContent = "Couldn't challenge: " + (error?.message || result.reason);
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = `${result.primordial_name} rises. Redirecting to the PvE tab to build your loadout...`;
+    statusEl.style.color = "var(--gold-bright)";
+    setTimeout(() => location.reload(), 1200);
+  }
+
+  initDuelCheck();
+  loadPendingCardBattle();
+  loadPvgObjectives();
+</script>
+</body>
+</html>

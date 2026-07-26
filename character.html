@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Character</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Character Tab</div>
+        <h2>Characters</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="char-tabs">
+      <button class="page-tab-btn active" data-tab="overview">Overview</button>
+      <button class="page-tab-btn" data-tab="cards">Player Cards</button>
+      <button class="page-tab-btn" data-tab="stats">Stats</button>
+      <button class="page-tab-btn" data-tab="attributes">Attributes</button>
+      <button class="page-tab-btn" data-tab="inventory">Inventory</button>
+      <button class="page-tab-btn" data-tab="class">Class</button>
+      <button class="page-tab-btn" data-tab="progression">Progression</button>
+    </div>
+      <div class="channel-content">
+
+    <!-- OVERVIEW — holds the real, live player roster -->
+    <div class="page-tab-panel active" data-panel="overview">
+
+      <section class="frame" id="create-character-card" style="display:none; margin-bottom:1.25rem;">
+        <h3>Create Your Character</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">You don't have a character yet — pick a name and a class to begin your progression.</p>
+
+        <div class="field" style="margin-bottom:1rem;">
+          <label for="cc-name" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Character Name</label>
+          <input type="text" id="cc-name" maxlength="24" placeholder="Enter a name"
+            style="width:100%; max-width:360px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+        </div>
+
+        <div class="field" style="margin-bottom:1rem;">
+          <label for="cc-class" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Class</label>
+          <select id="cc-class" onchange="renderClassDescription()" style="width:100%; max-width:360px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <option>Knight</option>
+            <option>Berserker</option>
+            <option>Assassin</option>
+            <option>Ranger</option>
+            <option>Mage</option>
+            <option>Druid</option>
+            <option>Paladin</option>
+            <option>Necromancer</option>
+            <option>Monk</option>
+            <option>Engineer</option>
+            <option>Hunter</option>
+            <option>Bard</option>
+            <option>Alchemist</option>
+            <option>Beastmaster</option>
+            <option>Templar</option>
+          </select>
+        </div>
+
+        <div class="frame" id="class-description-box" style="max-width:420px; margin-bottom:1rem;"></div>
+
+        <button class="btn" onclick="createCharacter()">Create Character</button>
+        <p class="placeholder-note" id="cc-message" style="margin-top:0.75rem;"></p>
+      </section>
+
+      <section class="frame" id="my-character-card" style="display:none; margin-bottom:1.25rem;">
+        <h3>Your Character</h3>
+        <ul class="clean">
+          <li><span>Name</span><span class="mono" id="mc-name">--</span></li>
+          <li><span>Class</span><span class="mono" id="mc-class">--</span></li>
+          <li><span>Level</span><span class="mono" id="mc-level">--</span></li>
+          <li><span>Unspent AP</span><span class="mono" id="mc-ap">--</span></li>
+        </ul>
+        <p class="placeholder-note" style="margin-top:0.75rem;">Manage your stats in the Stats and Attributes tabs.</p>
+
+        <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Backstory</h4>
+          <p class="placeholder-note" id="mc-backstory-text" style="font-style:italic; display:none; margin-bottom:0.75rem;"></p>
+          <button class="btn" id="mc-backstory-btn" onclick="generateBackstory()">✨ Generate My Backstory</button>
+          <button class="btn" id="mc-backstory-regen-btn" style="display:none; border-color:var(--border-bright); color:var(--dim);" onclick="generateBackstory()">🔄 Regenerate</button>
+          <p class="placeholder-note" id="mc-backstory-status" style="margin-top:0.5rem;"></p>
+        </div>
+      </section>
+
+      <section class="frame">
+        <h3>Player Roster <span class="tag" id="player-count-tag"></span></h3>
+        <div style="overflow-x:auto;">
+          <table class="roster-table" id="player-roster-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Title</th>
+                <th>Level</th>
+                <th>Rank</th>
+                <th>STR</th>
+                <th>AGI</th>
+                <th>INT</th>
+                <th>VIT</th>
+                <th>Equipment</th>
+              </tr>
+            </thead>
+            <tbody id="player-roster-body">
+              <tr><td colspan="10" class="placeholder-note">Loading roster...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="cards">
+      <section class="frame">
+        <h3>Player Card</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Your class's card — always included in every fight automatically, on top of whatever creature cards you bring. This alone is enough to fight from Valoria on day one.</p>
+        <div id="player-card-display"><p class="placeholder-note">Loading...</p></div>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Your Cards <span class="tag" style="font-size:0.65rem;">by rank, highest first</span></h3>
+        <div id="owned-cards-display"><p class="placeholder-note">Loading...</p></div>
+      </section>
+    </div>
+
+    <!-- Everything else below is placeholder until each system is built -->
+    <div class="page-tab-panel" data-panel="stats">
+      <section class="frame">
+        <h3>Stats</h3>
+        <div id="stats-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
+        <ul class="clean" id="stats-list" style="display:none;">
+          <li><span>Strength</span><span class="mono" id="stat-strength">--</span></li>
+          <li><span>Vitality</span><span class="mono" id="stat-vitality">--</span></li>
+          <li><span>Agility</span><span class="mono" id="stat-agility">--</span></li>
+          <li><span>Dexterity</span><span class="mono" id="stat-dexterity">--</span></li>
+          <li><span>Intelligence</span><span class="mono" id="stat-intellect">--</span></li>
+          <li><span>Wisdom</span><span class="mono" id="stat-wisdom">--</span></li>
+          <li><span>Luck</span><span class="mono" id="stat-luck">--</span></li>
+          <li><span>Spirit</span><span class="mono" id="stat-spirit">--</span></li>
+          <li><span>Endurance</span><span class="mono" id="stat-endurance">--</span></li>
+          <li><span>Perception</span><span class="mono" id="stat-perception">--</span></li>
+          <li><span>Charisma</span><span class="mono" id="stat-charisma">--</span></li>
+        </ul>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="attributes">
+      <section class="frame">
+        <h3>Attributes</h3>
+        <div id="attributes-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
+
+        <div id="attributes-content" style="display:none;">
+          <p>Unspent Attribute Points: <span class="mono" id="ap-count" style="color:var(--gold-bright);">--</span></p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Spend on a Stat</h4>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Each click spends 1 AP into that stat.</p>
+          <div class="card-grid" id="ap-stat-buttons"></div>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Convert to Gold</h4>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">1 AP converts to 100 Gold.</p>
+          <div style="display:flex; gap:0.5rem; align-items:center; max-width:320px;">
+            <input type="number" id="ap-convert-amount" min="1" value="1" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+            <button class="btn" onclick="convertApToGold()">Convert</button>
+          </div>
+          <p class="placeholder-note" id="ap-message" style="margin-top:0.75rem;"></p>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="inventory">
+      <section class="frame">
+        <h3>Inventory</h3>
+        <p class="placeholder-note" id="inventory-no-character" style="display:none;">Create a character first to have an inventory.</p>
+        <div id="inventory-content" style="display:none;">
+          <p class="placeholder-note" style="margin-bottom:1rem;">Crystals: <span class="mono" id="crystals-count">0</span> <span class="tag" id="crystals-rank-tag"></span></p>
+          <div id="inventory-list" style="display:flex; flex-direction:column; gap:0.5rem;"><p class="placeholder-note">Loading...</p></div>
+        </div>
+      </section>
+    </div>
+    <div class="page-tab-panel" data-panel="class">
+      <section class="frame">
+        <h3>Change Your Class</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Your current class determines your base combat stats and passive — this changes it for real, not just a preview.</p>
+        <select id="my-class-picker" style="width:100%; max-width:280px; margin-bottom:0.75rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <option>Knight</option>
+          <option>Berserker</option>
+          <option>Assassin</option>
+          <option>Ranger</option>
+          <option>Mage</option>
+          <option>Druid</option>
+          <option>Paladin</option>
+          <option>Necromancer</option>
+          <option>Monk</option>
+          <option>Engineer</option>
+        </select>
+        <button class="btn" onclick="changeMyClass()">Confirm Class Change</button>
+        <p class="placeholder-note" id="class-change-status" style="margin-top:0.5rem;"></p>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Browse Any Class's Kit</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Preview only — doesn't change your actual class.</p>
+        <select id="class-kit-picker" onchange="loadClassKit(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <option>Knight</option>
+          <option>Berserker</option>
+          <option>Assassin</option>
+          <option>Ranger</option>
+          <option>Mage</option>
+          <option>Druid</option>
+          <option>Paladin</option>
+          <option>Necromancer</option>
+          <option>Monk</option>
+          <option>Engineer</option>
+          <option>Hunter</option>
+          <option>Bard</option>
+          <option>Alchemist</option>
+          <option>Beastmaster</option>
+          <option>Templar</option>
+        </select>
+        <div id="class-tab-content"></div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="progression">
+      <section class="frame">
+        <h3>Progression</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Where you stand right now, and what's left before the endgame — updates automatically as you play.</p>
+        <div id="progression-display"><p class="placeholder-note">Loading...</p></div>
+      </section>
+    </div>
+
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  // Generic tab switching — works for any number of tabs, based on
+  // matching data-tab (on the button) to data-panel (on the content)
+  document.querySelectorAll("#char-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#char-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+
+      if (target === "progression") loadProgression();
+    });
+  });
+
+  // Load every player's character into the roster table
+  (async () => {
+    const { data: characters, error } = await sb
+      .from("characters")
+      .select("*")
+      .order("level", { ascending: false });
+
+    const tbody = document.getElementById("player-roster-body");
+    const countTag = document.getElementById("player-count-tag");
+
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="10" class="placeholder-note">Couldn't load the roster: ${error.message}</td></tr>`;
+      return;
+    }
+
+    if (!characters || characters.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" class="placeholder-note">No characters created yet.</td></tr>`;
+      countTag.textContent = "";
+      return;
+    }
+
+    countTag.textContent = characters.length + (characters.length === 1 ? " player" : " players");
+
+    tbody.innerHTML = "";
+    characters.forEach((c) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="rname">${escapeHtml(c.name)}</td>
+        <td>${escapeHtml(c.class || "--")}</td>
+        <td>${escapeHtml(c.title || "--")}</td>
+        <td class="mono">${c.level ?? "--"}</td>
+        <td class="mono">${escapeHtml(c.rank || "--")}</td>
+        <td class="mono">${c.strength ?? "--"}</td>
+        <td class="mono">${c.agility ?? "--"}</td>
+        <td class="mono">${c.intellect ?? "--"}</td>
+        <td class="mono">${c.vitality ?? "--"}</td>
+        <td class="placeholder-note" style="font-size:0.8rem;">Not built yet</td>
+      `;
+      tbody.appendChild(row);
+    });
+  })();
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  // Character Creation, Stats, and AP Spending
+  // ============================================================
+  const CLASS_INFO = {
+    Knight:      { identity: "Unbreakable defender", mechanic: "Can block part of incoming damage and protect allies better than any other class. Excels in long fights.", primary: "Vitality", resource: "Resolve" },
+    Berserker:   { identity: "Stronger when wounded", mechanic: "Damage increases as HP decreases — the closer to defeat, the more dangerous they become.", primary: "Strength", resource: "Rage" },
+    Assassin:    { identity: "Precision killer", mechanic: "Highest critical-hit potential and bonus damage against already weakened enemies.", primary: "Dexterity", resource: "Focus" },
+    Ranger:      { identity: "Battlefield controller", mechanic: "Longest attack range, superior mobility, and bonuses for attacking from advantageous positions.", primary: "Agility", resource: "Precision" },
+    Mage:        { identity: "Raw magical power", mechanic: "Highest spell damage and area-of-effect attacks, but relies heavily on mana management.", primary: "Intelligence", resource: "Mana" },
+    Druid:       { identity: "Master of nature", mechanic: "Can shift between offensive and supportive play while summoning vines, animals, or natural effects.", primary: "Spirit", resource: "Nature Energy" },
+    Paladin:     { identity: "Holy protector", mechanic: "Combines offense, defense, and healing. Gains bonuses when defending teammates or cleansing negative effects.", primary: "Wisdom", resource: "Faith" },
+    Necromancer: { identity: "Commander of the dead", mechanic: "Creates and strengthens summoned undead — the more battles fought, the larger the potential undead army.", primary: "Intelligence + Spirit", resource: "Souls" },
+    Monk:        { identity: "Martial master", mechanic: "Combo-based combat — consecutive successful actions become stronger and faster.", primary: "Agility + Endurance", resource: "Ki" },
+    Engineer:    { identity: "Tactical inventor", mechanic: "Places turrets, traps, gadgets, drones, and mechanical devices that permanently define their playstyle.", primary: "Intelligence", resource: "Energy Cells" },
+    Hunter:      { identity: "Monster specialist", mechanic: "Learns creature weaknesses, tracks enemies, and gains increasing bonuses against powerful beasts and bosses.", primary: "Perception", resource: "Instinct" },
+    Bard:        { identity: "Battlefield support", mechanic: "Uses songs to buff allies, weaken enemies, and influence morale — the strongest party-support class.", primary: "Charisma", resource: "Inspiration" },
+    Alchemist:   { identity: "Potion and chemistry expert", mechanic: "Crafts unique potions, explosives, toxins, antidotes, and temporary combat mixtures unavailable to others.", primary: "Intelligence", resource: "Reagents" },
+    Beastmaster: { identity: "Companion specialist", mechanic: "Tames stronger creatures than any other class and develops permanent bonds with animal companions.", primary: "Spirit", resource: "Bond" },
+    Templar:     { identity: "Anti-magic warrior", mechanic: "Excels at resisting, disrupting, and punishing magic users while remaining formidable in melee combat.", primary: "Wisdom + Strength", resource: "Conviction" },
+  };
+
+  function renderClassDescription(){
+    const select = document.getElementById("cc-class");
+    const box = document.getElementById("class-description-box");
+    if (!select || !box) return;
+
+    const info = CLASS_INFO[select.value];
+    if (!info) return;
+
+    box.innerHTML = `
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">${select.value} — ${info.identity}</h4>
+      <p>${info.mechanic}</p>
+      <ul class="clean" style="margin-top:0.75rem;">
+        <li><span>Primary Attribute</span><span class="mono">${info.primary}</span></li>
+        <li><span>Resource</span><span class="mono">${info.resource}</span></li>
+      </ul>
+    `;
+  }
+
+  let myCharacter = null;
+
+  const STAT_LABELS = {
+    strength: "Strength", vitality: "Vitality", agility: "Agility",
+    dexterity: "Dexterity", intellect: "Intelligence", wisdom: "Wisdom",
+    luck: "Luck", spirit: "Spirit", endurance: "Endurance",
+    perception: "Perception", charisma: "Charisma"
+  };
+
+  async function loadMyCharacter(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user) return;
+
+    const { data, error } = await sb
+      .from("characters")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error){
+      console.error("Failed to load character:", error.message);
+      return;
+    }
+
+    myCharacter = data;
+    renderCharacterState();
+  }
+
+  function renderCharacterState(){
+    const createCard = document.getElementById("create-character-card");
+    const myCard = document.getElementById("my-character-card");
+    const statsNo = document.getElementById("stats-no-character");
+    const statsList = document.getElementById("stats-list");
+    const attrNo = document.getElementById("attributes-no-character");
+    const attrContent = document.getElementById("attributes-content");
+
+    loadInventory();
+    loadClassKit();
+    loadEquipment();
+
+    if (!myCharacter){
+      createCard.style.display = "block";
+      myCard.style.display = "none";
+      statsNo.style.display = "block";
+      statsList.style.display = "none";
+      attrNo.style.display = "block";
+      attrContent.style.display = "none";
+      return;
+    }
+
+    createCard.style.display = "none";
+    myCard.style.display = "block";
+    statsNo.style.display = "none";
+    statsList.style.display = "flex";
+    attrNo.style.display = "none";
+    attrContent.style.display = "block";
+
+    document.getElementById("mc-name").textContent = myCharacter.name;
+    document.getElementById("mc-class").textContent = myCharacter.class;
+    document.getElementById("mc-level").textContent = myCharacter.level;
+    document.getElementById("mc-ap").textContent = myCharacter.attribute_points ?? 0;
+
+    const backstoryText = document.getElementById("mc-backstory-text");
+    const backstoryBtn = document.getElementById("mc-backstory-btn");
+    if (myCharacter.backstory){
+      backstoryText.textContent = myCharacter.backstory;
+      backstoryText.style.display = "block";
+      backstoryBtn.textContent = "✨ Regenerate Backstory";
+    } else {
+      backstoryText.style.display = "none";
+      backstoryBtn.textContent = "✨ Generate My Backstory";
+    }
+
+    Object.keys(STAT_LABELS).forEach((key) => {
+      const el = document.getElementById("stat-" + key);
+      if (el) el.textContent = myCharacter[key] ?? 10;
+    });
+
+    document.getElementById("ap-count").textContent = myCharacter.attribute_points ?? 0;
+
+    const btnContainer = document.getElementById("ap-stat-buttons");
+    btnContainer.innerHTML = Object.entries(STAT_LABELS).map(([key, label]) => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem;">
+        <span>${label}</span>
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span class="mono">${myCharacter[key] ?? 10}</span>
+          <button class="btn" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="spendApOnStat('${key}')">+1</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function callGemini(prompt, purpose, groundWith){
+    try {
+      const { data: result, error } = await sb.functions.invoke("call-gemini", {
+        body: { purpose: purpose || "general", prompt, groundWith: groundWith || "" },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (result?.error) return { ok: false, error: result.error };
+      return { ok: true, text: result.text, warning: result.warning };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  async function generateBackstory(){
+    const btn = document.getElementById("mc-backstory-btn");
+    const statusEl = document.getElementById("mc-backstory-status");
+    if (!myCharacter){ statusEl.textContent = "Create a character first."; return; }
+
+    btn.disabled = true;
+    statusEl.textContent = "Writing your backstory...";
+    statusEl.style.color = "var(--dim)";
+
+    const prompt = `Write a short (4-6 sentence) character backstory for a ${myCharacter.class} named ${myCharacter.name} in a dark-fantasy RPG world called Solonia. Give them a clear origin, a motivation, and a hint of mystery. Second or third person is fine. No preamble, just the backstory itself.`;
+    const result = await callGemini(prompt, "backstory", "information");
+
+    if (!result.ok){
+      statusEl.textContent = result.error;
+      statusEl.style.color = "var(--crimson-bright)";
+      btn.disabled = false;
+      return;
+    }
+
+    const { data: userData } = await sb.auth.getUser();
+    const { error: saveError } = await sb.from("characters").update({ backstory: result.text }).eq("user_id", userData.user.id);
+
+    if (saveError){
+      statusEl.textContent = "Generated, but couldn't save: " + saveError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      btn.disabled = false;
+      return;
+    }
+
+    myCharacter.backstory = result.text;
+    document.getElementById("mc-backstory-text").textContent = result.text;
+    document.getElementById("mc-backstory-text").style.display = "block";
+    btn.textContent = "✨ Regenerate Backstory";
+    btn.disabled = false;
+    statusEl.textContent = "";
+  }
+
+  async function createCharacter(){
+    const name = document.getElementById("cc-name").value.trim();
+    const charClass = document.getElementById("cc-class").value;
+    const msgEl = document.getElementById("cc-message");
+
+    if (!name){
+      msgEl.textContent = "Enter a character name.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user){
+      msgEl.textContent = "You need to be logged in.";
+      return;
+    }
+
+    msgEl.textContent = "Creating...";
+    msgEl.style.color = "var(--dim)";
+
+    const { error } = await sb.from("characters").insert({
+      user_id: user.id,
+      name: name,
+      class: charClass
+    });
+
+    if (error){
+      msgEl.textContent = "Couldn't create character: " + error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = "Character created!";
+    msgEl.style.color = "var(--steel-bright)";
+    await loadMyCharacter();
+  }
+
+  async function spendApOnStat(statKey){
+    if (!myCharacter) return;
+    if ((myCharacter.attribute_points ?? 0) < 1){
+      alert("No unspent Attribute Points left.");
+      return;
+    }
+
+    const newStatValue = (myCharacter[statKey] ?? 10) + 1;
+    const newAp = myCharacter.attribute_points - 1;
+
+    const { error } = await sb
+      .from("characters")
+      .update({ [statKey]: newStatValue, attribute_points: newAp })
+      .eq("user_id", myCharacter.user_id);
+
+    if (error){
+      alert("Couldn't spend AP: " + error.message);
+      return;
+    }
+
+    await loadMyCharacter();
+  }
+
+  async function convertApToGold(){
+    if (!myCharacter) return;
+    const amountInput = document.getElementById("ap-convert-amount");
+    const msgEl = document.getElementById("ap-message");
+    const amount = parseInt(amountInput.value, 10);
+
+    if (!amount || amount < 1){
+      msgEl.textContent = "Enter a valid amount of AP to convert.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (amount > (myCharacter.attribute_points ?? 0)){
+      msgEl.textContent = "You don't have that many unspent AP.";
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const goldGained = amount * 100;
+    const newGold = (myCharacter.gold ?? 0) + goldGained;
+    const newAp = myCharacter.attribute_points - amount;
+
+    const { error } = await sb
+      .from("characters")
+      .update({ gold: newGold, attribute_points: newAp })
+      .eq("user_id", myCharacter.user_id);
+
+    if (error){
+      msgEl.textContent = "Couldn't convert: " + error.message;
+      msgEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    msgEl.textContent = `Converted ${amount} AP into ${goldGained} Gold.`;
+    msgEl.style.color = "var(--steel-bright)";
+    await loadMyCharacter();
+  }
+
+  async function loadInventory(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    const noCharEl = document.getElementById("inventory-no-character");
+    const contentEl = document.getElementById("inventory-content");
+    const listEl = document.getElementById("inventory-list");
+    if (!noCharEl) return;
+
+    if (!user || !myCharacter){
+      noCharEl.style.display = "block";
+      contentEl.style.display = "none";
+      return;
+    }
+
+    noCharEl.style.display = "none";
+    contentEl.style.display = "block";
+
+    document.getElementById("crystals-count").textContent = myCharacter.crystals ?? 0;
+    document.getElementById("crystals-rank-tag").textContent = `Rank ${myCharacter.rank || "E"}`;
+
+    const { data: items, error } = await sb
+      .from("player_inventory")
+      .select("*")
+      .in("item_type", ["Weapon Item", "Armor Item", "Consumable Item"])
+      .order("acquired_at", { ascending: false });
+
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load inventory: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    if (!items || items.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Nothing in your inventory yet — buy weapons, armor, or consumables from the Shop on the World Map.</p>`;
+      return;
+    }
+
+    const categories = [
+      { type: "Weapon Item", label: "Weapons" },
+      { type: "Armor Item", label: "Armor" },
+      { type: "Consumable Item", label: "Consumables" },
+    ];
+
+    listEl.innerHTML = categories.map(cat => {
+      const catItems = items.filter(i => i.item_type === cat.type);
+      if (catItems.length === 0) return "";
+      const rows = catItems.map((item) => `
+        <div class="frame" style="display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.3rem;">${escapeHtml(item.item_name)} <span class="tag">${escapeHtml(item.rarity)}</span></h4>
+            <p style="font-size:0.88rem;">${escapeHtml(item.description || "")}</p>
+          </div>
+          <span class="mono" style="color:var(--dim);">x${item.quantity}</span>
+        </div>
+      `).join("");
+      return `<h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">${cat.label}</h4>${rows}`;
+    }).join("");
+  }
+
+  async function changeMyClass(){
+    const statusEl = document.getElementById("class-change-status");
+    const newClass = document.getElementById("my-class-picker").value;
+    statusEl.textContent = "Changing class...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: result, error } = await sb.rpc("change_player_class", { p_new_class: newClass });
+    if (error || !result.success){
+      const reasonText = {
+        class_is_locked: "Your class is locked in — it became permanent the moment you entered your first political hierarchy fight.",
+        unknown_class: "That's not a recognized class.",
+        no_character: "You don't have a character yet.",
+      }[result?.reason] || (error?.message || result?.reason);
+      statusEl.textContent = "Couldn't change class: " + reasonText;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = `Class changed to ${newClass}.`;
+    statusEl.style.color = "var(--steel-bright)";
+    await loadMyCharacter();
+    await loadPlayerCard();
+  }
+
+  async function loadProgression(){
+    const el = document.getElementById("progression-display");
+    if (!el) return;
+
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: character } = await sb.from("characters").select("class, rank, level, xp, current_kingdom").eq("user_id", userData.user.id).maybeSingle();
+    if (!character){ el.innerHTML = `<p class="placeholder-note">Create your character first.</p>`; return; }
+
+    const { count: kingdomsUnlocked } = await sb.from("player_kingdom_unlocks").select("*", { count: "exact", head: true }).eq("user_id", userData.user.id);
+    const { data: elig, error } = await sb.rpc("check_pvg_eligibility");
+    const { data: bundle } = await sb.from("player_bundle_progress").select("*").eq("user_id", userData.user.id).eq("kingdom", character.current_kingdom).maybeSingle();
+
+    if (error){
+      el.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    const row = (label, value) => `<li><span>${escapeHtml(label)}</span><span class="mono">${value}</span></li>`;
+    const checkRow = (met, label) => `<li><span>${met ? "✅" : "⬜"} ${escapeHtml(label)}</span></li>`;
+
+    el.innerHTML = `
+      <div class="frame" style="margin-bottom:1rem; padding:0.75rem 1rem;">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Current Standing</h4>
+        <ul class="clean">
+          ${row("Class", escapeHtml(character.class))}
+          ${row("Rank", escapeHtml(character.rank))}
+          ${row("Level / XP", `${character.level} (${character.xp} XP)`)}
+          ${row("Current Kingdom", escapeHtml(character.current_kingdom || "—"))}
+          ${row("Kingdoms Unlocked", `${kingdomsUnlocked ?? 0} / 9`)}
+        </ul>
+      </div>
+
+      ${bundle ? `
+      <div class="frame" style="margin-bottom:1rem; padding:0.75rem 1rem;">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">${escapeHtml(character.current_kingdom)} Progress</h4>
+        <ul class="clean">
+          ${row("Ability-Fragments Collected", bundle.fragments_collected)}
+          ${row("Hierarchy Tier Cleared", bundle.hierarchy_tier_cleared || "None yet")}
+        </ul>
+      </div>
+      ` : ""}
+
+      <div class="frame" style="padding:0.75rem 1rem; ${elig.eligible ? "border-color:var(--gold);" : ""}">
+        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Final Goal — Primordial Gods (PvG)</h4>
+        <p class="placeholder-note" style="margin-bottom:0.5rem;">${elig.eligible ? "You're eligible right now — challenge a Primordial from any kingdom's name on the World Map." : "What's left to reach the endgame:"}</p>
+        <ul class="clean">
+          ${checkRow(elig.all_kingdoms_conquered, `All 9 kingdoms conquered (${elig.kingdoms_owned}/${elig.kingdoms_total})`)}
+          ${checkRow(elig.all_champions_defeated, `All 9 Champions defeated (${elig.champions_defeated}/${elig.champions_total})`)}
+          ${checkRow(elig.all_ss_creatures_defeated, `All SS-rank creatures defeated (${elig.ss_defeated}/${elig.ss_total})`)}
+        </ul>
+      </div>
+    `;
+  }
+
+  async function loadPlayerCard(){
+    const listEl = document.getElementById("player-card-display");
+    if (!listEl) return;
+
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+    const { data: character } = await sb.from("characters").select("class, conquest_rank").eq("user_id", userData.user.id).maybeSingle();
+    if (!character){
+      listEl.innerHTML = `<p class="placeholder-note">Create your character first.</p>`;
+      return;
+    }
+
+    const { data: abilities, error } = await sb.from("card_catalog").select("*").eq("source_type", "class").eq("source_name", character.class).order("unlock_position");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+
+    const cards = (abilities || []).map(a => `
+      <div class="ability-card">
+        <span class="ability-card-rank-tag">${escapeHtml(character.conquest_rank)}</span>
+        <div class="ability-card-name">${escapeHtml(a.ability_name)}</div>
+        <div class="ability-card-effect">${escapeHtml(a.effect_text)}</div>
+        <hr class="ability-card-divider">
+        <div class="ability-card-energy-label">${a.energy_cost} energy</div>
+      </div>
+    `).join("");
+
+    listEl.innerHTML = `
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">${escapeHtml(character.class)}</h4>
+      <div class="ability-card-grid">${cards}</div>
+    `;
+
+    await loadOwnedCardsByRank();
+  }
+
+  async function loadOwnedCardsByRank(){
+    const listEl = document.getElementById("owned-cards-display");
+    if (!listEl) return;
+
+    const { data: cards, error } = await sb.rpc("get_my_cards");
+    if (error){
+      listEl.innerHTML = `<p class="placeholder-note">Couldn't load: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
+    if (!cards || cards.length === 0){
+      listEl.innerHTML = `<p class="placeholder-note">Nothing earned yet — defeat creatures or hierarchy NPCs to collect ability-fragment cards.</p>`;
+      return;
+    }
+
+    const rankOrder = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5, E: 6 };
+    const sorted = [...cards].sort((a, b) => (rankOrder[a.rank] ?? 9) - (rankOrder[b.rank] ?? 9));
+
+    const byRank = {};
+    sorted.forEach(c => {
+      if (!byRank[c.rank]) byRank[c.rank] = [];
+      byRank[c.rank].push(c);
+    });
+
+    const rankLabel = (r) => `<h5 class="mono" style="color:var(--gold-bright); margin:1rem 0 0.5rem; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase;">${escapeHtml(r)}-Rank</h5>`;
+
+    listEl.innerHTML = Object.keys(byRank)
+      .sort((a, b) => (rankOrder[a] ?? 9) - (rankOrder[b] ?? 9))
+      .map(rank => `
+        ${rankLabel(rank)}
+        <div class="ability-card-grid">${byRank[rank].map(c => `
+          <div class="ability-card">
+            <span class="ability-card-rank-tag">${escapeHtml(c.rank)}</span>
+            <div class="ability-card-name">${escapeHtml(c.ability_name)}</div>
+            <div class="mono" style="font-size:0.6rem; color:var(--dim); margin-bottom:0.25rem;">${escapeHtml(c.source_name)}</div>
+            <div class="ability-card-effect">${escapeHtml(c.effect_text)}</div>
+            <hr class="ability-card-divider">
+            <div class="ability-card-energy-label">${c.energy_cost} energy</div>
+          </div>
+        `).join("")}</div>
+      `).join("");
+  }
+
+  async function loadClassKit(classNameOverride){
+    const contentEl = document.getElementById("class-tab-content");
+    if (!contentEl) return;
+
+    const picker = document.getElementById("class-kit-picker");
+    let className = classNameOverride;
+    if (!className){
+      // Default to your own class if you have a character, else whatever the picker shows
+      className = (myCharacter && myCharacter.class) || picker.value;
+      picker.value = className;
+    }
+
+    const { data: abilities, error } = await sb
+      .from("class_abilities")
+      .select("*")
+      .eq("class", className)
+      .order("id", { ascending: true });
+
+    if (error || !abilities || abilities.length === 0){
+      contentEl.innerHTML = `<p class="placeholder-note">No ability kit found for this class yet.</p>`;
+      return;
+    }
+
+    const resourceName = abilities[0].resource_name;
+    const passive = abilities.find(a => a.slot === "passive");
+    const actives = abilities.filter(a => a.slot.startsWith("ability_"));
+    const isMyClass = myCharacter && myCharacter.class === className;
+
+    let html = `
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.75rem;">${escapeHtml(className)} <span class="tag">Resource: ${escapeHtml(resourceName)}</span>${isMyClass ? ' <span class="tag">Your Class</span>' : ""}</h4>
+    `;
+
+    if (passive){
+      html += `
+        <div class="frame" style="margin-bottom:0.75rem;">
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(passive.ability_name)} <span class="tag">Passive</span></h4>
+          <p>${escapeHtml(passive.effect_description)}</p>
+        </div>
+      `;
+    }
+
+    html += `<h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Abilities</h4>`;
+    html += `<div class="card-grid">`;
+    actives.forEach((a) => {
+      html += `
+        <div class="frame">
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(a.ability_name)}</h4>
+          <p class="mono" style="font-size:0.75rem; color:var(--dim); margin-bottom:0.5rem;">
+            ${a.resource_cost} ${escapeHtml(resourceName)} • Cooldown ${a.cooldown} turn${a.cooldown === 1 ? "" : "s"}${a.position_req ? ` • ${a.position_req === "front" ? "Front only" : "Back only"}` : ""}
+          </p>
+          <p>${escapeHtml(a.effect_description)}</p>
+          ${a.combo_note ? `<p class="placeholder-note" style="margin-top:0.5rem;">Combo: ${escapeHtml(a.combo_note)}</p>` : ""}
+        </div>
+      `;
+    });
+    html += `</div>`;
+
+    html += `<p class="placeholder-note" style="margin-top:1rem;">Abilities aren't selectable in live duels yet (still Attack/Guard/Surrender for now). Wiring these into real combat is next.</p>`;
+
+    contentEl.innerHTML = html;
+  }
+
+  async function loadEquipment(){
+    const eqWeaponEl = document.getElementById("eq-weapon-value");
+    if (!eqWeaponEl || !myCharacter) return;
+
+    eqWeaponEl.textContent = myCharacter.equipped_weapon || "None — visit the Shop to buy one";
+
+    const { data: ownedItems } = await sb.from("player_inventory").select("*");
+    const ownedWeapons = (ownedItems || []).filter(i => ["Weapon", "Weapon Item", "General Weapon"].includes(i.item_type));
+    const ownedArmor = (ownedItems || []).filter(i => ["Armor", "General Armor"].includes(i.item_type));
+
+    const armorEl = document.getElementById("eq-owned-armor");
+    let html = "";
+
+    html += `<h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Weapons</h4>`;
+    if (ownedWeapons.length === 0){
+      html += `<p class="placeholder-note">None yet — visit the Shop to buy one.</p>`;
+    } else {
+      html += `<div class="card-grid">` + ownedWeapons.map((w) => {
+        const equipped = myCharacter.equipped_weapon === w.item_name;
+        return `
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(w.item_name)}</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem;">${escapeHtml(w.description || "")}</p>
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+              ${equipped
+                ? `<span class="mono" style="color:var(--gold-bright);">Equipped</span><button class="btn" style="padding:0.4rem 0.7rem; font-size:0.75rem;" onclick="unequipSlot('weapon')">Unequip</button>`
+                : `<button class="btn" onclick="switchWeapon('${w.item_name}')">Equip</button>`
+              }
+              <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright); padding:0.4rem 0.7rem; font-size:0.75rem;" onclick="sellItem('${w.item_type}', '${w.item_name.replace(/'/g, "\\'")}')">Sell</button>
+            </div>
+          </div>
+        `;
+      }).join("") + `</div>`;
+    }
+
+    html += `<h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Armor <span class="tag">Equipped: ${escapeHtml(myCharacter.equipped_armor || "None")}</span></h4>`;
+    if (ownedArmor.length === 0){
+      html += `<p class="placeholder-note">None yet — visit the Shop to buy armor.</p>`;
+    } else {
+      html += `<div class="card-grid">` + ownedArmor.map(a => {
+        const equipped = myCharacter.equipped_armor === a.item_name;
+        return `
+          <div class="frame">
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(a.item_name)}</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem;">${escapeHtml(a.description || "")}</p>
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+              ${equipped
+                ? `<span class="mono" style="color:var(--gold-bright);">Equipped</span><button class="btn" style="padding:0.4rem 0.7rem; font-size:0.75rem;" onclick="unequipSlot('armor')">Unequip</button>`
+                : `<button class="btn" onclick="switchArmor('${a.item_name}')">Equip</button>`
+              }
+              <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright); padding:0.4rem 0.7rem; font-size:0.75rem;" onclick="sellItem('${a.item_type}', '${a.item_name.replace(/'/g, "\\'")}')">Sell</button>
+            </div>
+          </div>
+        `;
+      }).join("") + `</div>`;
+    }
+
+    armorEl.innerHTML = html;
+  }
+
+  async function unequipSlot(slot){
+    const { error } = await sb.rpc("unequip_item", { p_slot: slot });
+    if (error){ alert("Couldn't unequip: " + error.message); return; }
+    await loadMyCharacter();
+    await loadEquipment();
+  }
+
+  async function switchWeapon(weaponType){
+    const owned = (await sb.from("player_inventory").select("item_type").eq("item_name", weaponType).maybeSingle()).data;
+    const itemType = owned ? owned.item_type : "Weapon";
+    const { error } = await sb.rpc("equip_inventory_item", { p_item_type: itemType, p_item_name: weaponType });
+    if (error){ alert("Couldn't equip weapon: " + error.message); return; }
+    await loadMyCharacter();
+  }
+
+  async function switchArmor(armorType){
+    const owned = (await sb.from("player_inventory").select("item_type").eq("item_name", armorType).maybeSingle()).data;
+    const itemType = owned ? owned.item_type : "Armor";
+    const { error } = await sb.rpc("equip_inventory_item", { p_item_type: itemType, p_item_name: armorType });
+    if (error){ alert("Couldn't equip armor: " + error.message); return; }
+    await loadMyCharacter();
+  }
+
+  async function sellItem(itemType, itemName){
+    if (!confirm(`Sell ${itemName} for 75% of its purchase price?`)) return;
+    const { error } = await sb.rpc("sell_inventory_item", { p_item_type: itemType, p_item_name: itemName });
+    if (error){ alert("Couldn't sell: " + error.message); return; }
+    await loadMyCharacter();
+    await loadInventory();
+  }
+
+  document.querySelectorAll("#inventory-subtabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#inventory-subtabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.invsub;
+      document.querySelectorAll(".inv-subpanel").forEach((p) => {
+        const match = p.dataset.invsubpanel === target;
+        p.classList.toggle("active", match);
+        p.style.display = match ? "block" : "none";
+      });
+    });
+  });
+
+  loadMyCharacter();
+  loadPlayerCard();
+  loadProgression();
+  renderClassDescription();
+</script>
+</body>
+</html>

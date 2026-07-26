@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Duel</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .duel-shell{
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .duel-header{
+    text-align:center;
+  }
+  .duel-header .code{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem;
+    color: var(--dim);
+  }
+  .fighters{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 2rem;
+    width:100%;
+    max-width: 720px;
+  }
+  .fighter-card{
+    flex:1;
+    background: var(--panel);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align:center;
+  }
+  .fighter-card.me{ border-color: var(--gold); }
+  .fighter-card .name{
+    font-family:'Cinzel',serif;
+    color: var(--gold-bright);
+    font-size:1.1rem;
+    margin-bottom:0.75rem;
+  }
+  .hp-bar-track{
+    width:100%;
+    height: 18px;
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow:hidden;
+    margin-bottom:0.4rem;
+  }
+  .hp-bar-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--crimson), var(--crimson-bright));
+    transition: width 0.4s ease;
+  }
+  .hp-text{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem;
+    color: var(--dim);
+  }
+  .vs-glyph{
+    font-family:'Cinzel',serif;
+    color: var(--gold);
+    font-size:1.5rem;
+  }
+  .turn-indicator{
+    text-align:center;
+    font-family:'Cinzel',serif;
+    color: var(--gold-bright);
+    font-size:1rem;
+  }
+  .turn-timer{
+    font-family:'JetBrains Mono', monospace;
+    font-size:2rem;
+    color: var(--crimson-bright);
+    text-align:center;
+  }
+  .action-row{
+    display:flex;
+    gap:0.75rem;
+    justify-content:center;
+  }
+  .action-btn{
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:0.85rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:0.8rem 1.6rem;
+    border-radius: var(--radius);
+    border:1px solid var(--gold);
+    color: var(--gold-bright);
+    background: rgba(201,162,75,0.08);
+    cursor:pointer;
+  }
+  .action-btn:hover{ background: rgba(201,162,75,0.18); }
+  .action-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .action-btn.surrender{ border-color: var(--crimson); color: var(--crimson-bright); }
+  .battle-log-box{
+    width:100%;
+    max-width: 720px;
+    max-height: 220px;
+    overflow-y:auto;
+    background: var(--panel);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    padding: 1rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.4rem;
+    font-size:0.88rem;
+  }
+  .battle-log-box .entry{ color: var(--dim); }
+  .battle-log-box .entry.mine{ color: var(--parchment); }
+  .duel-result{
+    text-align:center;
+    padding: 2rem;
+  }
+  .duel-result h2{ font-size:1.8rem; }
+</style>
+</head>
+<body>
+
+<div class="duel-shell">
+  <div class="duel-header">
+    <h1 style="font-family:'Cinzel',serif; color:var(--gold-bright);">Duel</h1>
+    <div class="code" id="battle-code-display"></div>
+  </div>
+
+  <div id="duel-loading" class="placeholder-note">Loading duel...</div>
+
+  <div id="duel-active" style="display:none; width:100%; display:flex; flex-direction:column; align-items:center; gap:1.5rem;">
+    <div class="fighters">
+      <div class="fighter-card" id="fighter-a">
+        <div class="name" id="fighter-a-name">--</div>
+        <div class="hp-bar-track"><div class="hp-bar-fill" id="fighter-a-hp-bar" style="width:100%;"></div></div>
+        <div class="hp-text" id="fighter-a-hp-text">100 / 100 HP</div>
+      </div>
+      <div class="vs-glyph">VS</div>
+      <div class="fighter-card" id="fighter-b">
+        <div class="name" id="fighter-b-name">--</div>
+        <div class="hp-bar-track"><div class="hp-bar-fill" id="fighter-b-hp-bar" style="width:100%;"></div></div>
+        <div class="hp-text" id="fighter-b-hp-text">100 / 100 HP</div>
+      </div>
+    </div>
+
+    <div class="turn-indicator" id="turn-indicator">--</div>
+    <div class="turn-timer" id="turn-timer">--</div>
+
+    <div class="action-row">
+      <button class="action-btn" id="attack-btn" onclick="doAction('attack')">Attack</button>
+      <button class="action-btn" id="guard-btn" onclick="doAction('guard')">Guard</button>
+      <button class="action-btn surrender" id="surrender-btn" onclick="doAction('surrender')">Surrender</button>
+    </div>
+
+    <div class="battle-log-box" id="battle-log-box"></div>
+  </div>
+
+  <div id="duel-finished" style="display:none;" class="duel-result frame">
+    <h2 id="result-title">--</h2>
+    <p class="placeholder-note" id="result-subtitle"></p>
+    <a class="btn" href="duel-trade.html" style="margin-top:1rem; display:inline-block;">Back to Duel Trade</a>
+  </div>
+
+  <div id="duel-error" style="display:none;" class="placeholder-note"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="audioManager.js"></script>
+<script src="profileHelper.js"></script>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const duelId = urlParams.get("id");
+
+  let myUserId = null;
+  let currentDuel = null;
+  let nameCache = {};
+  let timerInterval = null;
+
+  async function getGamerNameFor(userId){
+    if (nameCache[userId]) return nameCache[userId];
+    const { data } = await sb.from("profiles").select("gamer_name").eq("user_id", userId).maybeSingle();
+    const name = data?.gamer_name || "Unknown";
+    nameCache[userId] = name;
+    return name;
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function init(){
+    const { data: userData } = await sb.auth.getUser();
+    const user = userData?.user;
+    if (!user){
+      window.location.href = "login.html";
+      return;
+    }
+    myUserId = user.id;
+
+    if (!duelId){
+      showError("No duel specified.");
+      return;
+    }
+
+    await loadDuel();
+
+    // Subscribe to live updates on this duel and its actions
+    sb.channel("duel-" + duelId)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "duels", filter: `id=eq.${duelId}` }, () => {
+        loadDuel();
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "duel_actions", filter: `duel_id=eq.${duelId}` }, (payload) => {
+        appendLogEntry(payload.new);
+      })
+      .subscribe();
+
+    timerInterval = setInterval(tickTimer, 1000);
+  }
+
+  function showError(msg){
+    document.getElementById("duel-loading").style.display = "none";
+    const errEl = document.getElementById("duel-error");
+    errEl.style.display = "block";
+    errEl.textContent = msg;
+  }
+
+  async function loadDuel(){
+    const { data: duel, error } = await sb.from("duels").select("*").eq("id", duelId).maybeSingle();
+
+    if (error || !duel){
+      showError("Couldn't load this duel.");
+      return;
+    }
+
+    currentDuel = duel;
+    document.getElementById("duel-loading").style.display = "none";
+    document.getElementById("battle-code-display").textContent = duel.battle_code || "";
+
+    if (duel.status === "finished"){
+      showResult(duel);
+      return;
+    }
+
+    if (duel.status !== "active"){
+      showError("This duel isn't active.");
+      return;
+    }
+
+    document.getElementById("duel-active").style.display = "flex";
+    document.getElementById("duel-finished").style.display = "none";
+
+    const isChallenger = myUserId === duel.challenger_id;
+    const myHp = isChallenger ? duel.challenger_hp : duel.opponent_hp;
+    const oppHp = isChallenger ? duel.opponent_hp : duel.challenger_hp;
+    const myId = isChallenger ? duel.challenger_id : duel.opponent_id;
+    const oppId = isChallenger ? duel.opponent_id : duel.challenger_id;
+
+    const myName = await getGamerNameFor(myId);
+    const oppName = await getGamerNameFor(oppId);
+
+    document.getElementById("fighter-a-name").textContent = myName + " (You)";
+    document.getElementById("fighter-a-hp-bar").style.width = Math.max(0, myHp) + "%";
+    document.getElementById("fighter-a-hp-text").textContent = `${myHp} / 100 HP`;
+
+    document.getElementById("fighter-b-name").textContent = oppName;
+    document.getElementById("fighter-b-hp-bar").style.width = Math.max(0, oppHp) + "%";
+    document.getElementById("fighter-b-hp-text").textContent = `${oppHp} / 100 HP`;
+
+    const isMyTurn = duel.turn_player_id === myUserId;
+    document.getElementById("turn-indicator").textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
+
+    document.getElementById("attack-btn").disabled = !isMyTurn;
+    document.getElementById("guard-btn").disabled = !isMyTurn;
+    document.getElementById("surrender-btn").disabled = false; // can always surrender
+  }
+
+  function tickTimer(){
+    if (!currentDuel || currentDuel.status !== "active" || !currentDuel.turn_deadline) return;
+
+    const deadline = new Date(currentDuel.turn_deadline).getTime();
+    const secondsLeft = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    document.getElementById("turn-timer").textContent = secondsLeft;
+
+    if (secondsLeft <= 0){
+      sb.rpc("resolve_timeout", { p_duel_id: parseInt(duelId, 10) });
+    }
+  }
+
+  async function doAction(action){
+    document.getElementById("attack-btn").disabled = true;
+    document.getElementById("guard-btn").disabled = true;
+
+    const { error } = await sb.rpc("submit_duel_action", { p_duel_id: parseInt(duelId, 10), p_action: action });
+
+    if (error){
+      alert("Couldn't submit action: " + error.message);
+      loadDuel();
+    }
+  }
+
+  async function appendLogEntry(action){
+    const logBox = document.getElementById("battle-log-box");
+    const name = await getGamerNameFor(action.player_id);
+    const isMine = action.player_id === myUserId;
+    const entry = document.createElement("div");
+    entry.className = "entry" + (isMine ? " mine" : "");
+    entry.textContent = `${name}: ${action.log_text}`;
+    logBox.appendChild(entry);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+
+  async function showResult(duel){
+    clearInterval(timerInterval);
+    document.getElementById("duel-active").style.display = "none";
+    document.getElementById("duel-finished").style.display = "block";
+
+    const won = duel.winner_id === myUserId;
+    document.getElementById("result-title").textContent = won ? "Victory!" : "Defeat";
+    document.getElementById("result-title").style.color = won ? "var(--gold-bright)" : "var(--crimson-bright)";
+
+    const winnerName = await getGamerNameFor(duel.winner_id);
+    document.getElementById("result-subtitle").textContent = `${winnerName} won this duel. Saved to your Battle Log.`;
+  }
+
+  init();
+</script>
+</body>
+</html>

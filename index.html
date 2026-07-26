@@ -1,144 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo League Rpg</title>
-    <style>
-        /* --- General Page Setup --- */
-        body {
-            font-family: 'Courier New', Courier, monospace, sans-serif;
-            margin: 0;
-            padding: 40px;
-            background-color: #ffffff;
-            color: #000000;
-        }
-
-        /* --- Header Section (Title Only) --- */
-        header {
-            margin-bottom: 60px; /* Gives nice breathing room below the title line */
-        }
-
-        .title-container {
-            display: inline-block;
-            max-width: fit-content;
-        }
-
-        .main-title {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: normal;
-            letter-spacing: 1px;
-        }
-
-        /* The double underline effect under the title */
-        .double-underline {
-            border-bottom: 4px double #000000;
-            margin-top: 5px;
-            width: 100%;
-        }
-
-        /* --- Perfectly Balanced Content Row --- */
-        .content-row {
-            display: flex;
-            justify-content: space-between; /* Ensures equal spacing between the 3 elements */
-            align-items: flex-start; /* Lines them up perfectly at the top edge */
-            width: 100%;
-        }
-
-        /* Each of the three sections gets equal sizing priority */
-        .column-left {
-            width: 30%;
-            text-align: left;
-        }
-
-        .column-center {
-            width: 40%;
-            display: flex;
-            justify-content: center; /* Centers the chat boxes container exactly in the middle */
-        }
-
-        .column-right {
-            width: 30%;
-            text-align: left; /* Keeps text left-aligned inside the right column */
-            display: flex;
-            justify-content: flex-end; /* Aligns the column block to the right side of the screen */
-        }
-
-        /* Lists formatting inside side columns */
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            cursor: pointer;
-            line-height: 1.4;
-            white-space: nowrap;
-        }
-
-        /* --- Chat Boxes Formatting --- */
-        .chat-container {
-            display: flex;
-            gap: 50px; /* Clear, wide spacing between the two boxes */
-            margin-top: 5px; /* Tiny nudge down so it matches the line height of the first links */
-        }
-
-        /* Boxed chat buttons */
-        .chat-box {
-            border: 2px solid #000000;
-            padding: 5px 15px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            background: none;
-            white-space: nowrap;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Applies the cached theme/display settings INSTANTLY, before the
+  // page paints -- no network wait. themeLoader.js (loaded later)
+  // re-syncs with the server in the background and updates this
+  // cache if it changed elsewhere.
+  (function(){
+    try {
+      var theme = localStorage.getItem("slrpg_theme");
+      var fontSize = localStorage.getItem("slrpg_font_size");
+      var density = localStorage.getItem("slrpg_density");
+      var reduceMotion = localStorage.getItem("slrpg_reduce_motion");
+      if (theme && theme !== "dark_fantasy") document.documentElement.setAttribute("data-theme", theme);
+      if (fontSize && fontSize !== "medium") document.documentElement.setAttribute("data-font-size", fontSize);
+      if (density && density !== "comfortable") document.documentElement.setAttribute("data-density", density);
+      if (reduceMotion === "true") document.documentElement.setAttribute("data-reduce-motion", "true");
+    } catch(e) {}
+  })();
+</script>
 </head>
 <body>
 
-    <header>
-        <div class="title-container">
-            <h1 class="main-title">Solo League Rpg</h1>
-            <div class="double-underline"></div>
+<div class="shell">
+
+  <!-- ===================== WELCOME MODAL ===================== -->
+  <div id="welcome-modal" style="display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; background:rgba(10,8,7,0.85);">
+    <div class="frame" style="max-width:560px; margin:1rem; padding:1.75rem;">
+      <h2 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.75rem;">Welcome, Adventurer</h2>
+      <p style="margin-bottom:0.75rem;">Solonia is a world of nine kingdoms, each with its own people, politics, and creatures — and you're here to make a name for yourself in it.</p>
+      <p style="margin-bottom:0.75rem;">Fight creatures and political hierarchies to earn XP and gold, rank up from E all the way to SS, and unlock new kingdoms as you go. Duel other players, form parties, take on Kingdom Champions, and — once you've conquered enough of the world — challenge the Primordial Gods themselves.</p>
+      <p style="margin-bottom:1.25rem;">Start with the <strong>World Map</strong> to explore and fight, check <strong>Player</strong> to build your character, and visit <strong>Gameplay</strong> in the left sidebar any time for the full rules.</p>
+      <button class="btn" onclick="document.getElementById('welcome-modal').style.display='none';">Continue</button>
+    </div>
+  </div>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
         </div>
-    </header>
+      </div>
+    </div>
 
-    <main class="content-row">
-        
-        <div class="column-left">
-            <ul>
-                <li>main dashboard.</li>
-                <li>league match Entry</li>
-                <li>Recent activity</li>
-                <li>Character tab</li>
-                <li>Battle log</li>
-                <li>settings</li>
-            </ul>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">Duel Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== LEFT NAV ===================== -->
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Player</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <a class="nav-item" href="gameplay.html"><span class="glyph">&#10070;</span> Gameplay</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">Main Dashboard</div>
+        <h2>Welcome back, Adventurer</h2>
+      </div>
+    </div>
+
+    <div class="card-grid">
+
+      <section class="frame">
+        <h3>League Summary</h3>
+        <ul class="clean">
+          <li><span>Matches Played</span><span class="mono" id="dash-matches-played">--</span></li>
+          <li><span>Win Rate</span><span class="mono" id="dash-win-rate">--</span></li>
+          <li><span>Current Streak</span><span class="mono" id="dash-streak">--</span></li>
+          <li><span>Last Match KDA</span><span class="mono" id="dash-last-kda">--</span></li>
+        </ul>
+      </section>
+
+      <section class="frame">
+        <h3>Character Summary</h3>
+        <ul class="clean">
+          <li><span>Level</span><span class="mono" id="dash-level">--</span></li>
+          <li><span>Class</span><span class="mono" id="dash-class">--</span></li>
+          <li><span>Rank</span><span class="mono" id="dash-rank">--</span></li>
+        </ul>
+        <a class="btn" href="character.html">Open Character Tab</a>
+      </section>
+
+      <section class="frame">
+        <h3>Current World Event</h3>
+        <p class="placeholder-note">No active world event right now.</p>
+      </section>
+
+      <section class="frame">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h3 style="margin:0;">Today's Kingdom News</h3>
+          <button class="btn" id="kingdom-news-generate-btn" onclick="loadKingdomNews(true)" style="padding:0.3rem 0.6rem; font-size:0.72rem;">Generate</button>
         </div>
+        <p class="placeholder-note" id="dash-kingdom-news" style="margin-top:0.6rem;">Loading...</p>
+      </section>
 
-        <div class="column-center">
-            <div class="chat-container">
-                <div class="chat-box">PvP chat</div>
-                <div class="chat-box">World chat</div>
-            </div>
-        </div>
+      <section class="frame">
+        <h3>Daily Missions</h3>
+        <p class="placeholder-note">No missions available yet.</p>
+      </section>
 
-        <div class="column-right">
-            <div>
-                <ul>
-                    <li>leaderboards</li>
-                    <li>world map</li>
-                    <li>Guild</li>
-                    <li>shop</li>
-                </ul>
-            </div>
-        </div>
+    </div>
+  </main>
 
-    </main>
+  <!-- ===================== RIGHT NAV ===================== -->
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
 
+</div>
+
+<script src="script.js"></script>
+
+<!-- Supabase library, then our connection file, then the login check below -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="themeLoader.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerWallet.js"></script>
+<script src="headerName.js"></script>
+<script>
+  // Require login: if nobody is signed in, bounce to login.html
+  (async () => {
+    const { data } = await sb.auth.getSession();
+    if(!data.session){
+      window.location.href = "login.html";
+      return;
+    }
+    document.getElementById("header-gamer-name").textContent = await getMyGamerName();
+
+    // Only show this on an actual browser refresh (F5, reload
+    // button) -- navigating here normally via a nav link is a real
+    // page load too, but shouldn't retrigger it every time.
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    if (navEntry && navEntry.type === "reload"){
+      document.getElementById("welcome-modal").style.display = "flex";
+    }
+  })();
+</script>
+<script src="duelWatcher.js"></script>
+<script src="audioManager.js"></script>
+<script src="lobbyChat.js"></script>
+<script src="loremaster.js"></script>
+
+<script>
+  async function loadDashboardSummaries(){
+    const { data: sessionData } = await sb.auth.getSession();
+    if (!sessionData.session) return;
+    const userId = sessionData.session.user.id;
+
+    // ---- Character Summary ----
+    const { data: character } = await sb.from("characters").select("*").eq("user_id", userId).maybeSingle();
+    if (character){
+      document.getElementById("dash-level").textContent = character.level ?? "--";
+      document.getElementById("dash-class").textContent = character.class || "--";
+      document.getElementById("dash-rank").textContent = character.rank || "--";
+    } else {
+      document.getElementById("dash-level").textContent = "No character yet";
+      document.getElementById("dash-class").textContent = "--";
+      document.getElementById("dash-rank").textContent = "--";
+    }
+
+    // ---- League Summary ----
+    const { data: matches, error } = await sb
+      .from("match_history")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error || !matches || matches.length === 0){
+      document.getElementById("dash-matches-played").textContent = "0";
+      document.getElementById("dash-win-rate").textContent = "--";
+      document.getElementById("dash-streak").textContent = "--";
+      document.getElementById("dash-last-kda").textContent = "No matches logged yet";
+      return;
+    }
+
+    const played = matches.length;
+    const wins = matches.filter(m => m.won).length;
+    const winRate = Math.round((wins / played) * 100);
+
+    // current streak -- count from the most recent match backwards
+    // while the result stays the same (win streak or loss streak)
+    let streak = 0;
+    const streakResult = matches[0].won;
+    for (const m of matches){
+      if (m.won === streakResult) streak++;
+      else break;
+    }
+
+    const last = matches[0];
+
+    document.getElementById("dash-matches-played").textContent = played;
+    document.getElementById("dash-win-rate").textContent = winRate + "%";
+    document.getElementById("dash-streak").textContent = `${streak} ${streakResult ? "Win" : "Loss"}${streak !== 1 ? "s" : ""}`;
+    document.getElementById("dash-last-kda").textContent = `${last.kills}/${last.deaths}/${last.assists}${last.won ? " (Win)" : " (Loss)"}`;
+  }
+
+  async function callGemini(prompt, purpose, groundWith){
+    try {
+      const { data: result, error } = await sb.functions.invoke("call-gemini", {
+        body: { purpose: purpose || "general", prompt, groundWith: groundWith || "" },
+      });
+      if (error) return { ok: false, error: error.message };
+      if (result?.error) return { ok: false, error: result.error };
+      return { ok: true, text: result.text, warning: result.warning };
+    } catch (e) {
+      return { ok: false, error: String(e) };
+    }
+  }
+
+  // Cached to exactly once per calendar day, shared for every
+  // player -- whoever loads the Dashboard first that day generates
+  // it (using their own key); everyone else just reads the cached
+  // row. This is what keeps this feature completely rate-limit-safe
+  // no matter how many times the Dashboard gets viewed.
+  async function loadKingdomNews(forceRegenerate){
+    const newsEl = document.getElementById("dash-kingdom-news");
+    const btn = document.getElementById("kingdom-news-generate-btn");
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    if (!forceRegenerate){
+      const { data: existing } = await sb.from("daily_kingdom_news").select("content").eq("news_date", today).maybeSingle();
+      if (existing){
+        newsEl.textContent = existing.content;
+        return;
+      }
+
+      // Don't even attempt an auto-generation if we already know
+      // this key is still rate-limited -- avoids silently hitting
+      // Google again every single Dashboard visit while waiting out
+      // a limit, which was happening before this check existed.
+      const { data: userData } = await sb.auth.getUser();
+      const { data: keys } = await sb.from("user_api_keys").select("gemini_1_rate_limited_until, gemini_2_rate_limited_until").eq("user_id", userData.user.id).maybeSingle();
+      const now = Date.now();
+      const key1Blocked = keys?.gemini_1_rate_limited_until && new Date(keys.gemini_1_rate_limited_until).getTime() > now;
+      const key2Blocked = keys?.gemini_2_rate_limited_until && new Date(keys.gemini_2_rate_limited_until).getTime() > now;
+      if (key1Blocked && (key2Blocked || !keys?.gemini_2_rate_limited_until)){
+        newsEl.textContent = "Still rate limited — check Settings → API for the countdown, or click Generate to try anyway.";
+        return;
+      }
+    }
+
+    if (btn){ btn.disabled = true; btn.textContent = "Generating..."; }
+    newsEl.textContent = "Generating today's news...";
+
+    const prompt = `Write a short (2-3 sentence) fictional daily news blurb for the fantasy world of Solonia, covering something happening in one of its nine kingdoms today (pick one). Tone: witty, funny, a little sarcastic -- like a news anchor who's slightly over it but still does the job well -- while staying genuinely informative about an actual event, not just a one-liner joke. Keep it grounded in the established lore. No preamble, no date stamp, just the news item itself.`;
+    const result = await callGemini(prompt, "kingdom_news", "information");
+
+    if (btn){ btn.disabled = false; btn.textContent = "Generate"; }
+
+    if (!result.ok){
+      // Show the REAL reason instead of a silent generic fallback --
+      // most likely cause is no Gemini key set, or a rate limit.
+      newsEl.textContent = "Couldn't generate news: " + result.error;
+      return;
+    }
+
+    newsEl.textContent = result.text;
+
+    // Save it for everyone else today -- if two players race to
+    // generate at the same moment, the unique news_date means only
+    // one insert wins, which is fine, the loser's generation just
+    // goes unused (no error surfaced to them either way).
+    await sb.from("daily_kingdom_news").upsert({ news_date: today, content: result.text }, { onConflict: "news_date" });
+  }
+
+  loadDashboardSummaries();
+  loadKingdomNews();
+</script>
 </body>
 </html>

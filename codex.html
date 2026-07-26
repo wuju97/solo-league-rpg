@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo League RPG — Codex</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="app-header">
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <div class="brand">
+        <span class="glyph">&#9876;</span>
+        <div>
+          <h1>Solo League RPG</h1>
+          <div class="sub">Season 01</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
+      <div class="chat-buttons">
+        <a class="chat-btn pvp" href="pvp-chat.html">PvP Chat</a>
+        <a class="chat-btn world" href="world-chat.html">World Lore</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar left">
+    <div class="label">Main</div>
+    <a class="nav-item" href="index.html"><span class="glyph">&#9673;</span> Dashboard</a>
+    <a class="nav-item" href="character.html"><span class="glyph">&#9820;</span> Character</a>
+    <a class="nav-item" href="battlelog.html"><span class="glyph">&#9876;</span> Battle Log</a>
+    <a class="nav-item" href="settings.html"><span class="glyph">&#9881;</span> Settings</a>
+    <div class="nav-bottom">
+      <a class="nav-item" href="kda-xp.html"><span class="glyph">&#9650;</span> KDA / XP</a>
+      <a class="nav-item" href="top-clips.html"><span class="glyph">&#9654;</span> Top Clips</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-title">
+      <div>
+        <div class="eyebrow">World</div>
+        <h2>Codex</h2>
+      </div>
+    </div>
+
+    <div class="channel-layout">
+    <div class="page-tabs" id="codex-tabs">
+      <button class="page-tab-btn active" data-tab="kingdoms">Kingdoms</button>
+      <button class="page-tab-btn" data-tab="cities">Cities</button>
+      <button class="page-tab-btn" data-tab="npcs">NPCs</button>
+      <button class="page-tab-btn" data-tab="creatures">Creatures</button>
+      <button class="page-tab-btn" data-tab="artifacts">Artifacts</button>
+      <button class="page-tab-btn" data-tab="history">History</button>
+      <button class="page-tab-btn" data-tab="timeline">Timeline</button>
+      <button class="page-tab-btn" data-tab="books">Books</button>
+      <button class="page-tab-btn" data-tab="politics">Politics</button>
+      <button class="page-tab-btn" data-tab="guilds">Guilds</button>
+      <button class="page-tab-btn" data-tab="bosses">Bosses</button>
+      <button class="page-tab-btn" data-tab="classes">Classes</button>
+      <button class="page-tab-btn" data-tab="skills">Skills</button>
+    </div>
+      <div class="channel-content">
+
+    <div class="page-tab-panel active" data-panel="kingdoms">
+      <section class="frame"><h3>Kingdoms</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="cities">
+      <section class="frame"><h3>Cities</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="npcs">
+      <section class="frame"><h3>NPCs</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="creatures">
+      <section class="frame"><h3>Creatures</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="artifacts">
+      <section class="frame"><h3>Artifacts</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="history">
+      <section class="frame"><h3>History</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="timeline">
+      <section class="frame"><h3>Timeline</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="books">
+      <section class="frame"><h3>Books</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="politics">
+      <section class="frame"><h3>Politics</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="guilds">
+      <section class="frame"><h3>Guilds</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="bosses">
+      <section class="frame"><h3>Bosses</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="classes">
+      <section class="frame"><h3>Classes</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+    <div class="page-tab-panel" data-panel="skills">
+      <section class="frame"><h3>Skills</h3><p class="placeholder-note">Nothing here yet.</p></section>
+    </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="sidebar right">
+    <div class="label">World</div>
+    <a class="nav-item" href="leaderboards.html"><span class="glyph">&#9733;</span> Leaderboards</a>
+    <a class="nav-item" href="world.html"><span class="glyph">&#9757;</span> World Map</a>
+    <a class="nav-item" href="quests.html"><span class="glyph">&#10070;</span> Quests</a>
+    <a class="nav-item" href="codex.html"><span class="glyph">&#128214;</span> Codex</a>
+    <a class="nav-item" href="guild.html"><span class="glyph">&#9962;</span> Guild</a>
+    <a class="nav-item" href="duel-trade.html"><span class="glyph">&#8644;</span> Duel Trade</a>
+    <a class="nav-item" href="shop.html"><span class="glyph">&#9878;</span> Shop</a>
+    <a class="nav-item" href="mail.html"><span class="glyph">&#9993;</span> Mail</a>
+    <a class="nav-item" href="party.html"><span class="glyph">&#9873;</span> Party</a>
+  </nav>
+
+</div>
+
+<script src="script.js"></script>
+
+<!-- Floating lobby chat bubble, available on every page -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
+<script src="audioManager.js"></script>
+<script src="profileHelper.js"></script>
+<script src="headerName.js"></script>
+<script src="lobbyChat.js"></script>
+<script>
+  document.querySelectorAll("#codex-tabs .page-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#codex-tabs .page-tab-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
+      document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+</script>
+</body>
+</html>
