@@ -20,9 +20,18 @@ async function getMyGamerName() {
 
     const { data, error } = await sb
       .from("profiles")
-      .select("gamer_name")
+      .select("gamer_name, avatar_url")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    // Populate the header avatar if this page has one -- gated on
+    // the element existing so pages without it (or any future page
+    // that doesn't include this markup) don't error out.
+    const avatarEl = document.getElementById("header-avatar");
+    if (avatarEl && data?.avatar_url) {
+      avatarEl.src = data.avatar_url;
+      avatarEl.style.display = "inline-block";
+    }
 
     if (!error && data && data.gamer_name) {
       return data.gamer_name;

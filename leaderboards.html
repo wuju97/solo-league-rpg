@@ -40,6 +40,7 @@
       </div>
     </div>
     <div style="display:flex; align-items:center; gap:1rem;">
+      <img id="header-avatar" src="" alt="" style="display:none; width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-bright);">
       <span id="header-gamer-name" class="mono" style="font-size:0.75rem; color:var(--dim);"></span>
       <span id="header-wallet" class="mono" style="font-size:0.75rem; color:var(--gold-bright);"></span>
       <div class="chat-buttons">
@@ -160,6 +161,15 @@
     return div.innerHTML;
   }
 
+  async function getAvatarMap(userIds){
+    const ids = [...new Set(userIds)].filter(Boolean);
+    if (ids.length === 0) return {};
+    const { data: profiles } = await sb.from("profiles").select("user_id, avatar_url").in("user_id", ids);
+    const map = {};
+    (profiles || []).forEach(p => { map[p.user_id] = p.avatar_url; });
+    return map;
+  }
+
   function renderRankedList(elId, rows, valueLabel){
     const el = document.getElementById(elId);
     if (!rows || rows.length === 0){
@@ -168,16 +178,21 @@
     }
     el.innerHTML = rows.map((r, i) => `
       <div style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--border);">
-        <span><span class="mono" style="color:var(--gold-bright); margin-right:0.6rem;">#${i + 1}</span>${lbEscapeHtml(r.name)}</span>
+        <span style="display:flex; align-items:center;">
+          <span class="mono" style="color:var(--gold-bright); margin-right:0.6rem;">#${i + 1}</span>
+          ${r.avatar_url ? `<img src="${r.avatar_url}" alt="" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:0.5rem;">` : ""}
+          ${lbEscapeHtml(r.name)}
+        </span>
         <span class="mono" style="color:var(--dim);">${lbEscapeHtml(String(r.value))} ${valueLabel}</span>
       </div>
     `).join("");
   }
 
   async function loadOverallRankLeaderboard(){
-    const { data: chars, error } = await sb.from("characters").select("name, level, rank, xp").order("xp", { ascending: false }).limit(20);
+    const { data: chars, error } = await sb.from("characters").select("name, level, rank, xp, user_id").order("xp", { ascending: false }).limit(20);
     if (error){ document.getElementById("lb-overall-rank").innerHTML = `<p class="placeholder-note">Couldn't load: ${lbEscapeHtml(error.message)}</p>`; return; }
-    renderRankedList("lb-overall-rank", (chars || []).map(c => ({ name: c.name, value: `Level ${c.level} (${c.rank})` })), "");
+    const avatarMap = await getAvatarMap((chars || []).map(c => c.user_id));
+    renderRankedList("lb-overall-rank", (chars || []).map(c => ({ name: c.name, avatar_url: avatarMap[c.user_id], value: `Level ${c.level} (${c.rank})` })), "");
   }
 
   async function loadPvpLeaderboard(){
@@ -189,21 +204,23 @@
     const userIds = Object.keys(winCounts);
     if (userIds.length === 0){ renderRankedList("lb-pvp", [], "Wins"); return; }
 
-    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name").in("user_id", userIds);
+    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name, avatar_url").in("user_id", userIds);
     const nameFor = {};
-    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; });
+    const avatarFor = {};
+    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; avatarFor[c.user_id] = c.avatar_url; });
 
     const rows = userIds
-      .map(id => ({ name: nameFor[id] || "Unknown", value: winCounts[id] }))
+      .map(id => ({ name: nameFor[id] || "Unknown", avatar_url: avatarFor[id], value: winCounts[id] }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 20);
     renderRankedList("lb-pvp", rows, "Wins");
   }
 
   async function loadRichestLeaderboard(){
-    const { data: chars, error } = await sb.from("characters").select("name, gold, crystals").order("gold", { ascending: false }).limit(20);
+    const { data: chars, error } = await sb.from("characters").select("name, gold, crystals, user_id").order("gold", { ascending: false }).limit(20);
     if (error){ document.getElementById("lb-richest").innerHTML = `<p class="placeholder-note">Couldn't load: ${lbEscapeHtml(error.message)}</p>`; return; }
-    renderRankedList("lb-richest", (chars || []).map(c => ({ name: c.name, value: `${c.gold} Gold, ${c.crystals ?? 0} Crystals` })), "");
+    const avatarMap = await getAvatarMap((chars || []).map(c => c.user_id));
+    renderRankedList("lb-richest", (chars || []).map(c => ({ name: c.name, avatar_url: avatarMap[c.user_id], value: `${c.gold} Gold, ${c.crystals ?? 0} Crystals` })), "");
   }
 
   async function loadCollectorLeaderboard(){
@@ -215,12 +232,13 @@
     const userIds = Object.keys(counts);
     if (userIds.length === 0){ renderRankedList("lb-collector", [], "Items"); return; }
 
-    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name").in("user_id", userIds);
+    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name, avatar_url").in("user_id", userIds);
     const nameFor = {};
-    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; });
+    const avatarFor = {};
+    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; avatarFor[c.user_id] = c.avatar_url; });
 
     const rows = userIds
-      .map(id => ({ name: nameFor[id] || "Unknown", value: counts[id] }))
+      .map(id => ({ name: nameFor[id] || "Unknown", avatar_url: avatarFor[id], value: counts[id] }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 20);
     renderRankedList("lb-collector", rows, "Items");
@@ -238,12 +256,13 @@
     const userIds = Object.keys(counts);
     if (userIds.length === 0){ renderRankedList("lb-monster-hunter", [], "Kills"); return; }
 
-    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name").in("user_id", userIds);
+    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name, avatar_url").in("user_id", userIds);
     const nameFor = {};
-    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; });
+    const avatarFor = {};
+    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; avatarFor[c.user_id] = c.avatar_url; });
 
     const rows = userIds
-      .map(id => ({ name: nameFor[id] || "Unknown", value: counts[id] }))
+      .map(id => ({ name: nameFor[id] || "Unknown", avatar_url: avatarFor[id], value: counts[id] }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 20);
     renderRankedList("lb-monster-hunter", rows, "Kills");
@@ -261,12 +280,13 @@
     const userIds = Object.keys(counts);
     if (userIds.length === 0){ renderRankedList("lb-explorer", [], "Discoveries"); return; }
 
-    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name").in("user_id", userIds);
+    const { data: chars } = await sb.from("profiles").select("user_id, gamer_name, avatar_url").in("user_id", userIds);
     const nameFor = {};
-    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; });
+    const avatarFor = {};
+    (chars || []).forEach(c => { nameFor[c.user_id] = c.gamer_name; avatarFor[c.user_id] = c.avatar_url; });
 
     const rows = userIds
-      .map(id => ({ name: nameFor[id] || "Unknown", value: counts[id] }))
+      .map(id => ({ name: nameFor[id] || "Unknown", avatar_url: avatarFor[id], value: counts[id] }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 20);
     renderRankedList("lb-explorer", rows, "Discoveries");
