@@ -109,13 +109,6 @@
 
     <div class="page-tab-panel" data-panel="preferences">
       <section class="frame">
-        <h3>Preferences</h3>
-        <p class="placeholder-note">General notification preferences go here as more systems (Mail, Party, Guild) come online. Audio is under Music &amp; Sound Effects; look and feel is under Personalization.</p>
-      </section>
-    </div>
-
-    <div class="page-tab-panel" data-panel="personalization">
-      <section class="frame">
         <h3>Avatar</h3>
         <p class="placeholder-note" style="margin-bottom:0.75rem;">Shown next to your gamer name in the header, on Leaderboards, and in your Friends list. Max 2MB, images only.</p>
         <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.75rem;">
@@ -132,17 +125,24 @@
       </section>
 
       <section class="frame" style="margin-top:1rem;">
-        <h3>Personalization</h3>
-        <p class="placeholder-note" style="margin-bottom:1rem;">Changes the whole site's colors and fonts. Saved to your account, so it follows you across devices.</p>
-        <div class="card-grid" id="theme-options"></div>
-      </section>
-
-      <section class="frame" style="margin-top:1rem;">
         <h3>Dashboard Layout</h3>
         <p class="placeholder-note" style="margin-bottom:0.75rem;">Show, hide, and reorder what appears on your Dashboard.</p>
         <div id="dashboard-widget-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
         <button class="btn" style="margin-top:0.75rem;" onclick="saveDashboardLayout()">Save Layout</button>
         <p class="placeholder-note" id="dashboard-layout-status" style="margin-top:0.5rem;"></p>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Preferences</h3>
+        <p class="placeholder-note">General notification preferences go here as more systems (Mail, Party, Guild) come online. Audio is under Music &amp; Sound Effects; look and feel is under Personalization.</p>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="personalization">
+      <section class="frame">
+        <h3>Personalization</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">Changes the whole site's colors and fonts. Saved to your account, so it follows you across devices.</p>
+        <div class="card-grid" id="theme-options"></div>
       </section>
 
       <section class="frame" style="margin-top:1rem;">
@@ -424,7 +424,8 @@
       document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
       document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
 
-      if (target === "personalization"){ loadThemeOptions(); loadAvatarPreview(); loadDashboardWidgets(); }
+      if (target === "personalization") loadThemeOptions();
+      if (target === "preferences"){ loadAvatarPreview(); loadDashboardWidgets(); }
       if (target === "audio") loadAudioPrefs();
       if (target === "api") loadApiKeys();
       if (target === "ai-memory") loadAiMemory();
