@@ -1030,6 +1030,98 @@ ul.clean li:last-child{ border-bottom:none; }
 }
 [data-theme="nature"] *{ font-family: 'Cormorant Garamond', serif !important; }
 
+/* ---- Frostbound: glacial blues and ice-white, Frosthaven-inspired ---- */
+[data-theme="frostbound"]{
+  --void:            #060B12;
+  --panel:           #0D1826;
+  --panel-raised:    #142338;
+  --border:          #24405C;
+  --border-bright:   #3A6088;
+
+  --gold:            #7EC8E3;
+  --gold-bright:     #A8E0F5;
+  --crimson:         #4A7FA8;
+  --crimson-bright:  #6BA3C9;
+  --steel:           #C4D8E8;
+  --steel-bright:    #E8F4FC;
+
+  --parchment:       #E4F0F8;
+  --dim:             #6E8CA6;
+
+  --radius: 3px;
+}
+[data-theme="frostbound"] *{ font-family: 'Cormorant Garamond', 'EB Garamond', serif !important; }
+
+/* ---- Emberfall: volcanic orange and ash-black, Pyrath-inspired ---- */
+[data-theme="emberfall"]{
+  --void:            #0D0705;
+  --panel:           #1C0F09;
+  --panel-raised:    #2A160D;
+  --border:          #4A2814;
+  --border-bright:   #7A3F1A;
+
+  --gold:            #E8641E;
+  --gold-bright:     #FF8A3D;
+  --crimson:         #B8321E;
+  --crimson-bright:  #E04529;
+  --steel:           #8A6248;
+  --steel-bright:    #B0805E;
+
+  --parchment:       #F5E4D4;
+  --dim:             #A0785E;
+
+  --radius: 2px;
+}
+[data-theme="emberfall"] h1, [data-theme="emberfall"] h2, [data-theme="emberfall"] h3, [data-theme="emberfall"] h4{
+  text-transform: uppercase !important; letter-spacing: 0.04em !important;
+}
+
+/* ---- Abyssal Tide: deep teal and sea-foam, Azure Reach-inspired ---- */
+[data-theme="abyssal_tide"]{
+  --void:            #050F0E;
+  --panel:           #0A1D1B;
+  --panel-raised:    #102B28;
+  --border:          #1E4A44;
+  --border-bright:   #2E7268;
+
+  --gold:            #2EC9B8;
+  --gold-bright:     #5EE8D6;
+  --crimson:         #1E7A9E;
+  --crimson-bright:  #2E9EC9;
+  --steel:           #4A9C8E;
+  --steel-bright:    #6EC4B4;
+
+  --parchment:       #D8F0EC;
+  --dim:             #5E9088;
+
+  --radius: 8px;
+}
+[data-theme="abyssal_tide"] *{ font-family: 'Cormorant Garamond', serif !important; }
+
+/* ---- Storm Sovereign: electric violet and stormcloud grey, Aetheria-inspired ---- */
+[data-theme="storm_sovereign"]{
+  --void:            #0A0912;
+  --panel:           #15121F;
+  --panel-raised:    #201B2F;
+  --border:          #3A2F52;
+  --border-bright:   #5A4A7C;
+
+  --gold:            #9B7FE8;
+  --gold-bright:     #BFA8FF;
+  --crimson:         #6B5CA0;
+  --crimson-bright:  #8A78C4;
+  --steel:           #7A8CA8;
+  --steel-bright:    #A0B4D0;
+
+  --parchment:       #EBE4FA;
+  --dim:             #8578A8;
+
+  --radius: 5px;
+}
+[data-theme="storm_sovereign"] h1, [data-theme="storm_sovereign"] h2, [data-theme="storm_sovereign"] h3, [data-theme="storm_sovereign"] h4{
+  font-family: 'Playfair Display', serif !important; letter-spacing: 0.02em !important;
+}
+
 /* ---- Font size ---- */
 [data-font-size="small"]{ font-size: 14px; }
 [data-font-size="medium"]{ font-size: 16px; }
