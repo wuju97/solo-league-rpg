@@ -48,7 +48,10 @@
       ? Math.min(1, progress.xp_into_level / progress.xp_for_next_level)
       : 1; // level 100 cap — ring shows full
 
-    const size = 26;
+    // Sized to comfortably wrap a real avatar image, not just a
+    // level number — the previous ring only needed to fit two
+    // digits of text.
+    const size = 36;
     const strokeWidth = 2.5;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
@@ -56,34 +59,51 @@
 
     let ring = document.getElementById("header-xp-ring");
     if (!ring) {
-      // Build the wrapper once: [ring+level] [gamer name]
+      // Build the wrapper once: [ring with avatar centered inside] [gamer name]
       const wrapper = document.createElement("span");
       wrapper.style.cssText = "display:inline-flex; align-items:center; gap:0.4rem;";
+
+      const ringWrap = document.createElement("span");
+      ringWrap.style.cssText = `position:relative; width:${size}px; height:${size}px; flex-shrink:0; display:inline-block;`;
 
       const ringSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       ringSvg.setAttribute("id", "header-xp-ring");
       ringSvg.setAttribute("width", size);
       ringSvg.setAttribute("height", size);
-      ringSvg.style.cssText = "transform:rotate(-90deg); flex-shrink:0;";
+      ringSvg.style.cssText = "position:absolute; inset:0; transform:rotate(-90deg);";
       ringSvg.innerHTML = `
         <circle cx="${size/2}" cy="${size/2}" r="${radius}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="${strokeWidth}"></circle>
         <circle id="header-xp-ring-fill" cx="${size/2}" cy="${size/2}" r="${radius}" fill="none" stroke="#3b82f6" stroke-width="${strokeWidth}"
           stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" stroke-linecap="round"
           style="transition: stroke-dashoffset 0.6s ease;"></circle>
-        <text id="header-xp-ring-level" x="${size/2}" y="${size/2}" fill="var(--gold-bright)" font-size="9" font-family="'JetBrains Mono', monospace"
-          text-anchor="middle" dominant-baseline="central" transform="rotate(90 ${size/2} ${size/2})">${progress.level}</text>
       `;
 
+      // The avatar image already exists in the header (populated by
+      // profileHelper.js, which this file already awaits via
+      // getMyGamerName() above) -- move that same element inside the
+      // ring instead of fetching avatar data a second time.
+      const avatarImg = document.getElementById("header-avatar");
+      const avatarInset = strokeWidth + 2;
+      const avatarSize = size - avatarInset * 2;
+      if (avatarImg) {
+        // An <img> with an empty src can show a broken-image icon in
+        // some browsers -- remove the attribute entirely when no
+        // avatar's been set, so it's just a plain background-colored
+        // circle instead.
+        if (!avatarImg.getAttribute("src")) avatarImg.removeAttribute("src");
+        avatarImg.style.cssText = `position:absolute; top:${avatarInset}px; left:${avatarInset}px; width:${avatarSize}px; height:${avatarSize}px; border-radius:50%; object-fit:cover; background:var(--panel-raised); display:block;`;
+      }
+
       el.parentNode.insertBefore(wrapper, el);
-      wrapper.appendChild(ringSvg);
+      ringWrap.appendChild(ringSvg);
+      if (avatarImg) ringWrap.appendChild(avatarImg);
+      wrapper.appendChild(ringWrap);
       wrapper.appendChild(el);
       ring = ringSvg;
     }
 
     const fillCircle = document.getElementById("header-xp-ring-fill");
-    const levelText = document.getElementById("header-xp-ring-level");
     if (fillCircle) fillCircle.setAttribute("stroke-dashoffset", offset);
-    if (levelText) levelText.textContent = progress.level;
 
     el.title = `Level ${progress.level} (${progress.rank}-Rank) — ${progress.xp_into_level} / ${progress.xp_for_next_level} XP to next level`;
   }
