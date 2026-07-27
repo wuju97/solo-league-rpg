@@ -81,6 +81,14 @@
 
     <div class="page-tab-panel active" data-panel="friends">
       <section class="frame">
+        <h3>Your Profile</h3>
+        <div id="my-profile-display" style="display:flex; align-items:center; gap:0.75rem;">
+          <p class="placeholder-note">Loading...</p>
+        </div>
+        <p class="placeholder-note" style="margin-top:0.5rem;">Change your avatar in Settings → Personalization.</p>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
         <h3>Friends</h3>
         <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem;">
           <input type="text" id="add-friend-gamer-name" placeholder="Gamer name" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
@@ -386,9 +394,20 @@
     }).join("");
   }
 
+  async function loadMyProfile(){
+    const displayEl = document.getElementById("my-profile-display");
+    const { data: userData } = await sb.auth.getUser();
+    const { data: profile } = await sb.from("profiles").select("gamer_name, avatar_url").eq("user_id", userData.user.id).maybeSingle();
+    const avatarHtml = profile?.avatar_url
+      ? `<img src="${profile.avatar_url}" alt="" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--border-bright);">`
+      : `<span style="display:inline-block; width:56px; height:56px; border-radius:50%; background:var(--panel-raised); border:2px solid var(--border-bright);"></span>`;
+    displayEl.innerHTML = `${avatarHtml}<strong style="color:var(--parchment); font-size:1.1rem;">${escapeHtml(profile?.gamer_name || "Adventurer")}</strong>`;
+  }
+
   loadMyParty();
   loadPartyInvites();
   loadFriendsList();
+  loadMyProfile();
 </script>
 
 <script>
