@@ -75,10 +75,8 @@
     <div class="channel-layout">
     <div class="page-tabs" id="shop-tabs">
       <button class="page-tab-btn active" data-tab="npc-shops">NPC Shops</button>
-      <button class="page-tab-btn" data-tab="weapons">Weapons</button>
-      <button class="page-tab-btn" data-tab="armor">Armor</button>
-      <button class="page-tab-btn" data-tab="consumables">Consumables</button>
-      <button class="page-tab-btn" data-tab="kingdom-armory">Kingdom Armory</button>
+      <button class="page-tab-btn" data-tab="general-shop">General Shop</button>
+      <button class="page-tab-btn" data-tab="kingdom-shop">Kingdom Shop</button>
     </div>
       <div class="channel-content">
 
@@ -173,69 +171,92 @@
         </ul>
       </section>
     </div>
-    <div class="page-tab-panel" data-panel="weapons">
-      <section class="frame">
-        <h3>General Weapon Shop <span class="tag">Common</span></h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Everyday starter weapons, no kingdom flavor.</p>
-        <div class="card-grid" id="general-weapons-list"></div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="kingdom-armory">
-      <section class="frame">
-        <h3>Kingdom Armory <span class="tag">72 named weapons, 8 per kingdom</span></h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Each kingdom forges weapons with its own combat identity. This is a reference catalog only — buying happens on the World Map, and only while you're actually in that kingdom.</p>
-        <select id="armory-kingdom-picker" onchange="loadArmoryKingdom(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
-          <option value="Valoria">Valoria</option>
-          <option value="Frosthaven">Frosthaven</option>
-          <option value="Eldergrove">Eldergrove</option>
-          <option value="Pyrath">Pyrath</option>
-          <option value="Aetheria">Aetheria</option>
-          <option value="Azure Reach">Azure Reach</option>
-          <option value="Khar'Duun">Khar'Duun</option>
-          <option value="Blackfen">Blackfen</option>
-          <option value="Mordrath">Mordrath</option>
-        </select>
-        <div id="armory-identity-note" class="placeholder-note" style="margin-bottom:1rem;"></div>
-        <div class="card-grid" id="armory-weapon-list"></div>
+    <div class="page-tab-panel" data-panel="general-shop">
+      <div class="page-tabs" id="general-shop-subtabs">
+        <button class="page-tab-btn active" data-subtab="general-weapons">General Weapons</button>
+        <button class="page-tab-btn" data-subtab="general-armor">General Armor</button>
+        <button class="page-tab-btn" data-subtab="general-consumables">General Consumables</button>
+      </div>
 
-        <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Material Locations</h4>
-        <div id="armory-materials-list"></div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="armor">
-      <section class="frame">
-        <h3>General Armor Shop <span class="tag">Common</span></h3>
-        <div class="card-grid" id="general-armor-list"></div>
-      </section>
+      <div class="page-tab-subpanel active" data-subpanel="general-weapons">
+        <section class="frame">
+          <h3>General Weapon Shop <span class="tag">Common</span></h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Everyday starter weapons, no kingdom flavor.</p>
+          <div class="card-grid" id="general-weapons-list"></div>
+        </section>
+      </div>
 
-      <section class="frame" style="margin-top:1.25rem;">
-        <h3>Kingdom Armor Shops <span class="tag">72 items, 8 per kingdom</span></h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
-        <select id="kingdom-armor-picker" onchange="loadKingdomArmor(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
-          <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
-          <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
-          <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
-        </select>
-        <div class="card-grid" id="kingdom-armor-list"></div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="consumables">
-      <section class="frame">
-        <h3>Consumables</h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Bring up to 2 into a duel during Pre-Battle Prep.</p>
-        <div class="card-grid" id="consumable-catalog-list"></div>
-      </section>
+      <div class="page-tab-subpanel" data-subpanel="general-armor">
+        <section class="frame">
+          <h3>General Armor Shop <span class="tag">Common</span></h3>
+          <div class="card-grid" id="general-armor-list"></div>
+        </section>
+      </div>
 
-      <section class="frame" style="margin-top:1.25rem;">
-        <h3>Kingdom Alchemist Shops <span class="tag">72 items, 8 per kingdom</span></h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
-        <select id="kingdom-consumable-picker" onchange="loadKingdomConsumables(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
-          <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
-          <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
-          <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
-        </select>
-        <div class="card-grid" id="kingdom-consumable-list"></div>
-      </section>
+      <div class="page-tab-subpanel" data-subpanel="general-consumables">
+        <section class="frame">
+          <h3>Consumables</h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Bring up to 2 into a duel during Pre-Battle Prep.</p>
+          <div class="card-grid" id="consumable-catalog-list"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="page-tab-panel" data-panel="kingdom-shop">
+      <div class="page-tabs" id="kingdom-shop-subtabs">
+        <button class="page-tab-btn active" data-subtab="kingdom-weapon-shops">Kingdom Weapon Shops</button>
+        <button class="page-tab-btn" data-subtab="kingdom-alchemist-shops">Kingdom Alchemist Shops</button>
+        <button class="page-tab-btn" data-subtab="kingdom-armor-shops">Kingdom Armor Shops</button>
+      </div>
+
+      <div class="page-tab-subpanel active" data-subpanel="kingdom-weapon-shops">
+        <section class="frame">
+          <h3>Kingdom Weapon Shops <span class="tag">72 named weapons, 8 per kingdom</span></h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Each kingdom forges weapons with its own combat identity. This is a reference catalog only — buying happens on the World Map, and only while you're actually in that kingdom.</p>
+          <select id="armory-kingdom-picker" onchange="loadArmoryKingdom(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <option value="Valoria">Valoria</option>
+            <option value="Frosthaven">Frosthaven</option>
+            <option value="Eldergrove">Eldergrove</option>
+            <option value="Pyrath">Pyrath</option>
+            <option value="Aetheria">Aetheria</option>
+            <option value="Azure Reach">Azure Reach</option>
+            <option value="Khar'Duun">Khar'Duun</option>
+            <option value="Blackfen">Blackfen</option>
+            <option value="Mordrath">Mordrath</option>
+          </select>
+          <div id="armory-identity-note" class="placeholder-note" style="margin-bottom:1rem;"></div>
+          <div class="card-grid" id="armory-weapon-list"></div>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Material Locations</h4>
+          <div id="armory-materials-list"></div>
+        </section>
+      </div>
+
+      <div class="page-tab-subpanel" data-subpanel="kingdom-alchemist-shops">
+        <section class="frame">
+          <h3>Kingdom Alchemist Shops <span class="tag">72 items, 8 per kingdom</span></h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
+          <select id="kingdom-consumable-picker" onchange="loadKingdomConsumables(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
+            <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
+            <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
+          </select>
+          <div class="card-grid" id="kingdom-consumable-list"></div>
+        </section>
+      </div>
+
+      <div class="page-tab-subpanel" data-subpanel="kingdom-armor-shops">
+        <section class="frame">
+          <h3>Kingdom Armor Shops <span class="tag">72 items, 8 per kingdom</span></h3>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Reference catalog only — buying happens on the World Map while you're in that kingdom.</p>
+          <select id="kingdom-armor-picker" onchange="loadKingdomArmor(this.value)" style="width:100%; max-width:280px; margin-bottom:1rem; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+            <option value="Valoria">Valoria</option><option value="Frosthaven">Frosthaven</option><option value="Eldergrove">Eldergrove</option>
+            <option value="Pyrath">Pyrath</option><option value="Aetheria">Aetheria</option><option value="Azure Reach">Azure Reach</option>
+            <option value="Khar'Duun">Khar'Duun</option><option value="Blackfen">Blackfen</option><option value="Mordrath">Mordrath</option>
+          </select>
+          <div class="card-grid" id="kingdom-armor-list"></div>
+        </section>
+      </div>
     </div>
       </div>
     </div>
@@ -276,6 +297,24 @@
       const target = btn.dataset.tab;
       document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
       document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+
+  // Same pattern, scoped to each nested subtab group independently
+  // (General Shop's 3 inner tabs, Kingdom Shop's 3 inner tabs).
+  ["general-shop-subtabs", "kingdom-shop-subtabs"].forEach((groupId) => {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll(".page-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        group.querySelectorAll(".page-tab-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const target = btn.dataset.subtab;
+        const parentPanel = group.closest(".page-tab-panel");
+        parentPanel.querySelectorAll(".page-tab-subpanel[data-subpanel]").forEach((p) => p.classList.remove("active"));
+        parentPanel.querySelector(`.page-tab-subpanel[data-subpanel="${target}"]`).classList.add("active");
+      });
     });
   });
 
