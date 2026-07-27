@@ -461,8 +461,6 @@
   // Personalization
   // ============================================================
   const THEMES = [
-    { id: "dark_fantasy", name: "Dark Fantasy", desc: "The original look — Cinzel & Spectral, gold and crimson on near-black." },
-    { id: "modern", name: "Modern", desc: "Clean sans-serif, rounded corners, blue and slate — minimal and contemporary." },
     { id: "victorian", name: "Victorian Gothic", desc: "Ornate serif headings, deep burgundy and brass, sharp edges." },
     { id: "light_fantasy", name: "Light Fantasy", desc: "Same fantasy bones, daylight parchment background instead of near-black." },
     { id: "cyberpunk", name: "Cyberpunk", desc: "Neon pink and cyan on near-black, uppercase headings, sharp edges." },
@@ -474,7 +472,7 @@
   async function loadThemeOptions(){
     const { data: prefs } = await sb.rpc("get_or_create_preferences");
     const p = Array.isArray(prefs) ? prefs[0] : prefs;
-    const currentTheme = p?.theme || "dark_fantasy";
+    const currentTheme = p?.theme || "victorian";
 
     document.getElementById("theme-options").innerHTML = THEMES.map(t => `
       <div class="frame" style="${t.id === currentTheme ? "border-color:var(--gold-bright);" : ""}">
@@ -498,11 +496,7 @@
     const { error } = await sb.from("user_preferences").upsert({ user_id: (await sb.auth.getUser()).data.user.id, theme: themeId }, { onConflict: "user_id" });
     if (error){ alert("Couldn't save theme: " + error.message); return; }
 
-    if (themeId === "dark_fantasy"){
-      document.documentElement.removeAttribute("data-theme");
-    } else {
-      document.documentElement.setAttribute("data-theme", themeId);
-    }
+    document.documentElement.setAttribute("data-theme", themeId);
     try { localStorage.setItem("slrpg_theme", themeId); } catch(e){}
     loadThemeOptions();
   }
