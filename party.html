@@ -367,12 +367,18 @@
     }
     listEl.innerHTML = friends.map(f => {
       const presence = presenceLabel(f.last_seen_at);
+      const avatarHtml = f.avatar_url
+        ? `<img src="${f.avatar_url}" alt="" style="width:32px; height:32px; border-radius:50%; object-fit:cover; margin-right:0.6rem; vertical-align:middle;">`
+        : `<span style="display:inline-block; width:32px; height:32px; border-radius:50%; background:var(--panel-raised); margin-right:0.6rem; vertical-align:middle;"></span>`;
       return `
       <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0.9rem; margin-bottom:0.5rem;">
-        <span>
-          <span style="display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:0.4rem; background:${presence.online ? "#8fdb8f" : "var(--dim)"};"></span>
-          <strong style="color:var(--parchment);">${escapeHtml(f.gamer_name)}</strong>${f.current_kingdom ? ` <span class="mono" style="font-size:0.75rem; color:var(--dim);">— ${escapeHtml(f.current_kingdom)}</span>` : ""}
-          <span class="mono" style="font-size:0.7rem; color:${presence.online ? "#8fdb8f" : "var(--dim)"}; margin-left:0.5rem;">${presence.text}</span>
+        <span style="display:flex; align-items:center;">
+          ${avatarHtml}
+          <span>
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:0.4rem; background:${presence.online ? "#8fdb8f" : "var(--dim)"};"></span>
+            <strong style="color:var(--parchment);">${escapeHtml(f.gamer_name)}</strong>${f.current_kingdom ? ` <span class="mono" style="font-size:0.75rem; color:var(--dim);">— ${escapeHtml(f.current_kingdom)}</span>` : ""}
+            <span class="mono" style="font-size:0.7rem; color:${presence.online ? "#8fdb8f" : "var(--dim)"}; margin-left:0.5rem;">${presence.text}</span>
+          </span>
         </span>
         <span class="tag" style="font-size:0.65rem;">${f.status === "pending" ? "Pending" : "Friend"}</span>
       </div>

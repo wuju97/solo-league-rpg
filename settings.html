@@ -115,9 +115,33 @@
 
     <div class="page-tab-panel" data-panel="personalization">
       <section class="frame">
+        <h3>Avatar</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Shown next to your gamer name in the header, on Leaderboards, and in your Friends list. Max 2MB, images only.</p>
+        <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.75rem;">
+          <img id="avatar-preview" src="" alt="" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--border-bright);">
+          <div>
+            <input type="file" id="avatar-file" accept="image/*">
+            <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+              <button class="btn" onclick="uploadAvatar()">Upload</button>
+              <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="removeAvatar()">Remove</button>
+            </div>
+          </div>
+        </div>
+        <p class="placeholder-note" id="avatar-status"></p>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
         <h3>Personalization</h3>
         <p class="placeholder-note" style="margin-bottom:1rem;">Changes the whole site's colors and fonts. Saved to your account, so it follows you across devices.</p>
         <div class="card-grid" id="theme-options"></div>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Dashboard Layout</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Show, hide, and reorder what appears on your Dashboard.</p>
+        <div id="dashboard-widget-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+        <button class="btn" style="margin-top:0.75rem;" onclick="saveDashboardLayout()">Save Layout</button>
+        <p class="placeholder-note" id="dashboard-layout-status" style="margin-top:0.5rem;"></p>
       </section>
 
       <section class="frame" style="margin-top:1rem;">
@@ -399,7 +423,7 @@
       document.querySelectorAll(".page-tab-panel[data-panel]").forEach((p) => p.classList.remove("active"));
       document.querySelector(`.page-tab-panel[data-panel="${target}"]`).classList.add("active");
 
-      if (target === "personalization") loadThemeOptions();
+      if (target === "personalization"){ loadThemeOptions(); loadAvatarPreview(); loadDashboardWidgets(); }
       if (target === "audio") loadAudioPrefs();
       if (target === "api") loadApiKeys();
       if (target === "ai-memory") loadAiMemory();
@@ -503,6 +527,138 @@
     document.documentElement.setAttribute("data-theme", themeId);
     try { localStorage.setItem("slrpg_theme", themeId); } catch(e){}
     loadThemeOptions();
+  }
+
+  async function loadAvatarPreview(){
+    const { data: userData } = await sb.auth.getUser();
+    const { data: profile } = await sb.from("profiles").select("avatar_url").eq("user_id", userData.user.id).maybeSingle();
+    const img = document.getElementById("avatar-preview");
+    if (profile?.avatar_url){
+      img.src = profile.avatar_url;
+      img.style.display = "block";
+    } else {
+      img.style.display = "none";
+    }
+  }
+
+  async function uploadAvatar(){
+    const fileInput = document.getElementById("avatar-file");
+    const statusEl = document.getElementById("avatar-status");
+    const file = fileInput.files[0];
+    if (!file){
+      statusEl.textContent = "Choose an image first.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (!file.type.startsWith("image/")){
+      statusEl.textContent = "Please choose an image file.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024){
+      statusEl.textContent = "Image must be under 2MB.";
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploading...";
+    statusEl.style.color = "var(--dim)";
+
+    const { data: userData } = await sb.auth.getUser();
+    const safeName = sanitizeFileName(file.name);
+    const path = `${userData.user.id}/avatar-${Date.now()}-${safeName}`;
+
+    const { error: uploadError } = await sb.storage.from("avatar-uploads").upload(path, file, { upsert: true });
+    if (uploadError){
+      statusEl.textContent = "Upload failed: " + uploadError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    const { data: publicUrlData } = sb.storage.from("avatar-uploads").getPublicUrl(path);
+    const { error: saveError } = await sb.from("profiles").update({ avatar_url: publicUrlData.publicUrl }).eq("user_id", userData.user.id);
+    if (saveError){
+      statusEl.textContent = "Uploaded, but couldn't save: " + saveError.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+
+    statusEl.textContent = "Uploaded and saved!";
+    statusEl.style.color = "var(--steel-bright)";
+    fileInput.value = "";
+    await loadAvatarPreview();
+  }
+
+  async function removeAvatar(){
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("profiles").update({ avatar_url: null }).eq("user_id", userData.user.id);
+    const statusEl = document.getElementById("avatar-status");
+    if (error){
+      statusEl.textContent = "Couldn't remove: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = "Avatar removed.";
+    statusEl.style.color = "var(--steel-bright)";
+    await loadAvatarPreview();
+  }
+
+  const DEFAULT_DASHBOARD_WIDGETS = [
+    { id: "league", label: "League Summary", visible: true },
+    { id: "character", label: "Character Summary", visible: true },
+    { id: "kingdom_news", label: "Today's Kingdom News", visible: true },
+    { id: "missions", label: "Daily Missions", visible: true },
+  ];
+  let currentDashboardWidgets = [];
+
+  async function loadDashboardWidgets(){
+    const { data: prefs } = await sb.rpc("get_or_create_preferences");
+    const p = Array.isArray(prefs) ? prefs[0] : prefs;
+    currentDashboardWidgets = p?.dashboard_widget_order || DEFAULT_DASHBOARD_WIDGETS;
+    renderDashboardWidgetList();
+  }
+
+  function renderDashboardWidgetList(){
+    const listEl = document.getElementById("dashboard-widget-list");
+    listEl.innerHTML = currentDashboardWidgets.map((w, i) => `
+      <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+          <input type="checkbox" ${w.visible ? "checked" : ""} onchange="toggleDashboardWidget(${i})">
+          <span>${w.label}</span>
+        </label>
+        <div style="display:flex; gap:0.3rem;">
+          <button class="btn" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="moveDashboardWidget(${i}, -1)" ${i === 0 ? "disabled" : ""}>↑</button>
+          <button class="btn" style="padding:0.2rem 0.5rem; font-size:0.7rem;" onclick="moveDashboardWidget(${i}, 1)" ${i === currentDashboardWidgets.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function toggleDashboardWidget(index){
+    currentDashboardWidgets[index].visible = !currentDashboardWidgets[index].visible;
+    renderDashboardWidgetList();
+  }
+
+  function moveDashboardWidget(index, direction){
+    const target = index + direction;
+    if (target < 0 || target >= currentDashboardWidgets.length) return;
+    [currentDashboardWidgets[index], currentDashboardWidgets[target]] = [currentDashboardWidgets[target], currentDashboardWidgets[index]];
+    renderDashboardWidgetList();
+  }
+
+  async function saveDashboardLayout(){
+    const statusEl = document.getElementById("dashboard-layout-status");
+    const { data: userData } = await sb.auth.getUser();
+    const { error } = await sb.from("user_preferences").upsert({
+      user_id: userData.user.id, dashboard_widget_order: currentDashboardWidgets,
+    }, { onConflict: "user_id" });
+    if (error){
+      statusEl.textContent = "Couldn't save: " + error.message;
+      statusEl.style.color = "var(--crimson-bright)";
+      return;
+    }
+    statusEl.textContent = "Layout saved.";
+    statusEl.style.color = "var(--steel-bright)";
   }
 
   async function updateDisplayOptions(){
