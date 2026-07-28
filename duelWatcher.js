@@ -46,6 +46,7 @@
           "min-width:16px; height:16px; border-radius:8px; display:flex; " +
           "align-items:center; justify-content:center; padding:0 3px; z-index:10;";
         navLink.appendChild(badge);
+        if (window.SoloLeagueAudio) window.SoloLeagueAudio.playNotification();
       }
       badge.textContent = count > 9 ? "9+" : count;
     } else if (badge) {
@@ -80,17 +81,28 @@
     const duelChatLink = document.querySelector('a.chat-btn.pvp[href="pvp-chat.html"]');
     if (!duelChatLink) return;
 
-    // Clean up any battle abandoned more than 5 minutes ago before
-    // checking what's still genuinely active — otherwise a stale
-    // "active" row from a closed tab keeps the badge lit forever.
-    await sb.rpc("cleanup_abandoned_pve_battles");
-
-    const [{ data: activePve }, { data: activeBoss }] = await Promise.all([
-      sb.from("pve_battles").select("id").eq("player_id", userId).eq("status", "active").limit(1).maybeSingle(),
+    // Checks the real tables this project actually uses --
+    // battle_instances/battle_participants for solo PvE, boss_battles
+    // for boss fights. Two independent queries rather than one
+    // embedded join, since that depends on Supabase's schema cache
+    // having the foreign key relationship registered, which isn't
+    // guaranteed. (No cleanup call here -- the old
+    // cleanup_abandoned_pve_battles function doesn't exist for this
+    // battle system; a battle staying "active" if someone abandons
+    // it is a pre-existing gap, not something this fix introduces.)
+    const [{ data: myBattleRows }, { data: activeBoss }] = await Promise.all([
+      sb.from("battle_participants").select("battle_id").eq("user_id", userId),
       sb.from("boss_battles").select("id").eq("player_id", userId).eq("status", "active").limit(1).maybeSingle(),
     ]);
 
-    const hasActiveFight = !!(activePve || activeBoss) && !onPvpChat;
+    let hasActivePve = false;
+    const myBattleIds = (myBattleRows || []).map(r => r.battle_id);
+    if (myBattleIds.length > 0){
+      const { data: activeInstance } = await sb.from("battle_instances").select("id").in("id", myBattleIds).eq("status", "active").limit(1).maybeSingle();
+      hasActivePve = !!activeInstance;
+    }
+
+    const hasActiveFight = (hasActivePve || !!activeBoss) && !onPvpChat;
 
     let badge = duelChatLink.querySelector(".pve-fight-badge");
     if (hasActiveFight) {
