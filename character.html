@@ -396,21 +396,18 @@
   // Character Creation, Stats, and AP Spending
   // ============================================================
   const CLASS_INFO = {
-    Knight:      { identity: "Unbreakable defender", mechanic: "Can block part of incoming damage and protect allies better than any other class. Excels in long fights.", primary: "Vitality", resource: "Resolve" },
-    Berserker:   { identity: "Stronger when wounded", mechanic: "Damage increases as HP decreases — the closer to defeat, the more dangerous they become.", primary: "Strength", resource: "Rage" },
-    Assassin:    { identity: "Precision killer", mechanic: "Highest critical-hit potential and bonus damage against already weakened enemies.", primary: "Dexterity", resource: "Focus" },
-    Ranger:      { identity: "Battlefield controller", mechanic: "Longest attack range, superior mobility, and bonuses for attacking from advantageous positions.", primary: "Agility", resource: "Precision" },
-    Mage:        { identity: "Raw magical power", mechanic: "Highest spell damage and area-of-effect attacks, but relies heavily on mana management.", primary: "Intelligence", resource: "Mana" },
-    Druid:       { identity: "Master of nature", mechanic: "Can shift between offensive and supportive play while summoning vines, animals, or natural effects.", primary: "Spirit", resource: "Nature Energy" },
-    Paladin:     { identity: "Holy protector", mechanic: "Combines offense, defense, and healing. Gains bonuses when defending teammates or cleansing negative effects.", primary: "Wisdom", resource: "Faith" },
-    Necromancer: { identity: "Commander of the dead", mechanic: "Creates and strengthens summoned undead — the more battles fought, the larger the potential undead army.", primary: "Intelligence + Spirit", resource: "Souls" },
-    Monk:        { identity: "Martial master", mechanic: "Combo-based combat — consecutive successful actions become stronger and faster.", primary: "Agility + Endurance", resource: "Ki" },
-    Engineer:    { identity: "Tactical inventor", mechanic: "Places turrets, traps, gadgets, drones, and mechanical devices that permanently define their playstyle.", primary: "Intelligence", resource: "Energy Cells" },
-    Hunter:      { identity: "Monster specialist", mechanic: "Learns creature weaknesses, tracks enemies, and gains increasing bonuses against powerful beasts and bosses.", primary: "Perception", resource: "Instinct" },
-    Bard:        { identity: "Battlefield support", mechanic: "Uses songs to buff allies, weaken enemies, and influence morale — the strongest party-support class.", primary: "Charisma", resource: "Inspiration" },
-    Alchemist:   { identity: "Potion and chemistry expert", mechanic: "Crafts unique potions, explosives, toxins, antidotes, and temporary combat mixtures unavailable to others.", primary: "Intelligence", resource: "Reagents" },
-    Beastmaster: { identity: "Companion specialist", mechanic: "Tames stronger creatures than any other class and develops permanent bonds with animal companions.", primary: "Spirit", resource: "Bond" },
-    Templar:     { identity: "Anti-magic warrior", mechanic: "Excels at resisting, disrupting, and punishing magic users while remaining formidable in melee combat.", primary: "Wisdom + Strength", resource: "Conviction" },
+    Knight:      { identity: "Unbreakable defender", mechanic: "Last Stand: takes reduced damage while below 40% HP, scaling with rank. Built for long fights on the front line.", primary: "Vitality", resource: "Resolve" },
+    Berserker:   { identity: "Stronger when wounded", mechanic: "Blood Rage: deals bonus damage based on missing HP, up to a rank-scaled cap. Costs 2% current HP after each attack.", primary: "Strength", resource: "Rage" },
+    Assassin:    { identity: "Precision killer", mechanic: "Execution: guaranteed critical hit with bonus damage against enemies below 25% HP, usable once every 4 turns.", primary: "Dexterity", resource: "Focus" },
+    Ranger:      { identity: "Sustained damage dealer", mechanic: "Deadeye: every 4th attack ignores a portion of the target's Defense, scaling with rank.", primary: "Agility", resource: "Precision" },
+    Arcanist:    { identity: "Raw magical power", mechanic: "Arcane Overflow: spells deal bonus damage while above 50% HP, and every 5th spell costs no resource.", primary: "Intelligence", resource: "Mana" },
+    Druid:       { identity: "Master of balance", mechanic: "Nature's Cycle: healing abilities restore resource, and damaging abilities restore HP — both scale with rank.", primary: "Spirit", resource: "Nature Energy" },
+    Paladin:     { identity: "Holy protector", mechanic: "Sacred Resolve: gain a shield equal to a portion of any healing received, lasting 2 turns.", primary: "Wisdom", resource: "Faith" },
+    Necromancer: { identity: "Commander of souls", mechanic: "Soul Harvest: damaging an enemy generates Souls. At 100 Souls, your next ability costs nothing and deals bonus damage.", primary: "Intelligence + Spirit", resource: "Souls" },
+    Monk:        { identity: "Martial combo fighter", mechanic: "Flow State: each consecutive Attack builds Flow (up to 3 stacks), boosting your next attack's damage. Guarding or using an ability resets it.", primary: "Agility + Endurance", resource: "Ki" },
+    Bard:        { identity: "Battlefield support", mechanic: "Encore: every 5th ability automatically repeats at reduced effectiveness, at no extra cost.", primary: "Charisma", resource: "Inspiration" },
+    Alchemist:   { identity: "Debuffing specialist", mechanic: "Corrosive Mixtures: damaging abilities stack a Defense reduction on the target, up to a rank-scaled cap.", primary: "Intelligence", resource: "Reagents" },
+    Beastmaster: { identity: "Companion specialist", mechanic: "Pack Bond: your companion deals bonus damage equal to a portion of your own, while above 50% HP.", primary: "Spirit", resource: "Bond" },
   };
 
   function renderClassDescription(){
@@ -493,6 +490,23 @@
     document.getElementById("mc-class").textContent = myCharacter.class;
     document.getElementById("mc-level").textContent = myCharacter.level;
     document.getElementById("mc-ap").textContent = myCharacter.attribute_points ?? 0;
+
+    // The class picker dropdown was never synced to the actual
+    // current class -- it just showed its HTML default ("Knight")
+    // on every page load, making a correctly-saved class change
+    // look like it had reverted after navigating away and back.
+    const classPicker = document.getElementById("my-class-picker");
+    if (classPicker && myCharacter.class){
+      classPicker.value = myCharacter.class;
+      // Also sync the companion name field's visibility to match --
+      // it's gated on the dropdown's value, so this needs updating too.
+      const companionField = document.getElementById("my-companion-name-field");
+      if (companionField) companionField.style.display = (myCharacter.class === "Beastmaster") ? "block" : "none";
+      if (myCharacter.class === "Beastmaster" && myCharacter.companion_name){
+        const companionInput = document.getElementById("my-companion-name");
+        if (companionInput) companionInput.value = myCharacter.companion_name;
+      }
+    }
 
     const backstoryText = document.getElementById("mc-backstory-text");
     const backstoryBtn = document.getElementById("mc-backstory-btn");
