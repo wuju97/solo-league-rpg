@@ -186,7 +186,9 @@
     const { data: character } = await sb.from("characters").select("*").eq("user_id", userId).maybeSingle();
     if (character){
       document.getElementById("dash-level").textContent = character.level ?? "--";
-      document.getElementById("dash-class").textContent = character.class || "--";
+      document.getElementById("dash-class").innerHTML = character.class
+        ? `<img src="images/classes/${character.class.toLowerCase()}.png" alt="" style="width:16px; height:16px; vertical-align:middle; margin-right:0.3rem; border-radius:3px;" onerror="this.style.display='none';">${character.class}`
+        : "--";
       document.getElementById("dash-rank").textContent = character.rank || "--";
     } else {
       document.getElementById("dash-level").textContent = "No character yet";
