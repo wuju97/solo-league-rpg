@@ -1370,7 +1370,7 @@
     const hpBarsEl = document.getElementById("live-hp-bars");
     const memberBars = (allParts || []).map(p => `
       <div style="flex:1; min-width:150px; ${p.is_alive ? "" : "opacity:0.5;"}">
-        <strong style="color:var(--parchment); font-size:0.85rem;"><img src="images/Classes/${(((p.class_name || '')) === 'Beastmaster' ? 'Beast Master' : ((p.class_name || '')))}.png" alt="" style="width:14px; height:14px; vertical-align:middle; margin-right:0.25rem; border-radius:2px;" onerror="this.style.display='none';">${escapeHtml(nameFor[p.user_id] || "Player")} (${escapeHtml(p.class_name)})${p.user_id === userData.user.id ? " — You" : ""}</strong>
+        <strong style="color:var(--parchment); font-size:0.85rem;"><img src="images/Classes/${(((p.class_name || '')) === 'Beastmaster' ? 'Beast Master' : ((p.class_name || '')))}.png" alt="" style="width:28px; height:28px; vertical-align:middle; margin-right:0.25rem; border-radius:2px;" onerror="this.style.display='none';">${escapeHtml(nameFor[p.user_id] || "Player")} (${escapeHtml(p.class_name)})${p.user_id === userData.user.id ? " — You" : ""}</strong>
         <div class="hp-bar-track"><div class="hp-bar-fill" style="width:${Math.max(0, (p.current_hp / p.max_hp) * 100)}%;"></div></div>
         <span class="mono" style="font-size:0.72rem;">${p.current_hp} / ${p.max_hp} HP</span>
       </div>

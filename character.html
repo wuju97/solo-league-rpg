@@ -372,7 +372,7 @@
       const row = document.createElement("tr");
       row.innerHTML = `
         <td class="rname">${escapeHtml(c.name)}</td>
-        <td>${c.class ? `<img src="images/Classes/${((c.class) === 'Beastmaster' ? 'Beast Master' : (c.class))}.png" alt="" style="width:14px; height:14px; vertical-align:middle; margin-right:0.25rem; border-radius:2px;" onerror="this.style.display='none';">` : ""}${escapeHtml(c.class || "--")}</td>
+        <td>${c.class ? `<img src="images/Classes/${((c.class) === 'Beastmaster' ? 'Beast Master' : (c.class))}.png" alt="" style="width:28px; height:28px; vertical-align:middle; margin-right:0.25rem; border-radius:2px;" onerror="this.style.display='none';">` : ""}${escapeHtml(c.class || "--")}</td>
         <td>${escapeHtml(c.title || "--")}</td>
         <td class="mono">${c.level ?? "--"}</td>
         <td class="mono">${escapeHtml(c.rank || "--")}</td>
@@ -488,7 +488,7 @@
 
     document.getElementById("mc-name").textContent = myCharacter.name;
     document.getElementById("mc-class").innerHTML = myCharacter.class
-      ? `<img src="images/Classes/${((myCharacter.class) === 'Beastmaster' ? 'Beast Master' : (myCharacter.class))}.png" alt="" style="width:16px; height:16px; vertical-align:middle; margin-right:0.3rem; border-radius:3px;" onerror="this.style.display='none';">${myCharacter.class}`
+      ? `<img src="images/Classes/${((myCharacter.class) === 'Beastmaster' ? 'Beast Master' : (myCharacter.class))}.png" alt="" style="width:22px; height:22px; vertical-align:middle; margin-right:0.3rem; border-radius:3px;" onerror="this.style.display='none';">${myCharacter.class}`
       : "--";
     document.getElementById("mc-level").textContent = myCharacter.level;
     document.getElementById("mc-ap").textContent = myCharacter.attribute_points ?? 0;
@@ -815,7 +815,7 @@
       <div class="frame" style="margin-bottom:1rem; padding:0.75rem 1rem;">
         <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Current Standing</h4>
         <ul class="clean">
-          ${row("Class", `${character.class ? `<img src="images/Classes/${((character.class) === 'Beastmaster' ? 'Beast Master' : (character.class))}.png" alt="" style="width:14px; height:14px; vertical-align:middle; margin-right:0.3rem; border-radius:2px;" onerror="this.style.display='none';">` : ""}${escapeHtml(character.class)}`)}
+          ${row("Class", `${character.class ? `<img src="images/Classes/${((character.class) === 'Beastmaster' ? 'Beast Master' : (character.class))}.png" alt="" style="width:28px; height:28px; vertical-align:middle; margin-right:0.3rem; border-radius:2px;" onerror="this.style.display='none';">` : ""}${escapeHtml(character.class)}`)}
           ${row("Rank", escapeHtml(character.rank))}
           ${row("Level / XP", `${character.level} (${character.xp} XP)`)}
           ${row("Current Kingdom", escapeHtml(character.current_kingdom || "—"))}
@@ -874,7 +874,7 @@
     `).join("");
 
     listEl.innerHTML = `
-      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;"><img src="images/Classes/${((character.class) === 'Beastmaster' ? 'Beast Master' : (character.class))}.png" alt="" style="width:18px; height:18px; vertical-align:middle; margin-right:0.4rem; border-radius:3px;" onerror="this.style.display='none';">${escapeHtml(character.class)}</h4>
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;"><img src="images/Classes/${((character.class) === 'Beastmaster' ? 'Beast Master' : (character.class))}.png" alt="" style="width:26px; height:26px; vertical-align:middle; margin-right:0.4rem; border-radius:3px;" onerror="this.style.display='none';">${escapeHtml(character.class)}</h4>
       <div class="ability-card-grid">${cards}</div>
     `;
 
@@ -952,7 +952,7 @@
     const isMyClass = myCharacter && myCharacter.class === className;
 
     let html = `
-      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.75rem;"><img src="images/Classes/${((className) === 'Beastmaster' ? 'Beast Master' : (className))}.png" alt="" style="width:20px; height:20px; vertical-align:middle; margin-right:0.4rem; border-radius:3px;" onerror="this.style.display='none';">${escapeHtml(className)} <span class="tag">Resource: ${escapeHtml(resourceName)}</span>${isMyClass ? ' <span class="tag">Your Class</span>' : ""}</h4>
+      <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.75rem;"><img src="images/Classes/${((className) === 'Beastmaster' ? 'Beast Master' : (className))}.png" alt="" style="width:28px; height:28px; vertical-align:middle; margin-right:0.4rem; border-radius:3px;" onerror="this.style.display='none';">${escapeHtml(className)} <span class="tag">Resource: ${escapeHtml(resourceName)}</span>${isMyClass ? ' <span class="tag">Your Class</span>' : ""}</h4>
     `;
 
     if (passive){
