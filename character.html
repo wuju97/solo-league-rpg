@@ -98,23 +98,26 @@
 
         <div class="field" style="margin-bottom:1rem;">
           <label for="cc-class" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Class</label>
-          <select id="cc-class" onchange="renderClassDescription()" style="width:100%; max-width:360px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+          <select id="cc-class" onchange="renderClassDescription(); toggleCompanionNameField();" style="width:100%; max-width:360px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
             <option>Knight</option>
             <option>Berserker</option>
             <option>Assassin</option>
             <option>Ranger</option>
-            <option>Mage</option>
+            <option>Arcanist</option>
             <option>Druid</option>
             <option>Paladin</option>
             <option>Necromancer</option>
             <option>Monk</option>
-            <option>Engineer</option>
-            <option>Hunter</option>
             <option>Bard</option>
             <option>Alchemist</option>
             <option>Beastmaster</option>
-            <option>Templar</option>
           </select>
+        </div>
+
+        <div class="field" id="cc-companion-name-field" style="margin-bottom:1rem; display:none;">
+          <label for="cc-companion-name" style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-bottom:0.4rem;">Companion Name</label>
+          <input type="text" id="cc-companion-name" maxlength="24" placeholder="Name your companion"
+            style="width:100%; max-width:360px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
         </div>
 
         <div class="frame" id="class-description-box" style="max-width:420px; margin-bottom:1rem;"></div>
@@ -242,16 +245,28 @@
           <option>Berserker</option>
           <option>Assassin</option>
           <option>Ranger</option>
-          <option>Mage</option>
+          <option>Arcanist</option>
           <option>Druid</option>
           <option>Paladin</option>
           <option>Necromancer</option>
           <option>Monk</option>
-          <option>Engineer</option>
+          <option>Bard</option>
+          <option>Alchemist</option>
+          <option>Beastmaster</option>
         </select>
+        <div id="my-companion-name-field" style="display:none; margin-bottom:0.75rem;">
+          <input type="text" id="my-companion-name" maxlength="24" placeholder="Name your companion"
+            style="width:100%; max-width:280px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
+        </div>
         <button class="btn" onclick="changeMyClass()">Confirm Class Change</button>
         <p class="placeholder-note" id="class-change-status" style="margin-top:0.5rem;"></p>
       </section>
+
+      <script>
+        document.getElementById("my-class-picker").addEventListener("change", function(){
+          document.getElementById("my-companion-name-field").style.display = (this.value === "Beastmaster") ? "block" : "none";
+        });
+      </script>
 
       <section class="frame" style="margin-top:1rem;">
         <h3>Browse Any Class's Kit</h3>
@@ -261,17 +276,14 @@
           <option>Berserker</option>
           <option>Assassin</option>
           <option>Ranger</option>
-          <option>Mage</option>
+          <option>Arcanist</option>
           <option>Druid</option>
           <option>Paladin</option>
           <option>Necromancer</option>
           <option>Monk</option>
-          <option>Engineer</option>
-          <option>Hunter</option>
           <option>Bard</option>
           <option>Alchemist</option>
           <option>Beastmaster</option>
-          <option>Templar</option>
         </select>
         <div id="class-tab-content"></div>
       </section>
@@ -562,6 +574,12 @@
     statusEl.textContent = "";
   }
 
+  function toggleCompanionNameField(){
+    const field = document.getElementById("cc-companion-name-field");
+    const selectedClass = document.getElementById("cc-class").value;
+    field.style.display = (selectedClass === "Beastmaster") ? "block" : "none";
+  }
+
   async function createCharacter(){
     const name = document.getElementById("cc-name").value.trim();
     const charClass = document.getElementById("cc-class").value;
@@ -583,11 +601,18 @@
     msgEl.textContent = "Creating...";
     msgEl.style.color = "var(--dim)";
 
-    const { error } = await sb.from("characters").insert({
+    const insertData = {
       user_id: user.id,
       name: name,
       class: charClass
-    });
+    };
+
+    if (charClass === "Beastmaster"){
+      const companionName = document.getElementById("cc-companion-name").value.trim();
+      insertData.companion_name = companionName || "Companion";
+    }
+
+    const { error } = await sb.from("characters").insert(insertData);
 
     if (error){
       msgEl.textContent = "Couldn't create character: " + error.message;
@@ -737,6 +762,13 @@
     }
     statusEl.textContent = `Class changed to ${newClass}.`;
     statusEl.style.color = "var(--steel-bright)";
+
+    if (newClass === "Beastmaster"){
+      const companionName = document.getElementById("my-companion-name").value.trim();
+      const { data: userData } = await sb.auth.getUser();
+      await sb.from("characters").update({ companion_name: companionName || "Companion" }).eq("user_id", userData.user.id);
+    }
+
     await loadMyCharacter();
     await loadPlayerCard();
   }
