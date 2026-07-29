@@ -946,8 +946,12 @@
       return;
     }
 
+    // Passives now live in player_classes, not class_abilities --
+    // the old slot='passive' rows were removed as dead weight once
+    // this project moved to the current 12-class passive system.
+    const { data: passiveData } = await sb.from("player_classes").select("passive_name, passive_description").eq("class_name", className).maybeSingle();
+
     const resourceName = abilities[0].resource_name;
-    const passive = abilities.find(a => a.slot === "passive");
     const actives = abilities.filter(a => a.slot.startsWith("ability_"));
     const isMyClass = myCharacter && myCharacter.class === className;
 
@@ -955,11 +959,11 @@
       <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.75rem;"><img src="images/Classes/${((className) === 'Beastmaster' ? 'Beast Master' : (className))}.png" alt="" style="width:28px; height:28px; vertical-align:middle; margin-right:0.4rem; border-radius:3px;" onerror="this.style.display='none';">${escapeHtml(className)} <span class="tag">Resource: ${escapeHtml(resourceName)}</span>${isMyClass ? ' <span class="tag">Your Class</span>' : ""}</h4>
     `;
 
-    if (passive){
+    if (passiveData){
       html += `
         <div class="frame" style="margin-bottom:0.75rem;">
-          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(passive.ability_name)} <span class="tag">Passive</span></h4>
-          <p>${escapeHtml(passive.effect_description)}</p>
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.4rem;">${escapeHtml(passiveData.passive_name)} <span class="tag">Passive</span></h4>
+          <p>${escapeHtml(passiveData.passive_description)}</p>
         </div>
       `;
     }
@@ -980,7 +984,7 @@
     });
     html += `</div>`;
 
-    html += `<p class="placeholder-note" style="margin-top:1rem;">Abilities aren't selectable in live duels yet (still Attack/Guard/Surrender for now). Wiring these into real combat is next.</p>`;
+    html += `<p class="placeholder-note" style="margin-top:1rem;">These 3 abilities are usable in any fight — PvP duels, creature and hierarchy fights, party battles, and boss fights.</p>`;
 
     contentEl.innerHTML = html;
   }
