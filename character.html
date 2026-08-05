@@ -254,6 +254,7 @@
           <option>Alchemist</option>
           <option>Beastmaster</option>
         </select>
+        <img id="my-class-picker-big-logo" style="display:none; width:100%; max-width:280px; max-height:280px; object-fit:contain; background:#000; border-radius:var(--radius); border:1px solid var(--border-bright); margin-bottom:0.75rem;" alt="">
         <div id="my-companion-name-field" style="display:none; margin-bottom:0.75rem;">
           <input type="text" id="my-companion-name" maxlength="24" placeholder="Name your companion"
             style="width:100%; max-width:280px; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.7rem; font-family:'Spectral',serif; font-size:0.95rem;">
@@ -265,6 +266,11 @@
       <script>
         document.getElementById("my-class-picker").addEventListener("change", function(){
           document.getElementById("my-companion-name-field").style.display = (this.value === "Beastmaster") ? "block" : "none";
+          const bigLogo = document.getElementById("my-class-picker-big-logo");
+          const logoName = this.value === "Beastmaster" ? "Beast Master" : this.value;
+          bigLogo.src = `images/Classes/${logoName}.png`;
+          bigLogo.style.display = "block";
+          bigLogo.onerror = function(){ this.style.display = "none"; };
         });
       </script>
 
@@ -285,6 +291,7 @@
           <option>Alchemist</option>
           <option>Beastmaster</option>
         </select>
+        <img id="class-kit-picker-big-logo" style="display:none; width:100%; max-width:280px; max-height:280px; object-fit:contain; background:#000; border-radius:var(--radius); border:1px solid var(--border-bright); margin-bottom:1rem;" alt="">
         <div id="class-tab-content"></div>
       </section>
     </div>
@@ -934,6 +941,12 @@
       className = (myCharacter && myCharacter.class) || picker.value;
       picker.value = className;
     }
+
+    const kitBigLogo = document.getElementById("class-kit-picker-big-logo");
+    const kitLogoName = className === "Beastmaster" ? "Beast Master" : className;
+    kitBigLogo.src = `images/Classes/${kitLogoName}.png`;
+    kitBigLogo.style.display = "block";
+    kitBigLogo.onerror = function(){ this.style.display = "none"; };
 
     const { data: abilities, error } = await sb
       .from("class_abilities")
