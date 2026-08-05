@@ -1739,22 +1739,11 @@
       "Azure Reach": "azure-reach", "Eldergrove": "eldergrove", "Pyrath": "pyrath",
       "Aetheria": "aetheria", "Khar'Duun": "kharduun", "Blackfen": "blackfen"
     };
-    let portraitEl = document.getElementById("card-battle-portrait");
-    if (!portraitEl){
-      portraitEl = document.createElement("img");
-      portraitEl.id = "card-battle-portrait";
-      portraitEl.alt = "";
-      portraitEl.style.cssText = "display:none; width:100%; max-height:280px; object-fit:cover; border-radius:var(--radius); margin-bottom:1rem;";
-      portraitEl.onerror = function(){ this.style.display = "none"; };
-      document.getElementById("card-battle-video").insertAdjacentElement("afterend", portraitEl);
-    }
-    if ((targetTab === "pvm" || targetTab === "pvg") && result.kingdom && kingdomSlugs[result.kingdom]){
-      const folder = targetTab === "pvg" ? "primordials" : "monarchs";
-      portraitEl.src = `images/${folder}/${kingdomSlugs[result.kingdom]}.gif`;
-      portraitEl.style.display = "block";
-    } else {
-      portraitEl.style.display = "none";
-    }
+    // (A separate, older "card-battle-portrait" image element used
+    // to live here, doing the same job as card-battle-enemy-image
+    // above but with the old broken lowercase/kingdom-slug/.gif
+    // path -- removed as dead, redundant code now that the real
+    // image element above covers this correctly.)
 
     // Each panel's own "nothing active here" empty state shows only
     // when the live-combat elements are NOT actually parked there.
@@ -1792,7 +1781,11 @@
     const imgEl = document.getElementById("card-battle-enemy-image");
     if (isPrimordial || result.is_champion){
       const folder = isPrimordial ? "Primordials" : "Monarchs";
-      imgEl.src = `images/${folder}/${result.enemy_name}.png`;
+      // Monarch files on GitHub ended up with a doubled extension
+      // (e.g. "Frost Monarch.png.png") from an earlier rename step --
+      // Primordials don't have this issue, so only Monarchs need the extra ".png".
+      const extraExt = isPrimordial ? "" : ".png";
+      imgEl.src = `images/${folder}/${result.enemy_name}.png${extraExt}`;
       imgEl.style.display = "block";
       imgEl.onerror = function(){ this.style.display = "none"; };
     } else {
