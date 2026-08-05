@@ -1621,6 +1621,7 @@
     }
 
     if (status === "surrendered"){
+      await sb.rpc("mark_pending_battle_resolved");
       const goldText = lastSurrenderGoldLost !== null ? ` Lost ${lastSurrenderGoldLost} Gold.` : "";
       const surrenderDetailHtml = lastSurrenderGoldLost !== null ? `<p class="mono" style="margin-top:0.5rem; font-size:0.78rem; color:var(--crimson-bright);">-${lastSurrenderGoldLost} Gold</p>` : "";
       outcomeEl.innerHTML = `<div class="frame" style="padding:0.75rem 1rem;"><strong>You retreated from the fight.</strong> No reward this time.${goldText}</div>`;
@@ -1628,6 +1629,7 @@
       return;
     }
     if (status === "lost"){
+      await sb.rpc("mark_pending_battle_resolved");
       const { data: penalty } = await sb.rpc("resolve_hierarchy_loss", { p_battle_id: currentBattleId });
       let penaltyHtml = "";
       if (penalty && penalty.success){
