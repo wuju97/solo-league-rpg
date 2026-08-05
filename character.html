@@ -76,7 +76,6 @@
       <button class="page-tab-btn active" data-tab="overview">Overview</button>
       <button class="page-tab-btn" data-tab="cards">Player Cards</button>
       <button class="page-tab-btn" data-tab="stats">Stats</button>
-      <button class="page-tab-btn" data-tab="attributes">Attributes</button>
       <button class="page-tab-btn" data-tab="inventory">Inventory</button>
       <button class="page-tab-btn" data-tab="class">Class</button>
       <button class="page-tab-btn" data-tab="progression">Progression</button>
@@ -187,7 +186,7 @@
     <!-- Everything else below is placeholder until each system is built -->
     <div class="page-tab-panel" data-panel="stats">
       <section class="frame">
-        <h3>Stats</h3>
+        <h3>Stats & Attributes</h3>
         <div id="stats-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
         <ul class="clean" id="stats-list" style="display:none;">
           <li><span>Strength</span><span class="mono" id="stat-strength">--</span></li>
@@ -202,21 +201,16 @@
           <li><span>Perception</span><span class="mono" id="stat-perception">--</span></li>
           <li><span>Charisma</span><span class="mono" id="stat-charisma">--</span></li>
         </ul>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="attributes">
-      <section class="frame">
-        <h3>Attributes</h3>
-        <div id="attributes-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
 
         <div id="attributes-content" style="display:none;">
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Spend Attribute Points</h4>
           <p>Unspent Attribute Points: <span class="mono" id="ap-count" style="color:var(--gold-bright);">--</span></p>
 
-          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Spend on a Stat</h4>
+          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Spend on a Stat</h5>
           <p class="placeholder-note" style="margin-bottom:0.75rem;">Each click spends 1 AP into that stat.</p>
           <div class="card-grid" id="ap-stat-buttons"></div>
 
-          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Convert to Gold</h4>
+          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Convert to Gold</h5>
           <p class="placeholder-note" style="margin-bottom:0.75rem;">1 AP converts to 100 Gold.</p>
           <div style="display:flex; gap:0.5rem; align-items:center; max-width:320px;">
             <input type="number" id="ap-convert-amount" min="1" value="1" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
@@ -469,7 +463,6 @@
     const myCard = document.getElementById("my-character-card");
     const statsNo = document.getElementById("stats-no-character");
     const statsList = document.getElementById("stats-list");
-    const attrNo = document.getElementById("attributes-no-character");
     const attrContent = document.getElementById("attributes-content");
 
     loadInventory();
@@ -481,7 +474,6 @@
       myCard.style.display = "none";
       statsNo.style.display = "block";
       statsList.style.display = "none";
-      attrNo.style.display = "block";
       attrContent.style.display = "none";
       return;
     }
@@ -490,7 +482,6 @@
     myCard.style.display = "block";
     statsNo.style.display = "none";
     statsList.style.display = "flex";
-    attrNo.style.display = "none";
     attrContent.style.display = "block";
 
     document.getElementById("mc-name").textContent = myCharacter.name;
