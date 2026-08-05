@@ -1727,6 +1727,34 @@
       targetPanel.appendChild(activeStateEl);
       targetPanel.appendChild(liveStateEl);
     }
+
+    // Monarch/Primordial portrait: same folder convention already
+    // used for World Lore's images (images/monarchs/{slug}.gif and
+    // images/primordials/{slug}.gif) -- reused here rather than
+    // needing new uploads, matched to whichever kingdom this fight
+    // is actually against.
+    const kingdomSlugs = {
+      "Valoria": "valoria", "Frosthaven": "frosthaven", "Mordrath": "mordrath",
+      "Azure Reach": "azure-reach", "Eldergrove": "eldergrove", "Pyrath": "pyrath",
+      "Aetheria": "aetheria", "Khar'Duun": "kharduun", "Blackfen": "blackfen"
+    };
+    let portraitEl = document.getElementById("card-battle-portrait");
+    if (!portraitEl){
+      portraitEl = document.createElement("img");
+      portraitEl.id = "card-battle-portrait";
+      portraitEl.alt = "";
+      portraitEl.style.cssText = "display:none; width:100%; max-height:280px; object-fit:cover; border-radius:var(--radius); margin-bottom:1rem;";
+      portraitEl.onerror = function(){ this.style.display = "none"; };
+      document.getElementById("card-battle-video").insertAdjacentElement("afterend", portraitEl);
+    }
+    if ((targetTab === "pvm" || targetTab === "pvg") && result.kingdom && kingdomSlugs[result.kingdom]){
+      const folder = targetTab === "pvg" ? "primordials" : "monarchs";
+      portraitEl.src = `images/${folder}/${kingdomSlugs[result.kingdom]}.gif`;
+      portraitEl.style.display = "block";
+    } else {
+      portraitEl.style.display = "none";
+    }
+
     // Each panel's own "nothing active here" empty state shows only
     // when the live-combat elements are NOT actually parked there.
     document.getElementById("card-battle-empty-state").style.display = (targetTab === "card-battle") ? "none" : "block";
