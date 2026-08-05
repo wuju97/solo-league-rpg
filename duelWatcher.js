@@ -86,10 +86,12 @@
     // for boss fights. Two independent queries rather than one
     // embedded join, since that depends on Supabase's schema cache
     // having the foreign key relationship registered, which isn't
-    // guaranteed. (No cleanup call here -- the old
-    // cleanup_abandoned_pve_battles function doesn't exist for this
-    // battle system; a battle staying "active" if someone abandons
-    // it is a pre-existing gap, not something this fix introduces.)
+    // guaranteed. Cleanup call restored -- the real function now
+    // exists (any fight still "active" more than 4 hours after
+    // creation gets marked surrendered), fixing the gap that let 8
+    // genuinely abandoned fights keep this badge blinking forever.
+    await sb.rpc("cleanup_abandoned_pve_battles");
+
     const [{ data: myBattleRows }, { data: activeBoss }] = await Promise.all([
       sb.from("battle_participants").select("battle_id").eq("user_id", userId),
       sb.from("boss_battles").select("id").eq("player_id", userId).eq("status", "active").limit(1).maybeSingle(),
