@@ -1064,10 +1064,10 @@ ul.clean li:last-child{ border-bottom:none; }
   --border:          #2A2A30;
   --border-bright:   #3E3E46;
 
-  --gold:            #6EA8E8;
-  --gold-bright:     #9AC4F5;
-  --crimson:         #5A5A66;
-  --crimson-bright:  #7E7E8C;
+  --gold:            #E8C13E;
+  --gold-bright:     #FFDB6E;
+  --crimson:         #C4322A;
+  --crimson-bright:  #E8483E;
   --steel:           #B0B0BC;
   --steel-bright:    #E0E0E8;
 
@@ -1079,60 +1079,6 @@ ul.clean li:last-child{ border-bottom:none; }
 [data-theme="midnight"] *{ font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important; }
 [data-theme="midnight"] h1, [data-theme="midnight"] h2, [data-theme="midnight"] h3, [data-theme="midnight"] h4{
   font-weight: 600 !important; letter-spacing: -0.01em !important;
-}
-
-/* ---- Slimekin: vibrant gelatinous blue-cyan, unusually rounded,
-   playful -- an anime-inspired feel without copying any specific
-   copyrighted show's characters or logos. ---- */
-[data-theme="slimekin"]{
-  --void:            #0A1620;
-  --panel:           #102436;
-  --panel-raised:    #163450;
-  --border:          #1E5C82;
-  --border-bright:   #2E8CC4;
-
-  --gold:            #4ED9E8;
-  --gold-bright:     #8AF0FA;
-  --crimson:         #3EB8D8;
-  --crimson-bright:  #6ED4EC;
-  --steel:           #7EC8E0;
-  --steel-bright:    #B0E8F5;
-
-  --parchment:       #E0F7FC;
-  --dim:             #5EA0BE;
-
-  --radius: 18px;
-}
-[data-theme="slimekin"] *{ font-family: 'Quicksand', 'Nunito', 'Comic Neue', sans-serif !important; }
-[data-theme="slimekin"] h1, [data-theme="slimekin"] h2, [data-theme="slimekin"] h3, [data-theme="slimekin"] h4{
-  font-weight: 700 !important;
-}
-
-/* ---- Bioluminescent: dark deep-sea backdrop with glowing neon-
-   teal accents -- distinct from every gothic/cyberpunk-pink option
-   already here. ---- */
-[data-theme="bioluminescent"]{
-  --void:            #030A0A;
-  --panel:           #061412;
-  --panel-raised:    #0A201C;
-  --border:          #123A30;
-  --border-bright:   #1E6350;
-
-  --gold:            #2EFFC4;
-  --gold-bright:     #6EFFDA;
-  --crimson:         #1EC49E;
-  --crimson-bright:  #4EE0BC;
-  --steel:           #4A9C8A;
-  --steel-bright:    #7EC4B0;
-
-  --parchment:       #D0FFF0;
-  --dim:             #3E8070;
-
-  --radius: 4px;
-}
-[data-theme="bioluminescent"] *{ font-family: 'Rajdhani', 'Orbitron', sans-serif !important; }
-[data-theme="bioluminescent"] h1, [data-theme="bioluminescent"] h2, [data-theme="bioluminescent"] h3, [data-theme="bioluminescent"] h4{
-  text-shadow: 0 0 8px currentColor !important; letter-spacing: 0.03em !important;
 }
 
 /* ---- Font size ---- */
