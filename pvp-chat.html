@@ -232,6 +232,7 @@
     <div class="page-tabs" id="duel-chat-tabs">
       <button class="page-tab-btn active" data-tab="pvp">PvP</button>
       <button class="page-tab-btn" data-tab="card-battle">PvE</button>
+      <button class="page-tab-btn" data-tab="pvm">PvM</button>
       <button class="page-tab-btn" data-tab="pvg">PvG</button>
     </div>
       <div class="channel-content">
@@ -397,12 +398,24 @@
       </section>
     </div>
 
+    <div class="page-tab-panel" data-panel="pvm">
+      <section class="frame" id="pvm-empty-state">
+        <h3>PvM — Champion Fights</h3>
+        <p class="placeholder-note">Start a Champion challenge from the World Map's Hierarchy tab — it'll bring you here automatically once your loadout is locked in.</p>
+      </section>
+      <!-- The live-combat UI (card-battle-active-state / card-battle-live-state)
+           gets moved into this panel via JS when a Champion fight is pending,
+           and moved back to the PvE panel otherwise -- same shared elements,
+           relocated rather than duplicated, so every existing function that
+           references them by id keeps working unchanged. -->
+    </div>
+
     <div class="page-tab-panel" data-panel="pvg">
       <section class="frame">
         <h3>PvG — Primordial Fights</h3>
         <p class="placeholder-note" style="margin-bottom:0.75rem;">Unlocked once all three of these are true:</p>
         <p class="placeholder-note" style="margin-bottom:0.75rem; color:var(--gold-bright);">Once eligible, click a country's name on the World Map — a "Challenge Primordial" button appears there, letting you fight that country's Primordial specifically. The picker below works too, but the map is the intended way in.</p>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Every Primordial fight requires a party at first. Once you've been part of a party that's defeated 3 different Primordials, you can challenge any of the remaining ones solo.</p>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Every Primordial fight requires a party at first. Once you've been part of a party that's defeated 1 Primordial, you can challenge any of the remaining ones solo.</p>
         <div id="pvg-objectives"><p class="placeholder-note">Loading...</p></div>
 
         <div id="pvg-challenge-area" style="margin-top:1rem;"></div>
@@ -1697,15 +1710,36 @@
     const { data: result, error } = await sb.rpc("get_my_pending_battle");
     if (error || !result || !result.found) return;
 
-    // A pending battle exists -- switch to that tab and show it
-    document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === "card-battle"));
-    document.querySelectorAll(".page-tab-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === "card-battle"));
+    // Champion/Monarch fights get PvM, everything else (creatures,
+    // regular hierarchy NPCs) stays in PvE. The live-combat elements
+    // themselves are the same DOM nodes either way -- relocated into
+    // whichever panel matches, not duplicated -- so every function
+    // that already references them by id keeps working unchanged.
+    const targetTab = result.is_champion ? "pvm" : "card-battle";
+    const targetPanel = document.querySelector(`.page-tab-panel[data-panel="${targetTab}"]`);
+    const activeStateEl = document.getElementById("card-battle-active-state");
+    const liveStateEl = document.getElementById("card-battle-live-state");
+    const resultEl = document.getElementById("card-battle-result");
+    if (targetPanel && activeStateEl.parentElement !== targetPanel){
+      targetPanel.appendChild(activeStateEl);
+      targetPanel.appendChild(liveStateEl);
+    }
+    // Whichever panel doesn't have the active fight keeps showing
+    // its own "nothing active" empty state -- only the panel that
+    // actually has the relocated live-combat elements hides its own.
+    document.getElementById("card-battle-empty-state").style.display = result.is_champion ? "block" : "none";
+    document.getElementById("pvm-empty-state").style.display = result.is_champion ? "none" : "block";
 
-    // Auto-select the matching PvE subtab (creature vs. hierarchy/Champion)
-    const matchingSubtype = result.enemy_source === "creature" ? "creature" : "characters";
-    document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.pvetype === matchingSubtype));
+    document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === targetTab));
+    document.querySelectorAll(".page-tab-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === targetTab));
 
-    document.getElementById("card-battle-empty-state").style.display = "none";
+    // Auto-select the matching PvE subtab (creature vs. hierarchy) --
+    // only relevant when this fight is actually staying in PvE.
+    if (!result.is_champion){
+      const matchingSubtype = result.enemy_source === "creature" ? "creature" : "characters";
+      document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.pvetype === matchingSubtype));
+    }
+
     document.getElementById("card-battle-active-state").style.display = "block";
     document.getElementById("card-battle-enemy-name").textContent = `${result.enemy_name} (${result.enemy_rank}-Rank)`;
     document.getElementById("card-battle-flavor").textContent = result.flavor_text || "";
