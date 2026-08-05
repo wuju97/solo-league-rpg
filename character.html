@@ -74,10 +74,10 @@
     <div class="channel-layout">
     <div class="page-tabs" id="char-tabs">
       <button class="page-tab-btn active" data-tab="overview">Overview</button>
+      <button class="page-tab-btn" data-tab="class">Class</button>
       <button class="page-tab-btn" data-tab="cards">Player Cards</button>
       <button class="page-tab-btn" data-tab="stats">Stats</button>
       <button class="page-tab-btn" data-tab="inventory">Inventory</button>
-      <button class="page-tab-btn" data-tab="class">Class</button>
       <button class="page-tab-btn" data-tab="progression">Progression</button>
     </div>
       <div class="channel-content">
@@ -170,67 +170,7 @@
       </section>
     </div>
 
-    <div class="page-tab-panel" data-panel="cards">
-      <section class="frame">
-        <h3>Player Card</h3>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Your class's card — always included in every fight automatically, on top of whatever creature cards you bring. This alone is enough to fight from Valoria on day one.</p>
-        <div id="player-card-display"><p class="placeholder-note">Loading...</p></div>
-      </section>
-
-      <section class="frame" style="margin-top:1rem;">
-        <h3>Your Cards <span class="tag" style="font-size:0.65rem;">by rank, highest first</span></h3>
-        <div id="owned-cards-display"><p class="placeholder-note">Loading...</p></div>
-      </section>
-    </div>
-
-    <!-- Everything else below is placeholder until each system is built -->
-    <div class="page-tab-panel" data-panel="stats">
-      <section class="frame">
-        <h3>Stats & Attributes</h3>
-        <div id="stats-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
-        <ul class="clean" id="stats-list" style="display:none;">
-          <li><span>Strength</span><span class="mono" id="stat-strength">--</span></li>
-          <li><span>Vitality</span><span class="mono" id="stat-vitality">--</span></li>
-          <li><span>Agility</span><span class="mono" id="stat-agility">--</span></li>
-          <li><span>Dexterity</span><span class="mono" id="stat-dexterity">--</span></li>
-          <li><span>Intelligence</span><span class="mono" id="stat-intellect">--</span></li>
-          <li><span>Wisdom</span><span class="mono" id="stat-wisdom">--</span></li>
-          <li><span>Luck</span><span class="mono" id="stat-luck">--</span></li>
-          <li><span>Spirit</span><span class="mono" id="stat-spirit">--</span></li>
-          <li><span>Endurance</span><span class="mono" id="stat-endurance">--</span></li>
-          <li><span>Perception</span><span class="mono" id="stat-perception">--</span></li>
-          <li><span>Charisma</span><span class="mono" id="stat-charisma">--</span></li>
-        </ul>
-
-        <div id="attributes-content" style="display:none;">
-          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Spend Attribute Points</h4>
-          <p>Unspent Attribute Points: <span class="mono" id="ap-count" style="color:var(--gold-bright);">--</span></p>
-
-          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Spend on a Stat</h5>
-          <p class="placeholder-note" style="margin-bottom:0.75rem;">Each click spends 1 AP into that stat.</p>
-          <div class="card-grid" id="ap-stat-buttons"></div>
-
-          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Convert to Gold</h5>
-          <p class="placeholder-note" style="margin-bottom:0.75rem;">1 AP converts to 100 Gold.</p>
-          <div style="display:flex; gap:0.5rem; align-items:center; max-width:320px;">
-            <input type="number" id="ap-convert-amount" min="1" value="1" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
-            <button class="btn" onclick="convertApToGold()">Convert</button>
-          </div>
-          <p class="placeholder-note" id="ap-message" style="margin-top:0.75rem;"></p>
-        </div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="inventory">
-      <section class="frame">
-        <h3>Inventory</h3>
-        <p class="placeholder-note" id="inventory-no-character" style="display:none;">Create a character first to have an inventory.</p>
-        <div id="inventory-content" style="display:none;">
-          <p class="placeholder-note" style="margin-bottom:1rem;">Crystals: <span class="mono" id="crystals-count">0</span> <span class="tag" id="crystals-rank-tag"></span></p>
-          <div id="inventory-list" style="display:flex; flex-direction:column; gap:0.5rem;"><p class="placeholder-note">Loading...</p></div>
-        </div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="class">
+<div class="page-tab-panel" data-panel="class">
       <section class="frame">
         <h3>Change Your Class</h3>
         <p class="placeholder-note" style="margin-bottom:0.75rem;">Your current class determines your base combat stats and passive — this changes it for real, not just a preview.</p>
@@ -290,7 +230,68 @@
       </section>
     </div>
 
-    <div class="page-tab-panel" data-panel="progression">
+<div class="page-tab-panel" data-panel="cards">
+      <section class="frame">
+        <h3>Player Card</h3>
+        <p class="placeholder-note" style="margin-bottom:0.75rem;">Your class's card — always included in every fight automatically, on top of whatever creature cards you bring. This alone is enough to fight from Valoria on day one.</p>
+        <div id="player-card-display"><p class="placeholder-note">Loading...</p></div>
+      </section>
+
+      <section class="frame" style="margin-top:1rem;">
+        <h3>Your Cards <span class="tag" style="font-size:0.65rem;">by rank, highest first</span></h3>
+        <div id="owned-cards-display"><p class="placeholder-note">Loading...</p></div>
+      </section>
+    </div>
+
+<div class="page-tab-panel" data-panel="stats">
+      <section class="frame">
+        <h3>Stats & Attributes</h3>
+        <div id="stats-no-character" class="placeholder-note">Create your character in the Overview tab first.</div>
+        <ul class="clean" id="stats-list" style="display:none;">
+          <li><span>Strength</span><span class="mono" id="stat-strength">--</span></li>
+          <li><span>Vitality</span><span class="mono" id="stat-vitality">--</span></li>
+          <li><span>Agility</span><span class="mono" id="stat-agility">--</span></li>
+          <li><span>Dexterity</span><span class="mono" id="stat-dexterity">--</span></li>
+          <li><span>Intelligence</span><span class="mono" id="stat-intellect">--</span></li>
+          <li><span>Wisdom</span><span class="mono" id="stat-wisdom">--</span></li>
+          <li><span>Luck</span><span class="mono" id="stat-luck">--</span></li>
+          <li><span>Spirit</span><span class="mono" id="stat-spirit">--</span></li>
+          <li><span>Endurance</span><span class="mono" id="stat-endurance">--</span></li>
+          <li><span>Perception</span><span class="mono" id="stat-perception">--</span></li>
+          <li><span>Charisma</span><span class="mono" id="stat-charisma">--</span></li>
+        </ul>
+
+        <div id="attributes-content" style="display:none;">
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Spend Attribute Points</h4>
+          <p>Unspent Attribute Points: <span class="mono" id="ap-count" style="color:var(--gold-bright);">--</span></p>
+
+          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Spend on a Stat</h5>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">Each click spends 1 AP into that stat.</p>
+          <div class="card-grid" id="ap-stat-buttons"></div>
+
+          <h5 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">Convert to Gold</h5>
+          <p class="placeholder-note" style="margin-bottom:0.75rem;">1 AP converts to 100 Gold.</p>
+          <div style="display:flex; gap:0.5rem; align-items:center; max-width:320px;">
+            <input type="number" id="ap-convert-amount" min="1" value="1" style="flex:1; background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.55rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.95rem;">
+            <button class="btn" onclick="convertApToGold()">Convert</button>
+          </div>
+          <p class="placeholder-note" id="ap-message" style="margin-top:0.75rem;"></p>
+        </div>
+      </section>
+    </div>
+
+<div class="page-tab-panel" data-panel="inventory">
+      <section class="frame">
+        <h3>Inventory</h3>
+        <p class="placeholder-note" id="inventory-no-character" style="display:none;">Create a character first to have an inventory.</p>
+        <div id="inventory-content" style="display:none;">
+          <p class="placeholder-note" style="margin-bottom:1rem;">Crystals: <span class="mono" id="crystals-count">0</span> <span class="tag" id="crystals-rank-tag"></span></p>
+          <div id="inventory-list" style="display:flex; flex-direction:column; gap:0.5rem;"><p class="placeholder-note">Loading...</p></div>
+        </div>
+      </section>
+    </div>
+
+<div class="page-tab-panel" data-panel="progression">
       <section class="frame">
         <h3>Progression</h3>
         <p class="placeholder-note" style="margin-bottom:0.75rem;">Where you stand right now, and what's left before the endgame — updates automatically as you play.</p>
