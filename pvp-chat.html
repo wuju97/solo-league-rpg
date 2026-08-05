@@ -371,6 +371,7 @@
         <h3 id="card-battle-enemy-name">Enemy</h3>
         <p class="placeholder-note" id="card-battle-flavor" style="margin-bottom:1rem;"></p>
         <video id="card-battle-video" style="display:none; width:100%; max-height:280px; border-radius:var(--radius); margin-bottom:1rem;" controls autoplay muted loop></video>
+        <img id="card-battle-enemy-image" style="display:none; width:100%; max-height:280px; object-fit:contain; border-radius:var(--radius); margin-bottom:1rem;" alt="">
 
         <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.5rem;">Your Loadout</h4>
         <div id="card-battle-loadout" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
@@ -1780,6 +1781,23 @@
     } else {
       videoEl.style.display = "none";
       videoEl.removeAttribute("src");
+    }
+
+    // Monarch (Champion) and Primordial fights each show that
+    // specific enemy's image, using the same predictable-filename
+    // pattern as class logos -- no database column needed, just
+    // constructs the path from the enemy's real name. Only these
+    // two tiers get this, matching what was asked for -- regular
+    // creature/hierarchy fights don't show this image at all.
+    const imgEl = document.getElementById("card-battle-enemy-image");
+    if (isPrimordial || result.is_champion){
+      const folder = isPrimordial ? "Primordials" : "Monarchs";
+      imgEl.src = `images/${folder}/${result.enemy_name}.png`;
+      imgEl.style.display = "block";
+      imgEl.onerror = function(){ this.style.display = "none"; };
+    } else {
+      imgEl.style.display = "none";
+      imgEl.removeAttribute("src");
     }
 
     const loadoutEl = document.getElementById("card-battle-loadout");
