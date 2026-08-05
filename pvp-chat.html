@@ -1710,32 +1710,34 @@
     const { data: result, error } = await sb.rpc("get_my_pending_battle");
     if (error || !result || !result.found) return;
 
-    // Champion/Monarch fights get PvM, everything else (creatures,
-    // regular hierarchy NPCs) stays in PvE. The live-combat elements
-    // themselves are the same DOM nodes either way -- relocated into
-    // whichever panel matches, not duplicated -- so every function
-    // that already references them by id keeps working unchanged.
-    const targetTab = result.is_champion ? "pvm" : "card-battle";
+    // Three-way routing: Primordial fights (a real, separate tier
+    // from Champion, confirmed by resolve_pending_battle's own
+    // branching logic) get PvG, Champion/Monarch fights get PvM,
+    // everything else (creatures, regular hierarchy NPCs) stays in
+    // PvE. The live-combat elements are the same DOM nodes either
+    // way -- relocated into whichever panel matches, not
+    // duplicated -- so every function that already references them
+    // by id keeps working unchanged.
+    const isPrimordial = result.npc_tier === "Primordial";
+    const targetTab = isPrimordial ? "pvg" : (result.is_champion ? "pvm" : "card-battle");
     const targetPanel = document.querySelector(`.page-tab-panel[data-panel="${targetTab}"]`);
     const activeStateEl = document.getElementById("card-battle-active-state");
     const liveStateEl = document.getElementById("card-battle-live-state");
-    const resultEl = document.getElementById("card-battle-result");
     if (targetPanel && activeStateEl.parentElement !== targetPanel){
       targetPanel.appendChild(activeStateEl);
       targetPanel.appendChild(liveStateEl);
     }
-    // Whichever panel doesn't have the active fight keeps showing
-    // its own "nothing active" empty state -- only the panel that
-    // actually has the relocated live-combat elements hides its own.
-    document.getElementById("card-battle-empty-state").style.display = result.is_champion ? "block" : "none";
-    document.getElementById("pvm-empty-state").style.display = result.is_champion ? "none" : "block";
+    // Each panel's own "nothing active here" empty state shows only
+    // when the live-combat elements are NOT actually parked there.
+    document.getElementById("card-battle-empty-state").style.display = (targetTab === "card-battle") ? "none" : "block";
+    document.getElementById("pvm-empty-state").style.display = (targetTab === "pvm") ? "none" : "block";
 
     document.querySelectorAll("#duel-chat-tabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.tab === targetTab));
     document.querySelectorAll(".page-tab-panel").forEach((p) => p.classList.toggle("active", p.dataset.panel === targetTab));
 
     // Auto-select the matching PvE subtab (creature vs. hierarchy) --
     // only relevant when this fight is actually staying in PvE.
-    if (!result.is_champion){
+    if (targetTab === "card-battle"){
       const matchingSubtype = result.enemy_source === "creature" ? "creature" : "characters";
       document.querySelectorAll("#pve-type-subtabs .page-tab-btn").forEach((b) => b.classList.toggle("active", b.dataset.pvetype === matchingSubtype));
     }
