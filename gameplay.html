@@ -78,10 +78,28 @@
           <h3>Game Rules</h3>
 
           <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Starting Out</h4>
-          <p>You pick a class at character creation (Knight, Berserker, Assassin, Ranger, Mage, Druid, Paladin, Necromancer, Monk, or Engineer). Your class sets your base Power, Defense, Speed, and HP, plus one visible passive — no hidden effects. Every player starts locked to Valoria at E-rank, with only Valoria unlocked.</p>
+          <p>You pick a class at character creation (Knight, Berserker, Assassin, Ranger, Arcanist, Druid, Paladin, Necromancer, Monk, Bard, Alchemist, or Beastmaster). Your class sets your base Power, Defense, Speed, and HP, plus one rank-scaling passive. Every player starts locked to Valoria at E-rank, with only Valoria unlocked.</p>
 
           <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Class Growth by Rank</h4>
-          <p>Your class's base stats and your Player Card's 3 abilities both scale up as your rank rises (E through SS) — not by level, by rank specifically. Each class grows differently: some (Paladin, Druid, Knight) lean tanky with high HP and Defense but low Speed; others (Assassin) lean pure speed, exceeding even a Kingdom Champion's typical Speed by SS-rank; others (Mage, Necromancer) stay glass-cannons even at the top, with Power beyond Champion-level but HP and Defense that stay comparatively low. By SS-rank, every class is roughly comparable in overall power to a Kingdom Champion, just arrived at differently. Choose carefully — your class becomes permanent the moment you enter your first political hierarchy fight (Warriors through Champion). Creature fights and Primordial fights don't lock it.</p>
+          <p>Your class's base stats and your Player Card's 3 abilities both scale up as your rank rises (E through SS) — not by level, by rank specifically. Each class grows differently: some (Paladin, Druid, Knight) lean tanky with high HP and Defense but low Speed; others (Assassin, Monk) lean pure speed, exceeding even a Kingdom Champion's typical Speed by SS-rank; others (Arcanist, Necromancer) stay glass-cannons even at the top, with Power beyond Champion-level but HP and Defense that stay comparatively low. By SS-rank, every class is roughly comparable in overall power to a Kingdom Champion, just arrived at differently. Choose carefully — your class becomes permanent the moment you enter your first political hierarchy fight (Warriors through Champion). Creature fights and Primordial fights don't lock it.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Class Passives</h4>
+          <p>Every class has one passive that scales with rank — weaker at E, strongest at SS — and works identically no matter which fight type you're in (solo, PvP, party, or boss). All twelve:</p>
+          <ul class="clean">
+            <li><span>Knight — Last Stand</span><span class="mono">Reduced damage below 40% HP</span></li>
+            <li><span>Berserker — Blood Rage</span><span class="mono">Bonus damage from missing HP, costs HP per attack</span></li>
+            <li><span>Assassin — Execution</span><span class="mono">Guaranteed crit vs. enemies below 25% HP, every 4 turns</span></li>
+            <li><span>Ranger — Deadeye</span><span class="mono">Every 4th attack ignores a portion of Defense</span></li>
+            <li><span>Arcanist — Arcane Overflow</span><span class="mono">Bonus spell damage above 50% HP; every 5th spell free</span></li>
+            <li><span>Druid — Nature's Cycle</span><span class="mono">Healing restores resource, damage restores HP</span></li>
+            <li><span>Paladin — Sacred Resolve</span><span class="mono">Shield from any healing received</span></li>
+            <li><span>Necromancer — Soul Harvest</span><span class="mono">Builds Souls from damage; free empowered ability at 100</span></li>
+            <li><span>Monk — Flow State</span><span class="mono">Attack chains build Flow (up to 3), boosting the next hit — Guard or using an ability resets it</span></li>
+            <li><span>Bard — Encore</span><span class="mono">Every 5th ability auto-repeats at reduced effectiveness</span></li>
+            <li><span>Alchemist — Corrosive Mixtures</span><span class="mono">Damaging abilities stack Defense reduction on the target</span></li>
+            <li><span>Beastmaster — Pack Bond</span><span class="mono">Companion deals bonus damage above 50% HP</span></li>
+          </ul>
+          <p>Beastmaster also lets you name your companion, either at character creation or when switching into the class.</p>
 
           <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Cards</h4>
           <p>A card is a single ability, not a whole creature. Your <strong>Player Card</strong> — your class's 3 abilities — is automatically included in every fight, on top of up to 3 optional creature cards you choose beforehand (0-3, not mandatory — your Player Card alone is enough to fight). Creature cards are earned through the Ability-Fragment system: defeating a creature grants one of its abilities at a time (weakest first), with the unlock chance dropping as abilities get stronger (70% / 45% / 25% / 10%), and a pity bonus that grows on repeated failures. Cards render as actual card-shaped visuals everywhere they appear — Pre-Battle selection, live battle, and your Player tab.</p>
@@ -114,7 +132,13 @@
           <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Parties &amp; PvP</h4>
           <p>Party fights use simultaneous submission — every living member picks their action, and once everyone's in, the whole round resolves together in true Speed order alongside the enemy, whose turn can land in the middle of your party's turns if it's fast enough. PvP duels (via Duel Trade) use the exact same engine — cards, classes, energy, full ability effects — with the faster player acting first each exchange. The Elemental Wheel bonus never applies in PvP specifically, since players carry no element of their own.</p>
 
-          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Wagering &amp; Trading</h4>
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Attribute Points</h4>
+          <p>Attribute Points (AP) come from two sources. Leveling up grants a flat 5 AP per level, on top of whatever XP source triggered it. Every single fight you win also grants AP on its own, based on your current rank at the moment of victory — E, D, and C-rank wins grant 3 AP, B and A-rank grant 5, S-rank grants 7, and SS-rank grants 9. Party wins grant this to every participating member, not just whoever landed the last hit. Spend AP on your stats or convert it to gold from the Stats &amp; Attributes tab.</p>
+
+          <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Duel Chat Tabs</h4>
+          <p>Duel Chat splits fights into three separate tabs by opponent type. PvE covers ordinary creatures and regular political hierarchy NPCs (Warriors through King), with its own Creature and Characters sub-tabs. PvM is exclusively for Kingdom Champions — Monarchs. PvG is exclusively for Primordials. A Monarch fight never appears in PvE, and a Primordial fight never appears anywhere but PvG.</p>
+
+
           <p>Before a duel starts, either player can lock in a bet — gold, AP, and/or specific items — which gets held immediately once locked. When the duel ends, the winner takes the entire combined pot from both sides. Changed your mind before the fight starts? Cancel Duel in the Prep screen refunds anything already locked in.</p>
           <p>Separately, Duel Trade also supports genuine gifting — offer gold, AP, any number of items, and any number of ability cards to another player by name, no fight required. They can accept or reject; nothing changes hands until they do.</p>
         </section>
@@ -157,7 +181,7 @@
 
           <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1rem 0 0.5rem;">Endgame — PvG</h4>
           <p>The Primordial Gods, one per kingdom, are the true endgame. Reaching them requires three things at once: every one of the 9 kingdoms conquered, every one of the 9 Champions defeated, and every SS-rank creature across every kingdom defeated at least once. Once eligible, click any kingdom's name on the World Map to challenge its Primordial directly.</p>
-          <p>Every Primordial fight requires a party at first — solo access to the remaining Primordials only opens up after you've personally been part of a party that's defeated 3 different ones. Defeating a Primordial grants both of its unique abilities as real cards, a large gold reward, and triple the usual SS-rank XP.</p>
+          <p>Every Primordial fight requires a party at first — solo access to the remaining Primordials only opens up after you've personally been part of a party that's defeated 1 Primordial. Defeating a Primordial grants triple the usual SS-rank XP guaranteed, plus a choice: 4 face-down cards, pick one — a genuine random ability belonging to that Primordial, 20,000 Gold, 200 Attribute Points, or 500 bonus XP. The card positions are freshly shuffled every single time, so there's no pattern to learn.</p>
         </section>
       </div>
     </div>
