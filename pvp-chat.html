@@ -1547,6 +1547,59 @@
     mysteryEl.appendChild(cardsRow);
   }
 
+  // Primordial reward: 4 face-down cards, genuinely blind pick --
+  // the backend already shuffled which reward sits at which
+  // position when the Primordial fell, so this just sends the
+  // position the player clicked (1-4), not any choice of reward
+  // type. Adapted from showChampionMysteryCards's 3-card pattern.
+  async function showPrimordialMysteryCards(npcId){
+    const banner = document.getElementById("battle-result-banner");
+    let mysteryEl = document.getElementById("primordial-mystery-cards");
+    if (!mysteryEl){
+      mysteryEl = document.createElement("div");
+      mysteryEl.id = "primordial-mystery-cards";
+      mysteryEl.style.cssText = "display:flex; flex-direction:column; align-items:center; margin-top:1.5rem;";
+      banner.appendChild(mysteryEl);
+    }
+    mysteryEl.innerHTML = `<p style="margin-bottom:0.75rem; font-family:'Cinzel',serif; color:var(--gold-bright);">Choose one</p>`;
+    const cardsRow = document.createElement("div");
+    cardsRow.style.cssText = "display:flex; gap:1rem;";
+    for (let i = 1; i <= 4; i++){
+      const position = i;
+      const card = document.createElement("button");
+      card.className = "ability-card";
+      card.style.cssText = "width:110px; min-height:140px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--gold-bright);";
+      card.textContent = "?";
+      card.onclick = async () => {
+        Array.from(cardsRow.children).forEach(c => { c.disabled = true; c.style.opacity = "0.5"; });
+        const { data: prize, error } = await sb.rpc("claim_primordial_reward", { p_npc_id: npcId, p_position: position });
+        if (error || !prize.success){
+          mysteryEl.innerHTML = `<p class="placeholder-note">Couldn't reveal the prize: ${escapeHtml(error?.message || prize.reason)}</p>`;
+          document.getElementById("battle-result-next-btn").style.display = "inline-block";
+          return;
+        }
+        let revealHtml;
+        if (prize.reward_type === "gold"){
+          revealHtml = `<p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.3rem;">+${prize.gold_amount} Gold</p>`;
+        } else if (prize.reward_type === "ap"){
+          revealHtml = `<p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.3rem;">+${prize.ap_amount} Attribute Points</p>`;
+        } else if (prize.reward_type === "xp"){
+          revealHtml = `<p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.3rem;">+500 XP</p>`;
+        } else {
+          revealHtml = `
+            <p style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.1rem;">${escapeHtml(prize.ability_name)}</p>
+            <p style="font-size:0.85rem; margin-top:0.3rem;">${escapeHtml(prize.effect_text)}</p>
+            <p class="mono" style="font-size:0.7rem; color:var(--dim); margin-top:0.3rem;">${escapeHtml(prize.rank)}-Rank ability from ${escapeHtml(prize.source_name)} — added to your cards</p>
+          `;
+        }
+        mysteryEl.innerHTML = `<div style="text-align:center;">${revealHtml}</div>`;
+        document.getElementById("battle-result-next-btn").style.display = "inline-block";
+      };
+      cardsRow.appendChild(card);
+    }
+    mysteryEl.appendChild(cardsRow);
+  }
+
   async function handleBattleEnd(status){
     const outcomeEl = document.getElementById("live-battle-outcome");
     outcomeEl.style.display = "block";
@@ -1607,13 +1660,10 @@
     } else if (result.tier){
       html = `<strong style="color:var(--gold-bright);">${escapeHtml(result.npc_name)} defeated.</strong><p style="margin-top:0.4rem; font-size:0.85rem;">${escapeHtml(result.tier)} tier progress recorded — the next tier may now be open.</p>`;
     } else if (result.primordial_name){
-      const cardsHtml = (result.cards_granted || []).map(c => `<li><span>${escapeHtml(c.ability_name)}</span><span class="mono" style="text-align:right;">${escapeHtml(c.effect_text)}</span></li>`).join("");
       html = `
         <h3 style="color:var(--gold-bright); margin-bottom:0.5rem;">🌌 ${escapeHtml(result.primordial_name)} falls.</h3>
         <p style="margin-bottom:0.5rem;">${escapeHtml(result.kingdom)}'s Primordial is defeated.</p>
-        <p class="mono" style="color:var(--gold-bright); margin-bottom:0.5rem;">+${result.gold_earned} Gold</p>
-        <ul class="clean">${cardsHtml}</ul>
-        <p class="placeholder-note" style="margin-top:0.5rem;">Primordials defeated (as party or solo): ${result.primordial_defeats_total}/9${result.primordial_defeats_total < 3 ? ` — reach 3 to unlock solo challenges for the rest.` : ""}</p>
+        <p class="placeholder-note" style="margin-top:0.5rem;">Primordials defeated (as party or solo): ${result.primordial_defeats_total}/9${result.primordial_defeats_total < 1 ? ` — win 1 to unlock solo challenges for the rest.` : ""}</p>
       `;
     } else {
       html = `<p>${escapeHtml(JSON.stringify(result))}</p>`;
@@ -1633,6 +1683,9 @@
     if (result.ownership_claimed && result.npc_id){
       showBattleResultBanner("You Won", true, html, true);
       await showChampionMysteryCards(result.npc_id);
+    } else if (result.reward_choice_pending && result.primordial_name){
+      showBattleResultBanner("You Won", true, html, true);
+      await showPrimordialMysteryCards(result.npc_id);
     } else {
       showBattleResultBanner("You Won", true, html);
     }
