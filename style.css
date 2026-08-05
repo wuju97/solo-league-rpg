@@ -1030,28 +1030,6 @@ ul.clean li:last-child{ border-bottom:none; }
 }
 [data-theme="nature"] *{ font-family: 'Cormorant Garamond', serif !important; }
 
-/* ---- Frostbound: glacial blues and ice-white, Frosthaven-inspired ---- */
-[data-theme="frostbound"]{
-  --void:            #060B12;
-  --panel:           #0D1826;
-  --panel-raised:    #142338;
-  --border:          #24405C;
-  --border-bright:   #3A6088;
-
-  --gold:            #7EC8E3;
-  --gold-bright:     #A8E0F5;
-  --crimson:         #4A7FA8;
-  --crimson-bright:  #6BA3C9;
-  --steel:           #C4D8E8;
-  --steel-bright:    #E8F4FC;
-
-  --parchment:       #E4F0F8;
-  --dim:             #6E8CA6;
-
-  --radius: 3px;
-}
-[data-theme="frostbound"] *{ font-family: 'Cormorant Garamond', 'EB Garamond', serif !important; }
-
 /* ---- Emberfall: volcanic orange and ash-black, Pyrath-inspired ---- */
 [data-theme="emberfall"]{
   --void:            #0D0705;
@@ -1076,50 +1054,85 @@ ul.clean li:last-child{ border-bottom:none; }
   text-transform: uppercase !important; letter-spacing: 0.04em !important;
 }
 
-/* ---- Abyssal Tide: deep teal and sea-foam, Azure Reach-inspired ---- */
-[data-theme="abyssal_tide"]{
-  --void:            #050F0E;
-  --panel:           #0A1D1B;
-  --panel-raised:    #102B28;
-  --border:          #1E4A44;
-  --border-bright:   #2E7268;
+/* ---- Midnight: a genuinely plain, modern dark mode -- clean
+   neutral greys, one blue-white accent, sans-serif -- the only
+   theme here that isn't fantasy-flavored at all. ---- */
+[data-theme="midnight"]{
+  --void:            #0A0A0C;
+  --panel:           #131316;
+  --panel-raised:    #1C1C20;
+  --border:          #2A2A30;
+  --border-bright:   #3E3E46;
 
-  --gold:            #2EC9B8;
-  --gold-bright:     #5EE8D6;
-  --crimson:         #1E7A9E;
-  --crimson-bright:  #2E9EC9;
-  --steel:           #4A9C8E;
-  --steel-bright:    #6EC4B4;
+  --gold:            #6EA8E8;
+  --gold-bright:     #9AC4F5;
+  --crimson:         #5A5A66;
+  --crimson-bright:  #7E7E8C;
+  --steel:           #B0B0BC;
+  --steel-bright:    #E0E0E8;
 
-  --parchment:       #D8F0EC;
-  --dim:             #5E9088;
+  --parchment:       #E8E8EC;
+  --dim:             #7A7A86;
 
-  --radius: 8px;
+  --radius: 6px;
 }
-[data-theme="abyssal_tide"] *{ font-family: 'Cormorant Garamond', serif !important; }
-
-/* ---- Storm Sovereign: electric violet and stormcloud grey, Aetheria-inspired ---- */
-[data-theme="storm_sovereign"]{
-  --void:            #0A0912;
-  --panel:           #15121F;
-  --panel-raised:    #201B2F;
-  --border:          #3A2F52;
-  --border-bright:   #5A4A7C;
-
-  --gold:            #9B7FE8;
-  --gold-bright:     #BFA8FF;
-  --crimson:         #6B5CA0;
-  --crimson-bright:  #8A78C4;
-  --steel:           #7A8CA8;
-  --steel-bright:    #A0B4D0;
-
-  --parchment:       #EBE4FA;
-  --dim:             #8578A8;
-
-  --radius: 5px;
+[data-theme="midnight"] *{ font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important; }
+[data-theme="midnight"] h1, [data-theme="midnight"] h2, [data-theme="midnight"] h3, [data-theme="midnight"] h4{
+  font-weight: 600 !important; letter-spacing: -0.01em !important;
 }
-[data-theme="storm_sovereign"] h1, [data-theme="storm_sovereign"] h2, [data-theme="storm_sovereign"] h3, [data-theme="storm_sovereign"] h4{
-  font-family: 'Playfair Display', serif !important; letter-spacing: 0.02em !important;
+
+/* ---- Slimekin: vibrant gelatinous blue-cyan, unusually rounded,
+   playful -- an anime-inspired feel without copying any specific
+   copyrighted show's characters or logos. ---- */
+[data-theme="slimekin"]{
+  --void:            #0A1620;
+  --panel:           #102436;
+  --panel-raised:    #163450;
+  --border:          #1E5C82;
+  --border-bright:   #2E8CC4;
+
+  --gold:            #4ED9E8;
+  --gold-bright:     #8AF0FA;
+  --crimson:         #3EB8D8;
+  --crimson-bright:  #6ED4EC;
+  --steel:           #7EC8E0;
+  --steel-bright:    #B0E8F5;
+
+  --parchment:       #E0F7FC;
+  --dim:             #5EA0BE;
+
+  --radius: 18px;
+}
+[data-theme="slimekin"] *{ font-family: 'Quicksand', 'Nunito', 'Comic Neue', sans-serif !important; }
+[data-theme="slimekin"] h1, [data-theme="slimekin"] h2, [data-theme="slimekin"] h3, [data-theme="slimekin"] h4{
+  font-weight: 700 !important;
+}
+
+/* ---- Bioluminescent: dark deep-sea backdrop with glowing neon-
+   teal accents -- distinct from every gothic/cyberpunk-pink option
+   already here. ---- */
+[data-theme="bioluminescent"]{
+  --void:            #030A0A;
+  --panel:           #061412;
+  --panel-raised:    #0A201C;
+  --border:          #123A30;
+  --border-bright:   #1E6350;
+
+  --gold:            #2EFFC4;
+  --gold-bright:     #6EFFDA;
+  --crimson:         #1EC49E;
+  --crimson-bright:  #4EE0BC;
+  --steel:           #4A9C8A;
+  --steel-bright:    #7EC4B0;
+
+  --parchment:       #D0FFF0;
+  --dim:             #3E8070;
+
+  --radius: 4px;
+}
+[data-theme="bioluminescent"] *{ font-family: 'Rajdhani', 'Orbitron', sans-serif !important; }
+[data-theme="bioluminescent"] h1, [data-theme="bioluminescent"] h2, [data-theme="bioluminescent"] h3, [data-theme="bioluminescent"] h4{
+  text-shadow: 0 0 8px currentColor !important; letter-spacing: 0.03em !important;
 }
 
 /* ---- Font size ---- */
