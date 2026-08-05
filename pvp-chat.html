@@ -383,6 +383,7 @@
 
       <!-- The real, in-progress fight -- works for both solo and party -->
       <section class="frame" id="card-battle-live-state" style="display:none;">
+        <img id="live-battle-enemy-image" style="display:none; width:100%; max-height:500px; object-fit:contain; background:#000; border-radius:var(--radius); margin-bottom:1rem;" alt="">
         <div id="live-hp-bars" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;"></div>
 
         <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
@@ -1368,6 +1369,23 @@
       console.error("renderLiveBattleState failed:", battleErr, partsErr, cardsErr);
       document.getElementById("live-hp-bars").innerHTML = `<p class="placeholder-note">Couldn't load battle state: ${escapeHtml((battleErr || partsErr || cardsErr)?.message || "battle not found")}</p>`;
       return;
+    }
+
+    // Monarch/Primordial fights show that specific enemy's image
+    // above the HP bars during the actual live fight, not just the
+    // pre-fight loadout screen. battle_type and enemy_name come
+    // straight from battle_instances, set once at battle creation --
+    // more reliable here than re-deriving it from anywhere else.
+    const liveImgEl = document.getElementById("live-battle-enemy-image");
+    if (battle.battle_type === "champion" || battle.battle_type === "primordial"){
+      const folder = battle.battle_type === "primordial" ? "Primordials" : "Monarchs";
+      const extraExt = battle.battle_type === "primordial" ? "" : ".png";
+      liveImgEl.src = `images/${folder}/${battle.enemy_name}.png${extraExt}`;
+      liveImgEl.style.display = "block";
+      liveImgEl.onerror = function(){ this.style.display = "none"; };
+    } else {
+      liveImgEl.style.display = "none";
+      liveImgEl.removeAttribute("src");
     }
 
     // Fetch gamer names separately (profiles, not characters -- no
