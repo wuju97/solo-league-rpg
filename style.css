@@ -581,6 +581,10 @@ ul.clean li:last-child{ border-bottom:none; }
 .lm-msg.lm-user{ background: rgba(201,162,75,0.12); align-self:flex-end; max-width: 85%; }
 .lm-msg.lm-ai{ background: var(--panel-raised); align-self:flex-start; max-width: 90%; }
 .lm-msg.lm-error{ color: var(--crimson-bright); }
+.lm-source-tag{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--gold-bright); margin-bottom:0.25rem; opacity:0.8; }
+.lm-divider{ border:none; border-top:1px solid var(--border); margin:0.6rem 0; }
+.lm-ask-ai-btn{ display:block; margin-top:0.6rem; background:transparent; border:1px solid var(--border-bright); color: var(--gold-bright); border-radius: var(--radius); padding:0.35rem 0.6rem; font-size:0.78rem; cursor:pointer; }
+.lm-ask-ai-btn:hover{ background: var(--panel-raised); }
 #loremaster-panel .lc-input-row{
   display:flex; gap:0.4rem; padding: 0.6rem; border-top: 1px solid var(--border);
 }
