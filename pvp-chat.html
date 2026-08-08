@@ -1363,7 +1363,12 @@
     const { data: battle, error: battleErr } = await sb.from("battle_instances").select("*").eq("id", currentBattleId).maybeSingle();
     const { data: userData } = await sb.auth.getUser();
     const { data: allParts, error: partsErr } = await sb.from("battle_participants").select("*").eq("battle_id", currentBattleId);
-    const { data: cards, error: cardsErr } = await sb.from("battle_cards").select("*, card_catalog(*)").eq("battle_id", currentBattleId).eq("user_id", userData.user.id);
+    const { data: cardsRaw, error: cardsErr } = await sb.from("battle_cards").select("*, card_catalog(*)").eq("battle_id", currentBattleId).eq("user_id", userData.user.id);
+    // Cards shown during any fight (solo, party, PvP, boss) are
+    // always arranged rank-wise, E through SS -- not insertion
+    // order, which is what the raw fetch returns.
+    const rankOrder = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5, SS: 6 };
+    const cards = (cardsRaw || []).slice().sort((a, b) => (rankOrder[a.card_catalog?.rank] ?? 99) - (rankOrder[b.card_catalog?.rank] ?? 99));
 
     if (battleErr || partsErr || cardsErr || !battle){
       console.error("renderLiveBattleState failed:", battleErr, partsErr, cardsErr);
