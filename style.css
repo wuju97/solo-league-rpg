@@ -704,6 +704,47 @@ ul.clean li:last-child{ border-bottom:none; }
   cursor:pointer;
 }
 
+/* Grouped consecutive messages from the same sender sit closer
+   together, matching how a real chat app collapses repeated names. */
+#lobby-chat-panel .lc-row.lc-grouped{ margin-top: -0.35rem; }
+
+.lc-bubble-wrap{ display:flex; align-items:flex-end; gap:0.35rem; }
+#lobby-chat-panel .lc-row.own .lc-bubble-wrap{ flex-direction: row-reverse; }
+.lc-time{
+  font-size: 0.62rem;
+  color: var(--dim);
+  white-space: nowrap;
+  padding-bottom: 0.15rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+#lobby-chat-panel .lc-row:hover .lc-time{ opacity: 1; }
+
+.lc-char-count{
+  font-size: 0.7rem;
+  color: var(--dim);
+  align-self: center;
+  min-width: 1.5rem;
+  text-align: right;
+}
+.lc-char-count.lc-char-count-warn{ color: var(--crimson-bright); }
+
+.lc-empty-state{
+  text-align: center;
+  color: var(--dim);
+  font-size: 0.82rem;
+  font-style: italic;
+  margin: auto;
+  padding: 1rem;
+}
+
+@keyframes lcRowEnter{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+#lobby-chat-panel .lc-row-enter{ animation: lcRowEnter 0.2s ease; }
+
+
 /* ============================================================
    WORLD MAP — region name labels
    ============================================================ */
