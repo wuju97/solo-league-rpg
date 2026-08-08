@@ -1429,8 +1429,15 @@
       const cc = bc.card_catalog;
       const usable = bc.current_energy >= cc.energy_cost;
       const energyPct = Math.min(100, (bc.current_energy / bc.energy_cap) * 100);
+      // Small visual distinction between the player's own 3 fixed
+      // Player Card abilities and the up-to-3 optional creature
+      // cards they chose -- a badge label plus a subtle border tint.
+      const isClassCard = cc.source_type === "class";
+      const badgeHtml = `<div class="ability-card-source-badge ${isClassCard ? "is-class" : "is-creature"}">${isClassCard ? "Player Card" : escapeHtml(cc.source_name)}</div>`;
+      const borderStyle = isClassCard ? "border-color: var(--gold-bright);" : "";
       return `
-        <button class="ability-card" ${usable ? "" : "disabled"} onclick="battleUseCard(${cc.id})">
+        <button class="ability-card" style="${borderStyle}" ${usable ? "" : "disabled"} onclick="battleUseCard(${cc.id})">
+          ${badgeHtml}
           <div class="ability-card-name">${escapeHtml(cc.ability_name)}</div>
           <span class="ability-card-cost">${cc.energy_cost} energy</span>
           <div class="ability-card-effect">${escapeHtml(cc.effect_text)}</div>
