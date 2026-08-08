@@ -100,7 +100,7 @@
       // ring was resized to wrap an avatar instead of text directly.
       const levelBadge = document.createElement("span");
       levelBadge.id = "header-xp-level-badge";
-      levelBadge.style.cssText = "position:absolute; bottom:-3px; right:-3px; min-width:13px; height:13px; padding:0 2px; border-radius:7px; background:transparent; border:1px solid #fff; color:#fff; font-size:0.55rem; font-weight:700; line-height:11px; text-align:center; box-shadow:0 0 0 2px var(--void);";
+      levelBadge.style.cssText = "position:absolute; bottom:-3px; right:-3px; min-width:13px; height:13px; padding:0 2px; border-radius:7px; background:transparent; border:1px solid #fff; color:#fff; font-size:0.7rem; font-weight:700; line-height:11px; text-align:center; box-shadow:0 0 0 2px var(--void);";
 
       el.parentNode.insertBefore(wrapper, el);
       ringWrap.appendChild(ringSvg);
