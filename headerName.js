@@ -73,7 +73,7 @@
       ringSvg.style.cssText = "position:absolute; inset:0; transform:rotate(-90deg);";
       ringSvg.innerHTML = `
         <circle cx="${size/2}" cy="${size/2}" r="${radius}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="${strokeWidth}"></circle>
-        <circle id="header-xp-ring-fill" cx="${size/2}" cy="${size/2}" r="${radius}" fill="none" stroke="#3b82f6" stroke-width="${strokeWidth}"
+        <circle id="header-xp-ring-fill" cx="${size/2}" cy="${size/2}" r="${radius}" fill="none" stroke="#1e40af" stroke-width="${strokeWidth}"
           stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" stroke-linecap="round"
           style="transition: stroke-dashoffset 0.6s ease;"></circle>
       `;
