@@ -749,22 +749,34 @@
 
     let myGold = 0;
     let inThisKingdom = false;
+    let ownedItemNames = new Set();
     if (userData.user){
       const { data: character } = await sb.from("characters").select("gold, current_kingdom").eq("user_id", userData.user.id).maybeSingle();
       myGold = character?.gold ?? 0;
       inThisKingdom = character?.current_kingdom === kingdom;
+
+      // Only weapon/armor items are one-time purchases -- consumables
+      // are meant to be bought again and again, so they're excluded here.
+      if (category === "weapon" || category === "armor"){
+        const itemType = category === "weapon" ? "Weapon Item" : "Armor Item";
+        const { data: owned } = await sb.from("player_inventory").select("item_name").eq("user_id", userData.user.id).eq("item_type", itemType);
+        ownedItemNames = new Set((owned || []).map(o => o.item_name));
+      }
     }
 
     function itemRow(item){
+      const alreadyOwned = ownedItemNames.has(item.name);
       return `
         <div style="border-top:1px solid var(--border); padding:0.4rem 0;">
           <div style="display:flex; justify-content:space-between;">
             <span>${mapEscapeHtml(item.name)}</span>
             <span class="mono" style="color:var(--gold-bright);">${item[priceField]}g</span>
           </div>
-          ${inThisKingdom
-            ? `<button class="btn" style="margin-top:0.3rem; padding:0.25rem 0.5rem; font-size:0.68rem;" onclick="buyFromMapPopup('${category}','${item.slug}')">Buy</button>`
-            : `<span class="placeholder-note" style="font-size:0.68rem;">Travel here to buy</span>`
+          ${alreadyOwned
+            ? `<button class="btn" disabled style="margin-top:0.3rem; padding:0.25rem 0.5rem; font-size:0.68rem; opacity:0.4; cursor:not-allowed;">Already Owned</button>`
+            : inThisKingdom
+              ? `<button class="btn" style="margin-top:0.3rem; padding:0.25rem 0.5rem; font-size:0.68rem;" onclick="buyFromMapPopup('${category}','${item.slug}')">Buy</button>`
+              : `<span class="placeholder-note" style="font-size:0.68rem;">Travel here to buy</span>`
           }
         </div>
       `;
