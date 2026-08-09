@@ -1517,11 +1517,11 @@
     await renderLiveBattleState();
   }
 
-  function showBattleResultBanner(text, isWin, detailsHtml, delayNextButton){
+  function showBattleResultBanner(text, isWin, detailsHtml, delayNextButton, extraClass){
     const banner = document.getElementById("battle-result-banner");
     const textEl = document.getElementById("battle-result-text");
     textEl.textContent = text;
-    textEl.className = isWin ? "win" : "loss";
+    textEl.className = (isWin ? "win" : "loss") + (extraClass ? " " + extraClass : "");
 
     let detailsEl = document.getElementById("battle-result-details");
     if (!detailsEl){
@@ -1727,10 +1727,16 @@
     outcomeEl.innerHTML = `<div class="frame" style="padding:1rem;">${html}</div>`;
 
     if (result.ownership_claimed && result.npc_id){
-      showBattleResultBanner("You Won", true, html, true);
+      showBattleResultBanner(
+        `${escapeHtml(result.npc_name)} MONARCH DEFEATED. You have now conquered ${escapeHtml(result.kingdom)} and are the country's current leader.`,
+        true, html, true, "monarch-victory"
+      );
       await showChampionMysteryCards(result.npc_id);
     } else if (result.reward_choice_pending && result.primordial_name){
-      showBattleResultBanner("You Won", true, html, true);
+      showBattleResultBanner(
+        `YOU HAVE DEFEATED THE ${escapeHtml(result.primordial_name).toUpperCase()} PRIMORDIAL. CONGRATULATIONS!`,
+        true, html, true, "primordial-victory"
+      );
       await showPrimordialMysteryCards(result.npc_id);
     } else {
       showBattleResultBanner("You Won", true, html);

@@ -348,6 +348,20 @@ a{ color: inherit; text-decoration: none; }
   animation: battleResultPop 0.4s ease-out;
 }
 .battle-result-banner h1.win{ color: var(--gold-bright); }
+.battle-result-banner h1.win.primordial-victory{
+  font-size: 2.4em;
+  text-shadow: 0 0 20px var(--gold-bright), 0 0 40px var(--gold-bright);
+  letter-spacing: 0.03em;
+  animation: primordialVictoryPulse 1.8s ease-in-out infinite;
+}
+@keyframes primordialVictoryPulse{
+  0%, 100%{ text-shadow: 0 0 20px var(--gold-bright), 0 0 40px var(--gold-bright); }
+  50%{ text-shadow: 0 0 30px var(--gold-bright), 0 0 60px var(--gold-bright); }
+}
+.battle-result-banner h1.win.monarch-victory{
+  font-size: 1.5em;
+  text-shadow: 0 0 10px var(--gold-bright);
+}
 .battle-result-banner h1.loss{ color: var(--crimson-bright); }
 @keyframes battleResultPop{
   0%{ transform: scale(0.6); opacity: 0; }
