@@ -80,6 +80,7 @@
       <button class="page-tab-btn" data-tab="ai-memory">AI Memory</button>
       <button class="page-tab-btn" data-tab="content-tools">Content Tools</button>
       <button class="page-tab-btn" data-tab="api">API</button>
+      <button class="page-tab-btn" data-tab="reset">Reset</button>
     </div>
     <div class="channel-content">
 
@@ -381,6 +382,16 @@
 
           <p class="placeholder-note" id="status-gdrive" style="margin-top:0.75rem;"></p>
         </div>
+      </section>
+    </div>
+
+    <div class="page-tab-panel" data-panel="reset">
+      <section class="frame">
+        <h3 style="color:var(--crimson-bright);">Reset</h3>
+        <p class="placeholder-note" style="margin-bottom:1rem;">This permanently wipes all of your progression, inventory, discoveries, achievements, and history — your class, rank, level, gold, gear, cards, kingdom unlocks, hierarchy defeats, everything. Your account, gamer name, and API keys are not affected. After resetting, you'll need to pick a class again before you can fight anything.</p>
+        <p class="placeholder-note" style="margin-bottom:1rem; color:var(--crimson-bright);">This cannot be undone.</p>
+        <button class="btn" id="reset-account-btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="confirmResetAccount()">Reset My Account</button>
+        <p class="placeholder-note" id="status-reset" style="margin-top:0.75rem;"></p>
       </section>
     </div>
 
@@ -1175,6 +1186,36 @@
 
     statusEl.textContent = error ? "Couldn't save: " + error.message : "Saved — now live for every player.";
     statusEl.style.color = error ? "var(--crimson-bright)" : "var(--steel-bright)";
+  }
+
+  async function confirmResetAccount(){
+    const statusEl = document.getElementById("status-reset");
+    const btn = document.getElementById("reset-account-btn");
+
+    const firstConfirm = confirm("This permanently wipes ALL of your progression — class, rank, level, gold, gear, cards, everything. This cannot be undone. Are you absolutely sure?");
+    if (!firstConfirm) return;
+
+    const typed = prompt('Type "RESET" (all capitals) to confirm one final time.');
+    if (typed !== "RESET"){
+      statusEl.textContent = "Reset cancelled — confirmation text didn't match.";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Resetting...";
+    statusEl.textContent = "";
+
+    const { error } = await sb.rpc("reset_my_account");
+
+    if (error){
+      statusEl.textContent = "Reset failed: " + error.message;
+      btn.disabled = false;
+      btn.textContent = "Reset My Account";
+      return;
+    }
+
+    statusEl.textContent = "Your account has been reset. Redirecting...";
+    setTimeout(() => { window.location.href = "character.html"; }, 1200);
   }
 
   async function saveApiKey(column, inputId, statusPrefix){

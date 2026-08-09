@@ -346,6 +346,17 @@
     });
   });
 
+  // Auto-switch to a tab if linked here with ?tab=... -- used by
+  // the "Choose Class" button in the Dashboard's Welcome modal, so
+  // new players land directly on Class instead of Overview.
+  (function(){
+    const requestedTab = new URLSearchParams(window.location.search).get("tab");
+    if (requestedTab){
+      const targetBtn = document.querySelector(`#char-tabs .page-tab-btn[data-tab="${requestedTab}"]`);
+      if (targetBtn) targetBtn.click();
+    }
+  })();
+
   // Load every player's character into the roster table
   (async () => {
     const { data: characters, error } = await sb
