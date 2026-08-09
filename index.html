@@ -111,9 +111,9 @@
         <a class="btn" href="character.html">Open Character Tab</a>
       </section>
 
-      <section class="frame" data-widget="world_event">
-        <h3>Current World Event</h3>
-        <p class="placeholder-note">No active world event right now.</p>
+      <section class="frame" data-widget="progression" id="dash-progression-widget">
+        <h3>Current Progression</h3>
+        <p class="placeholder-note" id="dash-progression-body">Loading...</p>
       </section>
 
       <section class="frame" data-widget="kingdom_news">
@@ -253,6 +253,36 @@
   // it (using their own key); everyone else just reads the cached
   // row. This is what keeps this feature completely rate-limit-safe
   // no matter how many times the Dashboard gets viewed.
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str ?? "";
+    return div.innerHTML;
+  }
+
+  async function loadDashboardProgression(){
+    const widget = document.getElementById("dash-progression-widget");
+    const bodyEl = document.getElementById("dash-progression-body");
+    if (!widget || !bodyEl) return;
+
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: character } = await sb.from("characters").select("class, rank, level, current_kingdom").eq("user_id", userData.user.id).maybeSingle();
+    if (!character || !character.class){
+      bodyEl.innerHTML = `Create your character and pick a class to start tracking progression.`;
+      return;
+    }
+
+    const { count: kingdomsUnlocked } = await sb.from("player_kingdom_unlocks").select("*", { count: "exact", head: true }).eq("user_id", userData.user.id);
+    const { data: elig } = await sb.rpc("check_pvg_eligibility");
+
+    bodyEl.innerHTML = `
+      <span class="mono">${escapeHtml(character.class)} — ${escapeHtml(character.rank)}-Rank, Level ${character.level}</span><br>
+      <span class="mono">${escapeHtml(character.current_kingdom || "—")} — ${kingdomsUnlocked ?? 0}/9 kingdoms unlocked</span><br>
+      <span class="mono">${elig && elig.eligible ? "Eligible for Primordial challenges" : `PvG: ${elig ? elig.kingdoms_owned : 0}/9 kingdoms conquered, ${elig ? elig.champions_defeated : 0}/9 Champions defeated`}</span>
+    `;
+  }
+
   async function loadKingdomNews(forceRegenerate){
     const newsEl = document.getElementById("dash-kingdom-news");
     const btn = document.getElementById("kingdom-news-generate-btn");
@@ -322,6 +352,7 @@
   applyDashboardLayout();
   loadDashboardSummaries();
   loadKingdomNews();
+  loadDashboardProgression();
 </script>
 </body>
 </html>
