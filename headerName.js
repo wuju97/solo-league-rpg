@@ -17,7 +17,7 @@
     const favicon = document.createElement("link");
     favicon.rel = "icon";
     favicon.type = "image/svg+xml";
-    favicon.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0A0605"/><path d="M6 22 L6 12 L11 17 L16 9 L21 17 L26 12 L26 22 Z" fill="#C9A24B" stroke="#8A6A2E" stroke-width="0.6"/><rect x="6" y="22" width="20" height="3" rx="1" fill="#C9A24B" stroke="#8A6A2E" stroke-width="0.6"/><circle cx="6" cy="12" r="1.6" fill="#E8D9B0"/><circle cx="16" cy="9" r="1.6" fill="#E8D9B0"/><circle cx="26" cy="12" r="1.6" fill="#E8D9B0"/></svg>`);
+    favicon.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="4" fill="#0A0605"/><path d="M5 24 L5 13 L8.5 17 L11 10 L14 15 L16 8 L18 15 L21 10 L23.5 17 L27 13 L27 24 Z" fill="#C9A24B" stroke="#6E5220" stroke-width="0.7"/><rect x="5" y="24" width="22" height="3.2" rx="0.8" fill="#B8923F" stroke="#6E5220" stroke-width="0.7"/><circle cx="5" cy="13" r="1.3" fill="#E8D9B0"/><circle cx="11" cy="10" r="1.3" fill="#E8D9B0"/><circle cx="16" cy="8" r="1.5" fill="#8B2635" stroke="#4A0F18" stroke-width="0.4"/><circle cx="21" cy="10" r="1.3" fill="#E8D9B0"/><circle cx="27" cy="13" r="1.3" fill="#E8D9B0"/><circle cx="9" cy="25.6" r="0.8" fill="#4A6FA5"/><circle cx="16" cy="25.6" r="0.8" fill="#4A6FA5"/><circle cx="23" cy="25.6" r="0.8" fill="#4A6FA5"/></svg>`);
     document.head.appendChild(favicon);
   }
 
