@@ -1073,7 +1073,11 @@
           <section class="frame">
             <h3>Legendary Artifacts</h3>
             <div style="display:flex; gap:1.2rem; flex-wrap:wrap; align-items:flex-start; border:1px solid var(--border); border-radius:var(--radius); padding:1rem; margin-top:0.75rem;">
-              <img id="worldbreaker-img" src="images/Artifacts/Worldbreaker.png" style="width:140px; height:140px; object-fit:contain; background:#000; border-radius:var(--radius);" alt="Worldbreaker" onerror="this.style.display='none';">
+              <img id="worldbreaker-img" src="" style="width:140px; height:140px; object-fit:contain; background:#000; border-radius:var(--radius); display:none;" alt="Worldbreaker" onerror="this.style.display='none';">
+              <div id="worldbreaker-upload-area" style="display:none;">
+                <input type="file" id="worldbreaker-file-input" accept="image/*" style="display:none;" onchange="uploadWorldbreakerImage(this.files[0])">
+                <button class="btn" onclick="document.getElementById('worldbreaker-file-input').click();">Upload Artifact Image</button>
+              </div>
               <div style="flex:1; min-width:240px;">
                 <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.4rem;">Worldbreaker</h4>
                 <p style="margin-bottom:0.6rem;">Forged from the conquest of all nine kingdoms. Devastating against Primordials — dealing far more damage to them, and taking far less in return. Useless against anything else; it cannot be equipped for any other kind of fight.</p>
@@ -1541,7 +1545,22 @@
     const statusEl = document.getElementById("worldbreaker-status");
     const getBtn = document.getElementById("worldbreaker-get-btn");
     const equipBtn = document.getElementById("worldbreaker-equip-btn");
+    const imgEl = document.getElementById("worldbreaker-img");
+    const uploadAreaEl = document.getElementById("worldbreaker-upload-area");
     if (!statusEl) return;
+
+    // Shared, global artifact image -- visible to every player, not
+    // just whoever owns the weapon. Shown here regardless of login
+    // state too, since anyone should be able to see it.
+    const { data: settings } = await sb.from("shared_site_settings").select("worldbreaker_image_url").eq("id", true).maybeSingle();
+    if (settings?.worldbreaker_image_url){
+      imgEl.src = settings.worldbreaker_image_url;
+      imgEl.style.display = "block";
+      uploadAreaEl.style.display = "none";
+    } else {
+      imgEl.style.display = "none";
+      uploadAreaEl.style.display = "block";
+    }
 
     const { data: userData } = await sb.auth.getUser();
     if (!userData.user){ statusEl.textContent = "Log in to check eligibility."; return; }
@@ -1568,6 +1587,37 @@
       statusEl.textContent = `Defeat all nine kingdoms' Monarchs to claim this weapon (${elig?.champions_defeated ?? 0}/9 so far).`;
       getBtn.disabled = true;
     }
+  }
+
+  async function uploadWorldbreakerImage(file){
+    if (!file) return;
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user){ alert("Log in to upload an image."); return; }
+
+    const uploadAreaEl = document.getElementById("worldbreaker-upload-area");
+    const originalHtml = uploadAreaEl.innerHTML;
+    uploadAreaEl.innerHTML = `<p class="placeholder-note">Uploading...</p>`;
+
+    const ext = file.name.split(".").pop();
+    const path = `worldbreaker-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await sb.storage.from("artifact-uploads").upload(path, file);
+    if (uploadError){
+      alert("Upload failed: " + uploadError.message);
+      uploadAreaEl.innerHTML = originalHtml;
+      return;
+    }
+
+    const { data: urlData } = sb.storage.from("artifact-uploads").getPublicUrl(path);
+    const { data: result, error: lockError } = await sb.rpc("set_worldbreaker_image", { p_url: urlData.publicUrl });
+
+    if (lockError || !result?.success){
+      alert("Couldn't save the image: " + (lockError?.message || result?.reason || "unknown error"));
+      uploadAreaEl.innerHTML = originalHtml;
+      return;
+    }
+
+    await loadWorldbreakerState();
   }
 
   async function claimWorldbreaker(){
