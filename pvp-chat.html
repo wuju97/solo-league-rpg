@@ -1475,12 +1475,12 @@
 
     const logEl = document.getElementById("live-battle-log");
     logEl.innerHTML = (battle.battle_log || []).map(entry => `<div>${escapeHtml(entry.text)}</div>`).join("");
-    // With flex-direction: column-reverse, scrollTop=0 is the
-    // visual top -- the newest message. Redrawing the log's
-    // innerHTML doesn't reliably reset an existing scroll position
-    // on its own, so this is forced explicitly every time, even if
-    // the player had scrolled up to check something older.
-    logEl.scrollTop = 0;
+    // With flex-direction: column-reverse, scrollTop=0 turned out
+    // to NOT be the visual top showing the newest message (a real
+    // browser quirk, confirmed directly) -- scrollHeight is. Forced
+    // explicitly every redraw, even if the player had scrolled up
+    // to check something older.
+    logEl.scrollTop = logEl.scrollHeight;
 
     // In a party battle, show "waiting" state once you've submitted
     // but the round hasn't resolved yet (i.e. your HP/energy hasn't
