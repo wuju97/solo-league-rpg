@@ -1070,7 +1070,25 @@
         </div>
 
         <div class="page-tab-panel" data-panel="artifacts">
-          <section class="frame"><h3>Legendary Artifacts</h3><p class="placeholder-note">Nothing here yet.</p></section>
+          <section class="frame">
+            <h3>Legendary Artifacts</h3>
+            <div style="display:flex; gap:1.2rem; flex-wrap:wrap; align-items:flex-start; border:1px solid var(--border); border-radius:var(--radius); padding:1rem; margin-top:0.75rem;">
+              <img id="worldbreaker-img" src="images/Artifacts/Worldbreaker.png" style="width:140px; height:140px; object-fit:contain; background:#000; border-radius:var(--radius);" alt="Worldbreaker" onerror="this.style.display='none';">
+              <div style="flex:1; min-width:240px;">
+                <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin-bottom:0.4rem;">Worldbreaker</h4>
+                <p style="margin-bottom:0.6rem;">Forged from the conquest of all nine kingdoms. Devastating against Primordials — dealing far more damage to them, and taking far less in return. Useless against anything else; it cannot be equipped for any other kind of fight.</p>
+                <p class="placeholder-note" id="worldbreaker-status" style="margin-bottom:0.6rem;">Loading...</p>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                  <button class="btn" id="worldbreaker-get-btn" onclick="claimWorldbreaker()" disabled>Get Weapon</button>
+                  <button class="btn" id="worldbreaker-equip-btn" style="display:none;" onclick="toggleWorldbreakerEquip()"></button>
+                </div>
+              </div>
+            </div>
+
+            <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:1.5rem 0 0.5rem;">World Artifacts</h4>
+            <p class="placeholder-note" id="artifact-progress" style="margin-bottom:0.5rem;"></p>
+            <div id="artifacts-list"></div>
+          </section>
         </div>
 
         <div class="page-tab-panel" data-panel="timeline">
@@ -1519,8 +1537,62 @@
     `).join("");
   }
 
+  async function loadWorldbreakerState(){
+    const statusEl = document.getElementById("worldbreaker-status");
+    const getBtn = document.getElementById("worldbreaker-get-btn");
+    const equipBtn = document.getElementById("worldbreaker-equip-btn");
+    if (!statusEl) return;
+
+    const { data: userData } = await sb.auth.getUser();
+    if (!userData.user){ statusEl.textContent = "Log in to check eligibility."; return; }
+
+    const { data: owned } = await sb.from("player_inventory").select("id").eq("user_id", userData.user.id).eq("item_type", "Legendary Weapon").eq("item_name", "Worldbreaker").maybeSingle();
+
+    if (owned){
+      const { data: character } = await sb.from("characters").select("primordial_weapon_equipped").eq("user_id", userData.user.id).maybeSingle();
+      statusEl.textContent = "You possess the Worldbreaker.";
+      getBtn.style.display = "none";
+      equipBtn.style.display = "inline-block";
+      equipBtn.textContent = character?.primordial_weapon_equipped ? "Unequip" : "Equip (for Primordial fights only)";
+      return;
+    }
+
+    getBtn.style.display = "inline-block";
+    equipBtn.style.display = "none";
+
+    const { data: elig } = await sb.rpc("check_pvg_eligibility");
+    if (elig?.all_champions_defeated){
+      statusEl.textContent = "All nine Monarchs have fallen before you. The Worldbreaker awaits.";
+      getBtn.disabled = false;
+    } else {
+      statusEl.textContent = `Defeat all nine kingdoms' Monarchs to claim this weapon (${elig?.champions_defeated ?? 0}/9 so far).`;
+      getBtn.disabled = true;
+    }
+  }
+
+  async function claimWorldbreaker(){
+    const { data: result, error } = await sb.rpc("claim_primordial_weapon");
+    if (error || !result?.success){
+      alert("Couldn't claim the weapon: " + (error?.message || result?.reason || "unknown error"));
+      return;
+    }
+    await loadWorldbreakerState();
+  }
+
+  async function toggleWorldbreakerEquip(){
+    const { data: userData } = await sb.auth.getUser();
+    const { data: character } = await sb.from("characters").select("primordial_weapon_equipped").eq("user_id", userData.user.id).maybeSingle();
+    const { data: result, error } = await sb.rpc("equip_primordial_weapon", { p_equip: !character?.primordial_weapon_equipped });
+    if (error || !result?.success){
+      alert("Couldn't update equip state: " + (error?.message || result?.reason || "unknown error"));
+      return;
+    }
+    await loadWorldbreakerState();
+  }
+
   loadDiscoveries();
   loadArtifacts();
+  loadWorldbreakerState();
 </script>
 </body>
 </html>

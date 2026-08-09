@@ -1773,6 +1773,15 @@
         true, html, true, "monarch-victory"
       );
       await showChampionMysteryCards(result.npc_id);
+
+      // Ninth and final Monarch -- prompt the player toward the
+      // Legendary Artifacts tab to claim the Worldbreaker.
+      const { data: elig } = await sb.rpc("check_pvg_eligibility");
+      if (elig?.all_champions_defeated){
+        setTimeout(() => {
+          alert("Every Monarch across all nine kingdoms has fallen before you. Visit the Legendary Artifacts tab in World Lore to claim the Worldbreaker — a weapon forged for one purpose: the Primordials.");
+        }, 500);
+      }
     } else if (result.reward_choice_pending && result.primordial_name){
       showBattleResultBanner(
         `YOU HAVE DEFEATED THE ${escapeHtml(result.primordial_name).toUpperCase()} PRIMORDIAL. CONGRATULATIONS!`,
