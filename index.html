@@ -113,7 +113,9 @@
 
       <section class="frame" data-widget="progression" id="dash-progression-widget">
         <h3>Current Progression</h3>
-        <p class="placeholder-note" id="dash-progression-body">Loading...</p>
+        <ul class="clean" id="dash-progression-list">
+          <li><span class="placeholder-note">Loading...</span></li>
+        </ul>
       </section>
 
       <section class="frame" data-widget="kingdom_news">
@@ -261,25 +263,36 @@
 
   async function loadDashboardProgression(){
     const widget = document.getElementById("dash-progression-widget");
-    const bodyEl = document.getElementById("dash-progression-body");
-    if (!widget || !bodyEl) return;
+    const listEl = document.getElementById("dash-progression-list");
+    if (!widget || !listEl) return;
 
     const { data: userData } = await sb.auth.getUser();
     if (!userData.user) return;
 
     const { data: character } = await sb.from("characters").select("class, rank, level, current_kingdom").eq("user_id", userData.user.id).maybeSingle();
     if (!character || !character.class){
-      bodyEl.innerHTML = `Create your character and pick a class to start tracking progression.`;
+      listEl.innerHTML = `<li><span class="placeholder-note">Create your character and pick a class to start tracking progression.</span></li>`;
       return;
     }
 
     const { count: kingdomsUnlocked } = await sb.from("player_kingdom_unlocks").select("*", { count: "exact", head: true }).eq("user_id", userData.user.id);
     const { data: elig } = await sb.rpc("check_pvg_eligibility");
 
-    bodyEl.innerHTML = `
-      <span class="mono">${escapeHtml(character.class)} — ${escapeHtml(character.rank)}-Rank, Level ${character.level}</span><br>
-      <span class="mono">${escapeHtml(character.current_kingdom || "—")} — ${kingdomsUnlocked ?? 0}/9 kingdoms unlocked</span><br>
-      <span class="mono">${elig && elig.eligible ? "Eligible for Primordial challenges" : `PvG: ${elig ? elig.kingdoms_owned : 0}/9 kingdoms conquered, ${elig ? elig.champions_defeated : 0}/9 Champions defeated`}</span>
+    const row = (label, value) => `<li><span>${escapeHtml(label)}</span><span class="mono">${value}</span></li>`;
+
+    listEl.innerHTML = `
+      ${row("Class", escapeHtml(character.class))}
+      ${row("Rank / Level", `${escapeHtml(character.rank)} — Lvl ${character.level}`)}
+      ${row("Current Kingdom", escapeHtml(character.current_kingdom || "—"))}
+      ${row("Kingdoms Unlocked", `${kingdomsUnlocked ?? 0} / 9`)}
+      <li style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid var(--border);"><strong style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:0.85rem;">PvG Progress</strong></li>
+      ${elig && elig.eligible
+        ? `<li><span class="placeholder-note" style="color:var(--gold-bright);">Eligible — challenge a Primordial now!</span></li>`
+        : `
+          ${row("Kingdoms Conquered", `${elig ? elig.kingdoms_owned : 0} / 9`)}
+          ${row("Champions Defeated", `${elig ? elig.champions_defeated : 0} / 9`)}
+        `
+      }
     `;
   }
 
