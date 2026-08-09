@@ -392,6 +392,8 @@
           <button class="action-btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="battleAction('surrender')">🏳 Surrender</button>
         </div>
 
+        <div id="live-consumables-list" style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;"></div>
+
         <div id="live-card-buttons" class="ability-card-grid" style="margin-bottom:1rem;"></div>
         <p class="placeholder-note" id="waiting-for-party-note" style="display:none; margin-bottom:1rem;">Waiting for the rest of your party to choose their action...</p>
 
@@ -1376,6 +1378,23 @@
       return;
     }
 
+    // Real mid-battle consumable use -- PvE only (solo/party). PvP
+    // already has its own separate consumable_1/consumable_2 system
+    // built into submit_duel_action.
+    const consumablesListEl = document.getElementById("live-consumables-list");
+    if (consumablesListEl){
+      if (isPvpBattle){
+        consumablesListEl.innerHTML = "";
+      } else {
+        const { data: myConsumables } = await sb.from("player_inventory").select("item_name, quantity").eq("user_id", userData.user.id).eq("item_type", "Consumable Item").gt("quantity", 0);
+        consumablesListEl.innerHTML = (myConsumables || []).map(item => `
+          <button class="action-btn" style="border-color:var(--gold-bright); color:var(--gold-bright); font-size:0.75rem;" onclick="useConsumableDuringBattle('${item.item_name.replace(/'/g, "\\'")}')">
+            🧪 ${escapeHtml(item.item_name)} (${item.quantity})
+          </button>
+        `).join("");
+      }
+    }
+
     // Monarch/Primordial fights show that specific enemy's image
     // above the HP bars during the actual live fight, not just the
     // pre-fight loadout screen. battle_type and enemy_name come
@@ -1469,6 +1488,17 @@
   }
 
   let lastSurrenderGoldLost = null;
+
+  async function useConsumableDuringBattle(itemName){
+    const { data: result, error } = await sb.rpc("use_consumable_in_battle", { p_battle_id: currentBattleId, p_item_name: itemName });
+    if (error || !result?.success){
+      alert("Couldn't use that: " + (error?.message || result?.reason || "unknown error"));
+      return;
+    }
+    // Doesn't cost a turn or trigger an enemy response -- refresh
+    // the battle state in place so the updated HP shows immediately.
+    await renderLiveBattleState();
+  }
 
   async function battleAction(type){
     let rpcName;
