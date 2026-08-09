@@ -439,6 +439,13 @@
     perception: "Perception", charisma: "Charisma"
   };
 
+  const STAT_EFFECTS = {
+    strength: "+Power", vitality: "+HP", agility: "+Speed",
+    dexterity: "+Crit Chance", intellect: "+Power (ability-focused)", wisdom: "+Energy Regen",
+    luck: "+Crit Chance", spirit: "+Defense", endurance: "+Defense",
+    perception: "+Crit Chance", charisma: "+Shop Discount"
+  };
+
   async function loadMyCharacter(){
     const { data: userData } = await sb.auth.getUser();
     const user = userData?.user;
@@ -530,7 +537,7 @@
     const btnContainer = document.getElementById("ap-stat-buttons");
     btnContainer.innerHTML = Object.entries(STAT_LABELS).map(([key, label]) => `
       <div class="frame" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem;">
-        <span>${label}</span>
+        <span>${label} <span class="mono" style="font-size:0.68rem; color:var(--dim);">(${STAT_EFFECTS[key]})</span></span>
         <div style="display:flex; align-items:center; gap:0.6rem;">
           <span class="mono">${myCharacter[key] ?? 10}</span>
           <button class="btn" style="padding:0.3rem 0.6rem; font-size:0.7rem;" onclick="spendApOnStat('${key}')">+1</button>
