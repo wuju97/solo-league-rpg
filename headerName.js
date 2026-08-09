@@ -9,6 +9,18 @@
 // ============================================================
 
 (async function () {
+  // Favicon injected here, before the login check below, so it
+  // applies site-wide including the login page itself -- this file
+  // is already loaded on every single page. Inline SVG data URI
+  // rather than a separate file, so nothing extra needs uploading.
+  if (!document.querySelector('link[rel="icon"]')){
+    const favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/svg+xml";
+    favicon.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0A0605"/><path d="M6 22 L6 12 L11 17 L16 9 L21 17 L26 12 L26 22 Z" fill="#C9A24B" stroke="#8A6A2E" stroke-width="0.6"/><rect x="6" y="22" width="20" height="3" rx="1" fill="#C9A24B" stroke="#8A6A2E" stroke-width="0.6"/><circle cx="6" cy="12" r="1.6" fill="#E8D9B0"/><circle cx="16" cy="9" r="1.6" fill="#E8D9B0"/><circle cx="26" cy="12" r="1.6" fill="#E8D9B0"/></svg>`);
+    document.head.appendChild(favicon);
+  }
+
   const { data } = await sb.auth.getSession();
   if (!data.session) return;
   const userId = data.session.user.id;
