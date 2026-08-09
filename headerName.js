@@ -17,7 +17,22 @@
     const favicon = document.createElement("link");
     favicon.rel = "icon";
     favicon.type = "image/svg+xml";
-    favicon.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="4" fill="#0A0605"/><path d="M5 24 L5 13 L8.5 17 L11 10 L14 15 L16 8 L18 15 L21 10 L23.5 17 L27 13 L27 24 Z" fill="#C9A24B" stroke="#6E5220" stroke-width="0.7"/><rect x="5" y="24" width="22" height="3.2" rx="0.8" fill="#B8923F" stroke="#6E5220" stroke-width="0.7"/><circle cx="5" cy="13" r="1.3" fill="#E8D9B0"/><circle cx="11" cy="10" r="1.3" fill="#E8D9B0"/><circle cx="16" cy="8" r="1.5" fill="#8B2635" stroke="#4A0F18" stroke-width="0.4"/><circle cx="21" cy="10" r="1.3" fill="#E8D9B0"/><circle cx="27" cy="13" r="1.3" fill="#E8D9B0"/><circle cx="9" cy="25.6" r="0.8" fill="#4A6FA5"/><circle cx="16" cy="25.6" r="0.8" fill="#4A6FA5"/><circle cx="23" cy="25.6" r="0.8" fill="#4A6FA5"/></svg>`);
+    favicon.href = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+      <g transform="rotate(45 16 16)">
+        <rect x="14.7" y="3" width="2.6" height="18" fill="#C8CDD6" stroke="#5A5F68" stroke-width="0.5"/>
+        <polygon points="14.7,3 17.3,3 16,0.5" fill="#C8CDD6" stroke="#5A5F68" stroke-width="0.5"/>
+        <rect x="10.5" y="20" width="11" height="2.4" rx="0.6" fill="#C9A24B" stroke="#6E5220" stroke-width="0.5"/>
+        <rect x="14.7" y="21.5" width="2.6" height="7" rx="1" fill="#8A6E3A" stroke="#5A4520" stroke-width="0.4"/>
+        <circle cx="16" cy="29.2" r="1.6" fill="#C9A24B" stroke="#6E5220" stroke-width="0.4"/>
+      </g>
+      <g transform="rotate(-45 16 16)">
+        <rect x="14.7" y="3" width="2.6" height="18" fill="#E0E4EA" stroke="#5A5F68" stroke-width="0.5"/>
+        <polygon points="14.7,3 17.3,3 16,0.5" fill="#E0E4EA" stroke="#5A5F68" stroke-width="0.5"/>
+        <rect x="10.5" y="20" width="11" height="2.4" rx="0.6" fill="#C9A24B" stroke="#6E5220" stroke-width="0.5"/>
+        <rect x="14.7" y="21.5" width="2.6" height="7" rx="1" fill="#8A6E3A" stroke="#5A4520" stroke-width="0.4"/>
+        <circle cx="16" cy="29.2" r="1.6" fill="#C9A24B" stroke="#6E5220" stroke-width="0.4"/>
+      </g>
+    </svg>`);
     document.head.appendChild(favicon);
   }
 
