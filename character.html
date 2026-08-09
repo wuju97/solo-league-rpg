@@ -506,6 +506,14 @@
     statsList.style.display = "flex";
     attrContent.style.display = "block";
 
+    // The 11 individual stat values here were never actually being
+    // set -- the container's visibility toggled, but every value
+    // inside permanently showed the static "--" placeholder.
+    Object.keys(STAT_LABELS).forEach((key) => {
+      const el = document.getElementById(`stat-${key}`);
+      if (el) el.textContent = myCharacter[key] ?? 10;
+    });
+
     document.getElementById("mc-name").textContent = myCharacter.name;
     document.getElementById("mc-class").innerHTML = myCharacter.class
       ? `<img src="images/Classes/${((myCharacter.class) === 'Beastmaster' ? 'Beast Master' : (myCharacter.class))}.png" alt="" style="width:22px; height:22px; vertical-align:middle; margin-right:0.3rem; border-radius:3px;" onerror="this.style.display='none';">${myCharacter.class}`
