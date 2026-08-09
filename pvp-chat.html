@@ -384,6 +384,12 @@
       <!-- The real, in-progress fight -- works for both solo and party -->
       <section class="frame" id="card-battle-live-state" style="display:none;">
         <img id="live-battle-enemy-image" style="display:none; width:100%; max-height:500px; object-fit:contain; background:#000; border-radius:var(--radius); margin-bottom:1rem;" alt="">
+
+        <div style="margin-bottom:1rem;">
+          <strong style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:0.82rem;">Battle Log</strong>
+          <div id="live-battle-log" style="display:flex; flex-direction:column-reverse; gap:0.3rem; max-height:220px; overflow-y:auto; font-size:0.82rem; border:1px solid var(--border); border-radius:var(--radius); padding:0.6rem; margin-top:0.3rem;"></div>
+        </div>
+
         <div id="live-hp-bars" style="display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;"></div>
 
         <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
@@ -397,7 +403,6 @@
         <div id="live-card-buttons" class="ability-card-grid" style="margin-bottom:1rem;"></div>
         <p class="placeholder-note" id="waiting-for-party-note" style="display:none; margin-bottom:1rem;">Waiting for the rest of your party to choose their action...</p>
 
-        <div id="live-battle-log" style="display:flex; flex-direction:column-reverse; gap:0.3rem; max-height:220px; overflow-y:auto; font-size:0.82rem;"></div>
         <div id="live-battle-outcome" style="display:none; margin-top:1rem;"></div>
       </section>
     </div>
