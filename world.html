@@ -841,8 +841,9 @@
     areaEl.innerHTML = `
       <div class="frame" style="margin-top:1rem;">
         <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">A Traveler's Request</h4>
-        <p>A nervous-looking traveler approaches. "I've got a riddle or two to pass the time on this road — solve one and there's coin in it for you."</p>
+        <p>A nervous-looking traveler approaches. "Could use an escort down this road — or if you'd rather, I've got a riddle or two to pass the time. Solve one and there's coin in it for you either way."</p>
         <div style="display:flex; gap:0.75rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn" onclick="acceptEscortQuest()">Escort Them</button>
           <button class="btn" onclick="startMysteryGame('pokedle')">PKMN</button>
           <button class="btn" onclick="startMysteryGame('narutodle')">NRTO</button>
           <button class="btn" onclick="startMysteryGame('loldle')">LOL</button>
