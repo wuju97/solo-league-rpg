@@ -1970,10 +1970,11 @@
       return;
     }
 
-    // Champions require a party per spec -- if the player's in a
-    // forming party, tag this pending battle as part of that
-    // party's shared attempt instead of a solo one.
-    if (preBattleEnemy.isChampion){
+    // Political hierarchy fights (Warriors through Champion) are
+    // party-fightable, not just Champions specifically -- if the
+    // player's in a forming party, tag this pending battle as part
+    // of that party's shared attempt instead of a solo one.
+    if (preBattleEnemy.source === "hierarchy"){
       const { data: partyResult } = await sb.rpc("tag_pending_battle_as_party");
       if (partyResult && partyResult.success){
         statusEl.textContent = "Loadout locked in — waiting on the rest of your party to ready up in the Party tab, then your leader can start the fight.";
