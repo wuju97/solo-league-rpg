@@ -389,10 +389,20 @@
             <span class="mono" style="font-size:0.7rem; color:${presence.online ? "#8fdb8f" : "var(--dim)"}; margin-left:0.5rem;">${presence.text}</span>
           </span>
         </span>
-        <span class="tag" style="font-size:0.65rem;">${f.status === "pending" ? "Pending" : "Friend"}</span>
+        <span class="tag" style="font-size:0.65rem;">${f.status === "pending" ? (f.is_incoming ? "Wants to be friends" : "Pending") : "Friend"}</span>
+        ${f.is_incoming ? `<button class="btn" style="padding:0.25rem 0.6rem; font-size:0.7rem; margin-left:0.5rem;" onclick="acceptFriendRequest('${f.gamer_name.replace(/'/g, "\\'")}')">Accept</button>` : ""}
       </div>
     `;
     }).join("");
+  }
+
+  async function acceptFriendRequest(gamerName){
+    const { data: result, error } = await sb.rpc("add_friend", { p_gamer_name: gamerName });
+    if (error || !result?.success){
+      alert("Couldn't accept: " + (error?.message || result?.reason || "unknown error"));
+      return;
+    }
+    await loadFriendsList();
   }
 
   async function loadMyProfile(){
