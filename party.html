@@ -418,6 +418,12 @@
   loadMyParty();
   loadPartyInvites();
   loadFriendsList();
+
+  // Other party members' ready state changes never showed up
+  // without a manual refresh -- no realtime subscription or polling
+  // existed for this at all. Polling every 5s so a party leader can
+  // actually see when everyone's ready without reloading the page.
+  setInterval(loadMyParty, 5000);
   loadMyProfile();
 </script>
 
