@@ -73,14 +73,13 @@
 
     <div class="channel-layout">
     <div class="page-tabs" id="party-tabs">
-      <button class="page-tab-btn active" data-tab="friends">Friends</button>
-      <button class="page-tab-btn" data-tab="party">Party</button>
+      <button class="page-tab-btn active" data-tab="party">Party</button>
       <button class="page-tab-btn" data-tab="invites">Invites</button>
       <button class="page-tab-btn" data-tab="shared-quests">Shared Quests</button>
     </div>
       <div class="channel-content">
 
-    <div class="page-tab-panel active" data-panel="friends">
+    <div class="page-tab-panel active" data-panel="party">
       <section class="frame">
         <h3>Your Profile</h3>
         <div id="my-profile-display" style="display:flex; align-items:center; gap:0.75rem;">
@@ -90,17 +89,7 @@
       </section>
 
       <section class="frame" style="margin-top:1rem;">
-        <h3>Friends</h3>
-        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:0.75rem;">
-          <input type="text" id="add-friend-gamer-name" placeholder="Gamer name" style="background:var(--panel-raised); border:1px solid var(--border-bright); border-radius:var(--radius); color:var(--parchment); padding:0.5rem 0.6rem;">
-          <button class="btn" onclick="addFriendByName()">Add Friend</button>
-        </div>
-        <p class="placeholder-note" id="add-friend-status" style="margin-bottom:0.75rem;"></p>
-        <p class="placeholder-note" style="margin-bottom:0.75rem;">Chat isn't wired up yet — this is your friends list for now, not a messaging system.</p>
-        <div id="friends-list"><p class="placeholder-note">Loading...</p></div>
-      </section>
-    </div>
-    <div class="page-tab-panel" data-panel="party">
+        <h3>Party</h3>
       <section class="frame">
         <h3>Party</h3>
         <div id="no-party-state">
@@ -128,7 +117,16 @@
             <button class="btn" style="border-color:var(--crimson); color:var(--crimson-bright);" onclick="leaveCurrentParty()">Leave Party</button>
           </div>
           <p class="placeholder-note" id="party-battle-status" style="margin-top:0.5rem;"></p>
-          <p class="placeholder-note" style="margin-top:0.75rem;">Inviting someone brings them into your world — their location moves to match yours, but their own class, rank, cards, and equipment stay entirely their own. Party members can pick from each other's cards when building a loadout for a fight. Champions require a party. Each ready member should challenge the same Champion from World Map first (their loadout gets tagged to this party automatically) — once everyone's done that, the leader can Start Party Battle here.</p>
+          <div class="frame" style="margin-top:1rem; padding:0.75rem 1rem;">
+            <strong style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:0.85rem;">How a party fight actually works</strong>
+            <ol style="margin:0.5rem 0 0 1.2rem; padding:0;">
+              <li style="margin-bottom:0.3rem;">Form the party (invite members above)</li>
+              <li style="margin-bottom:0.3rem;">Each member goes to World Map, finds the <em>same</em> target — a political hierarchy NPC, a Champion, or a Primordial — and clicks Challenge, picking their own loadout. This automatically tags their pick to this party.</li>
+              <li style="margin-bottom:0.3rem;">Each member <em>also</em> clicks Ready Up here — a separate step from challenging.</li>
+              <li>Once everyone who's ready has a matching challenge locked in, the leader's Start Party Battle button works.</li>
+            </ol>
+            <p class="placeholder-note" style="margin-top:0.6rem;">Inviting someone brings them into your world — their location moves to match yours, but their own class, rank, cards, and equipment stay entirely their own. Party members can pick from each other's cards when building a loadout. Creature fights can't be done as a party — only political hierarchy, Champions, and Primordials.</p>
+          </div>
         </div>
       </section>
     </div>
@@ -417,7 +415,6 @@
 
   loadMyParty();
   loadPartyInvites();
-  loadFriendsList();
 
   // Other party members' ready state changes never showed up
   // without a manual refresh -- no realtime subscription or polling
