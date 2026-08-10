@@ -842,16 +842,26 @@
       <div class="frame" style="margin-top:1rem;">
         <h4 style="font-family:'Cinzel',serif; color:var(--gold-bright); margin:0 0 0.5rem;">A Traveler's Request</h4>
         <p>A nervous-looking traveler approaches. "Could use an escort down this road — or if you'd rather, I've got a riddle or two to pass the time. Solve one and there's coin in it for you either way."</p>
-        <div style="display:flex; gap:0.75rem; margin-top:1rem; flex-wrap:wrap;">
-          <button class="btn" onclick="acceptEscortQuest()">Escort Them</button>
+        <div id="escort-initial-choice" style="display:flex; gap:0.75rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn" onclick="revealEscortMiniGames()">Escort Them</button>
+          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="declineOffer()">Decline</button>
+        </div>
+        <div id="escort-minigame-choice" style="display:none; gap:0.75rem; margin-top:1rem; flex-wrap:wrap;">
           <button class="btn" onclick="startMysteryGame('pokedle')">PKMN</button>
           <button class="btn" onclick="startMysteryGame('narutodle')">NRTO</button>
           <button class="btn" onclick="startMysteryGame('loldle')">LOL</button>
-          <button class="btn" style="border-color:var(--border-bright); color:var(--dim);" onclick="declineOffer()">Decline</button>
         </div>
         <div id="mystery-game-area" style="margin-top:1rem;"></div>
       </div>
     `;
+  }
+
+  // Purely reveals the mini-game choice -- grants nothing on its
+  // own. The actual reward only ever comes from playing and
+  // correctly guessing one of the three games.
+  function revealEscortMiniGames(){
+    document.getElementById("escort-initial-choice").style.display = "none";
+    document.getElementById("escort-minigame-choice").style.display = "flex";
   }
 
   // A synthesized low rumbling "roar" cue for rare (S/SS) encounters
@@ -1085,6 +1095,11 @@
     currentMysterySessionId = result.session_id;
     currentMysteryGameType = gameType;
     mysteryGuessHistory = [];
+
+    // Locks the player into this one game -- the other two options
+    // disappear so they can't switch mid-attempt.
+    const choiceEl = document.getElementById("escort-minigame-choice");
+    if (choiceEl) choiceEl.style.display = "none";
 
     const { data: names, error: namesError } = await sb.rpc("get_mystery_game_valid_names", { p_game_type: gameType });
     if (namesError){
